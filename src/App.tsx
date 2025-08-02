@@ -19,6 +19,8 @@ import { DebugRandomizer } from './components/admin/DebugRandomizer'
 import BatchOperationsDashboard from './components/admin/BatchOperationsDashboard'
 import { MaterialsTest } from './pages/MaterialsTest'
 import { SessionManager } from './components/admin/SessionManager'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { UnauthorizedPage } from './pages/UnauthorizedPage'
 
 function App() {
   return (
@@ -142,7 +144,13 @@ function App() {
             }
           />
           
+          {/* Error pages */}
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          
           <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* 404 - Must be last */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </BrowserRouter>
       </RealtimeProvider>
