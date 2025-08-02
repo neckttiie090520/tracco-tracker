@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zamluhrkxjoazssxctmd.supabase.co'
-const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphbWx1aHJreGpvYXpzc3hjdG1kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mzg5MDIzMCwiZXhwIjoyMDY5NDY2MjMwfQ.MU0aQ0CQsoV2XGtsvBdyLx2TMDeskmiwZhOvTImQOU4'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing Supabase admin environment variables')

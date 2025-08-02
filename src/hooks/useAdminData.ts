@@ -433,7 +433,7 @@ export function useParticipantData() {
     if (user) {
       fetchParticipantData()
     }
-  }, [user])
+  }, [user?.id])
 
   return {
     stats,
