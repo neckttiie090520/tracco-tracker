@@ -1,0 +1,86 @@
+@import './styles/design-system.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Duolingo-style animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 199, 111, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(0, 199, 111, 0.6); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Font families for Thai and English content */
+@layer base {
+  body {
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Thai text styling */
+  .font-thai {
+    font-family: 'Prompt', sans-serif;
+  }
+  
+  /* English text styling */
+  .font-eng {
+    font-family: 'Spline Sans Mono', monospace;
+  }
+  
+  /* Concert One for special elements */
+  .font-concert {
+    font-family: 'Concert One', cursive;
+  }
+  
+  /* Apply Thai font to common Thai text elements */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Prompt', sans-serif;
+  }
+  
+  p, span, div {
+    font-family: 'Prompt', sans-serif;
+  }
+  
+  /* English content - use for specific classes */
+  .text-eng, 
+  code, 
+  pre,
+  input[type="email"],
+  input[type="password"] {
+    font-family: 'Spline Sans Mono', monospace;
+  }
+}

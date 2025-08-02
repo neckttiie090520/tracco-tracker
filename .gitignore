@@ -1,0 +1,115 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production builds
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# ESLint cache
+.eslintcache
+
+# Temporary folders
+tmp/
+temp/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Supabase
+.supabase/
+
+# Backup files
+*.backup
+*.bak
+*_backup.*
+
+# Project specific folders
+random-name-picker-2.1.0/
+img_for_claude/
+data_for_you/
+.md_hub/
+.claude/
+minidenticons-4.2.1/
+
+# Debug and test files
+*.debug.js
+debug*.js
+debug*.html
+test*.js
+test*.html
+*_debug.js
+final-debug-test.js
+check_real_tasks.js
+console-debug.js
+create_sample_tasks.js
+debug_*.js
+update-admin-role.js
+
+# Backup files (additional)
+*_backup.*
+WorkshopFeedPage_backup.tsx
+BatchOperationsTypes.backup.ts
+
+# Random images/assets not in public
+*.png
+!public/*.png
+!logo.png
+
+# SQL exports and dumps
+lasted_DB_export.sql
+SQL_CODE/
+
+# Embedded repositories
+workshop-tracker/

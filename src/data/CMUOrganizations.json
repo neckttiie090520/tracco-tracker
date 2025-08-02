@@ -1,0 +1,26 @@
+{
+  "organizations": [
+    { "th": "สำนักงานอธิการบดี", "en": "Office of the President" },
+    { "th": "สำนักงานรองอธิการบดี", "en": "Office of the Vice President" },
+    { "th": "สำนักงานบริหารสินทรัพย์และหนี้สิน", "en": "Office of Asset and Debt Management" },
+    { "th": "สำนักวิชาการ", "en": "Academic Resources Center" },
+    { "th": "สำนักคอมพิวเตอร์", "en": "Computer Center" },
+    { "th": "สำนักงานประกันคุณภาพการศึกษา", "en": "Office of Educational Quality Assurance" },
+    { "th": "สำนักงานความสัมพันธ์ต่างประเทศ", "en": "International Relations Office" },
+    { "th": "สำนักกิจการนักศึกษา", "en": "Student Affairs Division" },
+    { "th": "สำนักงานประชาสัมพันธ์", "en": "Public Relations Office" },
+    { "th": "ศูนย์บริการชุมชน", "en": "Community Service Center" },
+    { "th": "ศูนย์วิจัยและพัฒนา", "en": "Research and Development Center" },
+    { "th": "ศูนย์ภาษา", "en": "Language Center" },
+    { "th": "ศูนย์เครื่องมือวิทยาศาสตร์และเทคโนโลยี", "en": "Scientific and Technological Research Equipment Center" },
+    { "th": "หน่วยงานกลาง", "en": "Central Units" },
+    { "th": "โรงพยาบาลมหาราชนครเชียงใหม่", "en": "Maharaj Nakorn Chiang Mai Hospital" },
+    { "th": "องค์กรนักศึกษา", "en": "Student Organizations" },
+    { "th": "ชมรมนักศึกษา", "en": "Student Clubs" },
+    { "th": "ศิษย์เก่า", "en": "Alumni" },
+    { "th": "หน่วยงานภายนอก", "en": "External Organizations" },
+    { "th": "หน่วยงานราชการ", "en": "Government Agencies" },
+    { "th": "องค์กรเอกชน", "en": "Private Organizations" },
+    { "th": "มูลนิธิ/สมาคม", "en": "Foundations/Associations" }
+  ]
+}

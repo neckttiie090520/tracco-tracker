@@ -1,0 +1,30 @@
+{
+  "faculties": [
+    { "th": "คณะการสื่อสารมวลชน", "en": "Faculty of Mass Communication" },
+    { "th": "คณะเกษตรศาสตร์", "en": "Faculty of Agriculture" },
+    { "th": "คณะทันตแพทยศาสตร์", "en": "Faculty of Dentistry" },
+    { "th": "คณะเทคนิคการแพทย์", "en": "Faculty of Associated Medical Sciences" },
+    { "th": "คณะนิติศาสตร์", "en": "Faculty of Law" },
+    { "th": "คณะพยาบาลศาสตร์", "en": "Faculty of Nursing" },
+    { "th": "คณะแพทยศาสตร์", "en": "Faculty of Medicine" },
+    { "th": "คณะเภสัชศาสตร์", "en": "Faculty of Pharmacy" },
+    { "th": "คณะมนุษยศาสตร์", "en": "Faculty of Humanities" },
+    { "th": "คณะรัฐศาสตร์และรัฐประศาสนศาสตร์", "en": "Faculty of Political Science and Public Administration" },
+    { "th": "คณะวิจิตรศิลป์", "en": "Faculty of Fine Arts" },
+    { "th": "คณะวิทยาศาสตร์", "en": "Faculty of Science" },
+    { "th": "คณะวิศวกรรมศาสตร์", "en": "Faculty of Engineering" },
+    { "th": "คณะศึกษาศาสตร์", "en": "Faculty of Education" },
+    { "th": "คณะเศรษฐศาสตร์", "en": "Faculty of Economics" },
+    { "th": "คณะสถาปัตยกรรมศาสตร์", "en": "Faculty of Architecture" },
+    { "th": "คณะสังคมศาสตร์", "en": "Faculty of Social Sciences" },
+    { "th": "คณะสัตวแพทยศาสตร์", "en": "Faculty of Veterinary Medicine" },
+    { "th": "คณะสาธารณสุขศาสตร์", "en": "Faculty of Public Health" },
+    { "th": "คณะอุตสาหกรรมเกษตร", "en": "Faculty of Agro-Industry" },
+    { "th": "คณะบริหารธุรกิจ", "en": "Chiang Mai University Business School" },
+    { "th": "วิทยาลัยนานาชาตินวัตกรรมดิจิทัล", "en": "International College of Digital Innovation" },
+    { "th": "วิทยาลัยศิลปะ สื่อ และเทคโนโลยี", "en": "College of Art, Media and Technology" },
+    { "th": "วิทยาลัยพหุวิทยาการและสหวิทยาการ", "en": "Multidisciplinary and Interdisciplinary School" },
+    { "th": "สถาบันนโยบายสาธารณะ", "en": "School of Public Policy Chiang Mai University" },
+    { "th": "สถาบันวิศวกรรมชีวการแพทย์", "en": "Biomedical Engineering Institute" }
+  ]
+}

@@ -1,0 +1,328 @@
+import React, { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { UrlSubmissionDisplay } from './UrlSubmissionDisplay'
+import { StatusBadge } from '../ui/StatusBadge'
+
+interface TaskSubmissionModalProps {
+  isOpen: boolean
+  onClose: () => void
+  submission: any
+  formData: any
+  setFormData: (data: any) => void
+  onSubmit: (e: React.FormEvent) => void
+  uploading: boolean
+  onFileChange: (file: File | null) => void
+  taskTitle?: string
+}
+
+export function ImprovedTaskSubmissionModal({ 
+  isOpen, 
+  onClose, 
+  submission, 
+  formData, 
+  setFormData, 
+  onSubmit, 
+  uploading,
+  onFileChange,
+  taskTitle = 'งานที่กำหนด'
+}: TaskSubmissionModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    onFileChange(file)
+  }
+
+  const handleSubmitWithAnimation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await onSubmit(e)
+    
+    // Show success animation after submission
+    if (!submission) { // Only for new submissions
+      setShowSuccessAnimation(true)
+      setTimeout(() => {
+        setShowSuccessAnimation(false)
+        onClose()
+      }, 2000)
+    }
+  }
+
+  // Handle escape key and focus management
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !uploading) {
+        onClose()
+      }
+    }
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && e.target === modalRef.current && !uploading) {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('mousedown', handleClickOutside)
+    
+    // Focus first input when modal opens
+    const firstInput = modalRef.current?.querySelector('textarea') as HTMLTextAreaElement
+    if (firstInput) {
+      firstInput.focus()
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, uploading, onClose])
+
+  if (!isOpen) return null
+
+  const modalContent = (
+    <div 
+      ref={modalRef}
+      className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm animate-fadeIn"
+    >
+      {showSuccessAnimation && (
+        <div className="absolute inset-0 flex items-center justify-center z-[10000] pointer-events-none">
+          <div className="bg-white rounded-3xl p-8 text-center animate-bounce shadow-2xl">
+            <div className="text-6xl mb-4">🎉</div>
+            <h3 className="text-2xl font-bold text-gray-900">ส่งงานสำเร็จ!</h3>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 animate-slideIn">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                <span className="text-2xl">{submission ? '✏️' : '📤'}</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold mb-1">
+                  {submission ? 'แก้ไขงานที่ส่ง' : 'ส่งงาน'}
+                </h2>
+                <p className="text-blue-100">
+                  {taskTitle}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+              disabled={uploading}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)] custom-scrollbar">
+          <form onSubmit={handleSubmitWithAnimation} className="space-y-6">
+            {/* Progress Indicator */}
+            <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-600">ความคืบหน้าการกรอกข้อมูล</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {[formData.notes.trim(), formData.submission_url.trim(), formData.file].filter(Boolean).length}/3
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${([formData.notes.trim(), formData.submission_url.trim(), formData.file].filter(Boolean).length / 3) * 100}%` 
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Notes Field */}
+            <div className="group">
+              <label htmlFor="notes" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-xl mr-2">📝</span>
+                <span>หมายเหตุ</span>
+                <span className="ml-2 text-xs text-gray-500 font-normal">(ไม่บังคับ)</span>
+              </label>
+              <textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                rows={4}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+                placeholder="เพิ่มหมายเหตุเกี่ยวกับงานที่ส่ง เช่น ปัญหาที่พบ สิ่งที่เรียนรู้ หรือข้อสังเกต..."
+                disabled={uploading}
+              />
+              <p className="text-xs text-gray-500 mt-2 text-right">
+                {formData.notes.length}/500 ตัวอักษร
+              </p>
+            </div>
+
+            {/* URL Field */}
+            <div className="group">
+              <label htmlFor="submission_url" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-xl mr-2">🔗</span>
+                <span>URL ส่งงาน</span>
+                <span className="ml-2 text-xs text-gray-500 font-normal">(ไม่บังคับ)</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="url"
+                  id="submission_url"
+                  value={formData.submission_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, submission_url: e.target.value }))}
+                  className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  placeholder="https://www.canva.com/design/... หรือ https://docs.google.com/..."
+                  disabled={uploading}
+                />
+                {formData.submission_url && (
+                  <div className="absolute right-3 top-3">
+                    <StatusBadge status="completed" size="sm" showIcon={false} />
+                  </div>
+                )}
+              </div>
+              
+              {/* URL Preview */}
+              {formData.submission_url && formData.submission_url.startsWith('http') && (
+                <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border-2 border-orange-200">
+                  <p className="text-sm text-orange-700 mb-3 font-semibold flex items-center">
+                    <span className="text-lg mr-2">👀</span>
+                    ตัวอย่างงานที่จะส่ง
+                  </p>
+                  <UrlSubmissionDisplay url={formData.submission_url} isSubmitted={false} />
+                </div>
+              )}
+            </div>
+
+            {/* File Upload Field */}
+            <div className="group">
+              <label htmlFor="file-upload" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                <span className="text-xl mr-2">📎</span>
+                <span>อัปโหลดไฟล์</span>
+                <span className="ml-2 text-xs text-gray-500 font-normal">(ไม่บังคับ, สูงสุด 10MB)</span>
+              </label>
+              
+              <div className="relative">
+                <input
+                  type="file"
+                  id="file-upload"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={uploading}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className={`block w-full p-6 border-2 border-dashed rounded-xl text-center cursor-pointer transition-all ${
+                    formData.file 
+                      ? 'border-green-400 bg-green-50' 
+                      : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                  }`}
+                >
+                  {formData.file ? (
+                    <div className="space-y-2">
+                      <div className="text-4xl">✅</div>
+                      <p className="font-semibold text-green-800">{formData.file.name}</p>
+                      <p className="text-sm text-green-600">{formatFileSize(formData.file.size)}</p>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          onFileChange(null)
+                        }}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium"
+                      >
+                        ลบไฟล์
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-4xl text-gray-400">📤</div>
+                      <p className="text-gray-600">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</p>
+                      <p className="text-xs text-gray-500">รองรับไฟล์ทุกประเภท (สูงสุด 10MB)</p>
+                    </div>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            {/* Submission Summary */}
+            {(formData.notes.trim() || formData.submission_url.trim() || formData.file) && (
+              <div className="bg-blue-50 rounded-xl p-4 space-y-2">
+                <p className="font-semibold text-blue-900 flex items-center">
+                  <span className="text-lg mr-2">📋</span>
+                  สรุปงานที่จะส่ง
+                </p>
+                {formData.notes.trim() && (
+                  <p className="text-sm text-blue-700 flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>มีหมายเหตุแนบ</span>
+                  </p>
+                )}
+                {formData.submission_url.trim() && (
+                  <p className="text-sm text-blue-700 flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>มี URL งาน</span>
+                  </p>
+                )}
+                {formData.file && (
+                  <p className="text-sm text-blue-700 flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>มีไฟล์แนบ ({formatFileSize(formData.file.size)})</span>
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={uploading}
+                className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-all disabled:opacity-50 hover-lift"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="submit"
+                disabled={uploading || (!formData.notes.trim() && !formData.submission_url.trim() && !formData.file)}
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg hover-lift"
+              >
+                {uploading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>กำลังส่ง...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{submission ? 'อัปเดตงาน' : 'ส่งงาน'}</span>
+                    <span className="text-lg">→</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+
+  return createPortal(modalContent, document.body)
+}
