@@ -435,12 +435,6 @@ export function WorkshopManagement() {
                                 Edit
                               </button>
                               <button
-                                onClick={() => setManagingMaterials(workshop)}
-                                className="text-purple-600 hover:text-purple-900 text-xs px-2 py-1 bg-purple-50 rounded"
-                              >
-                                Materials
-                              </button>
-                              <button
                                 onClick={() => handleDeleteWorkshop(workshop)}
                                 className="text-red-600 hover:text-red-900 text-xs px-2 py-1 bg-red-50 rounded"
                               >
