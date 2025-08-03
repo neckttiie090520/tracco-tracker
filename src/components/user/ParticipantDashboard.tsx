@@ -145,8 +145,8 @@ function RegisteredSessionsSection() {
                     </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
-                  ✅ เข้าร่วม
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium whitespace-nowrap">
+                  ✅ ลงทะเบียน
                 </span>
               </div>
 
