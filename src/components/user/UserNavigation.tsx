@@ -64,10 +64,10 @@ export function UserNavigation({
             {isAdmin && (
               <Link
                 to="/admin"
-                className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="flex items-center gap-1 bg-gradient-to-r from-red-500 to-pink-600 text-white px-2 py-1 rounded text-xs font-medium hover:from-red-600 hover:to-pink-700 transition-all duration-200"
               >
-                <span className="text-lg">⚡</span>
-                <span>Admin Panel</span>
+                <span className="text-xs">⚡</span>
+                <span>Admin</span>
               </Link>
             )}
 
