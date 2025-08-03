@@ -35,6 +35,166 @@ interface SessionRegistrationProps {
   onSessionRegistered: () => void
 }
 
+// Registered Sessions Section Component  
+function RegisteredSessionsSection() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [registeredSessions, setRegisteredSessions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchRegisteredSessions()
+  }, [])
+
+  const fetchRegisteredSessions = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('session_registrations')
+        .select(`
+          *,
+          sessions (
+            id,
+            title,
+            description,
+            start_date,
+            end_date,
+            max_participants,
+            is_active
+          )
+        `)
+        .eq('user_id', user?.id)
+        .eq('status', 'registered')
+
+      if (error) throw error
+      setRegisteredSessions(data || [])
+    } catch (error) {
+      console.error('Error fetching registered sessions:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-gray-200 rounded-lg h-48"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (registeredSessions.length === 0) {
+    return null
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="mb-8"
+    >
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2 flex items-center">
+          <span className="mr-3">🎯</span>
+          งานสัมมนาที่เข้าร่วม
+        </h2>
+        <p className="text-sm text-gray-600">งานสัมมนาที่คุณลงทะเบียนแล้ว</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {registeredSessions.map((registration, index) => {
+          const session = registration.sessions
+          if (!session) return null
+
+          const startDate = new Date(session.start_date)
+          const endDate = new Date(session.end_date)
+          const registeredDate = new Date(registration.registered_at)
+
+          return (
+            <motion.div
+              key={registration.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 max-w-sm"
+            >
+              {/* Header */}
+              <div className="p-3 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">✅</span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 text-sm leading-tight">
+                        {session.title}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {startDate.toLocaleDateString('th-TH', {
+                          day: 'numeric',
+                          month: 'short'
+                        })} - {endDate.toLocaleDateString('th-TH', {
+                          day: 'numeric',
+                          month: 'short'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs">
+                    ✅ เข้าร่วมแล้ว
+                  </span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-3">
+                <p className="text-gray-700 text-sm mb-3 whitespace-pre-line leading-relaxed">
+                  {session.description?.length > 100 
+                    ? `${session.description.slice(0, 100)}...` 
+                    : session.description
+                  }
+                </p>
+
+                {/* Meta info */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+                    👥 {session.max_participants} คน
+                  </span>
+                  <span className="inline-flex items-center px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full">
+                    📅 ลงทะเบียน {registeredDate.toLocaleDateString('th-TH', {
+                      day: 'numeric',
+                      month: 'short'
+                    })}
+                  </span>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => navigate('/session-feed')}
+                  className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>เข้าสู่งานสัมมนา</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+    </motion.div>
+  )
+}
+
 // Session Registration Section Component
 function SessionRegistrationSection({ onSessionRegistered }: SessionRegistrationProps) {
   const { user } = useAuth()
@@ -290,6 +450,10 @@ export function ParticipantDashboard() {
       {/* Dashboard Content - Show only if user has registered for a session */}
       {!showSessionRegistration && (
         <div className="max-w-7xl mx-auto px-8 py-8">
+          {/* Registered Sessions Section */}
+          <RegisteredSessionsSection />
+          
+          
           {/* Stats Grid */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
