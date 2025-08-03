@@ -131,10 +131,10 @@ function RegisteredSessionsSection() {
                     <span className="text-white font-semibold text-sm">✅</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight">
+                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">
                       {session.title}
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 mt-1">
                       {startDate.toLocaleDateString('th-TH', {
                         day: 'numeric',
                         month: 'short'
@@ -145,7 +145,7 @@ function RegisteredSessionsSection() {
                     </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
                   ✅ เข้าร่วม
                 </span>
               </div>
@@ -154,10 +154,10 @@ function RegisteredSessionsSection() {
               <div>
                 {/* Meta info */}
                 <div className="flex flex-wrap gap-3 mb-4">
-                  <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded-lg font-medium">
+                  <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-lg font-medium">
                     👥 {session.max_participants} คน
                   </span>
-                  <span className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 text-sm rounded-lg font-medium">
+                  <span className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 text-xs rounded-lg font-medium">
                     📅 {registeredDate.toLocaleDateString('th-TH', {
                       day: 'numeric',
                       month: 'short'
