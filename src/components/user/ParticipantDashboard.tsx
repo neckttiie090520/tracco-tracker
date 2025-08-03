@@ -117,7 +117,7 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
             <p className="text-sm text-gray-600">งานสัมมนาที่เปิดให้ลงทะเบียน</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {sessions.map((session) => {
               const startDate = new Date(session.start_date)
               const endDate = new Date(session.end_date)
@@ -126,10 +126,10 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
               return (
                 <div 
                   key={session.id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200"
+                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 max-w-sm mx-auto"
                 >
                   {/* Header */}
-                  <div className="p-4 border-b border-gray-100">
+                  <div className="p-3 border-b border-gray-100">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white font-semibold text-sm">🎯</span>
@@ -152,7 +152,7 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
+                  <div className="p-3">
                     <p className="text-gray-700 text-sm mb-3 whitespace-pre-line leading-relaxed">
                       {session.description?.length > 120 
                         ? `${session.description.slice(0, 120)}...` 
@@ -281,7 +281,11 @@ export function ParticipantDashboard() {
       </div>
 
       {/* Session Registration Section - Show if user hasn't registered */}
-      {showSessionRegistration && <SessionRegistrationSection onSessionRegistered={refetch} />}
+      {showSessionRegistration && (
+        <div className="max-w-4xl mx-auto px-6 py-6">
+          <SessionRegistrationSection onSessionRegistered={refetch} />
+        </div>
+      )}
 
       {/* Dashboard Content - Show only if user has registered for a session */}
       {!showSessionRegistration && (
