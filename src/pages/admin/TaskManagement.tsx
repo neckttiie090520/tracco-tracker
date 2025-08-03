@@ -1,10 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useAdminTasks } from '../../hooks/useAdminData'
 import { AdminNavigation } from '../../components/admin/AdminNavigation'
 import { CreateTaskModal } from '../../components/admin/CreateTaskModal'
 import { EditTaskModal } from '../../components/admin/EditTaskModal'
 import { TaskSubmissionsModal } from '../../components/admin/TaskSubmissionsModal'
 import { ConfirmDeleteModal } from '../../components/admin/ConfirmDeleteModal'
+import { SearchAndFilter } from '../../components/admin/SearchAndFilter'
+import { BulkActionBar } from '../../components/admin/BulkActionBar'
+import { supabase } from '../../services/supabase'
 
 export function TaskManagement() {
   const { tasks, workshops, loading, error, createTask, updateTask, deleteTask, refetch } = useAdminTasks()
@@ -17,6 +20,15 @@ export function TaskManagement() {
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [selectedWorkshop, setSelectedWorkshop] = useState<string>('all')
+  
+  // Search and Filter State
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [workshopFilter, setWorkshopFilter] = useState('all')
+  
+  // Bulk Actions State
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [bulkLoading, setBulkLoading] = useState(false)
 
   const handleCreateTask = async (taskData: any) => {
     try {
@@ -50,6 +62,7 @@ export function TaskManagement() {
       await deleteTask(deleteConfirm.task.id)
       console.log('Task deleted successfully')
       setDeleteConfirm({ task: null, show: false })
+      setSelectedItems(prev => prev.filter(id => id !== deleteConfirm.task.id))
     } catch (error) {
       console.error('Failed to delete task:', error)
       alert(`Failed to delete task: ${error.message || error}`)
@@ -57,6 +70,119 @@ export function TaskManagement() {
       setDeleteLoading(false)
     }
   }
+
+  // Workshop options for filtering
+  const workshopOptions = useMemo(() => {
+    return workshops.map(workshop => ({ 
+      value: workshop.id, 
+      label: workshop.title 
+    }))
+  }, [workshops])
+
+  // Filtering Logic
+  const filteredTasks = useMemo(() => {
+    let filtered = tasks
+
+    // Workshop filter (keep existing logic)
+    if (selectedWorkshop !== 'all') {
+      filtered = filtered.filter(task => task.workshop_id === selectedWorkshop)
+    }
+
+    // Additional filters
+    filtered = filtered.filter(task => {
+      // Search filter
+      const matchesSearch = !searchTerm || 
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (task.workshop?.title && task.workshop.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'active' && task.is_active) ||
+        (statusFilter === 'inactive' && !task.is_active)
+
+      // Workshop filter for search component
+      const matchesWorkshop = workshopFilter === 'all' ||
+        task.workshop_id === workshopFilter
+
+      return matchesSearch && matchesStatus && matchesWorkshop
+    })
+
+    return filtered
+  }, [tasks, selectedWorkshop, searchTerm, statusFilter, workshopFilter])
+
+  // Bulk Actions
+  const handleSelectAll = () => {
+    setSelectedItems(filteredTasks.map(task => task.id))
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedItems([])
+  }
+
+  const handleBulkHide = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateTask(id, { is_active: false }))
+      )
+      setSelectedItems([])
+      alert('Selected tasks have been hidden successfully')
+    } catch (error) {
+      console.error('Error hiding tasks:', error)
+      alert('Failed to hide selected tasks')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkShow = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateTask(id, { is_active: true }))
+      )
+      setSelectedItems([])
+      alert('Selected tasks have been shown successfully')
+    } catch (error) {
+      console.error('Error showing tasks:', error)
+      alert('Failed to show selected tasks')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => deleteTask(id))
+      )
+      setSelectedItems([])
+      alert('Selected tasks have been deleted successfully')
+    } catch (error) {
+      console.error('Error deleting tasks:', error)
+      alert('Failed to delete selected tasks')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleItemSelect = (taskId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(taskId)
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
+    )
+  }
+
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setWorkshopFilter('all')
+  }
+
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || workshopFilter !== 'all'
 
   const createSampleTasks = async (workshopId: string) => {
     const sampleTasks = [
@@ -97,10 +223,10 @@ export function TaskManagement() {
     }
   }
 
-  // Admin should see all tasks regardless of is_active status
-  const filteredTasks = selectedWorkshop === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.workshop_id === selectedWorkshop)
+  // Use the new filteredTasks from useMemo above
+  // const filteredTasks = selectedWorkshop === 'all' 
+  //   ? tasks 
+  //   : tasks.filter(task => task.workshop_id === selectedWorkshop)
 
   const getTaskStatusColor = (submissionCount: number, workshopParticipants: number = 0) => {
     if (workshopParticipants === 0) return 'bg-gray-100 text-gray-800'
@@ -215,6 +341,22 @@ export function TaskManagement() {
             </div>
           </div>
 
+          {/* Search and Filter */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <SearchAndFilter
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Search tasks by title or description..."
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              workshopFilter={workshopFilter}
+              onWorkshopFilterChange={setWorkshopFilter}
+              workshopOptions={workshopOptions}
+              onClearFilters={handleClearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
+          </div>
+
           {/* Tasks Overview Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg shadow-sm p-4">
@@ -299,16 +441,34 @@ export function TaskManagement() {
 
           {/* Tasks Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {/* Bulk Action Bar */}
+            {filteredTasks.length > 0 && (
+              <BulkActionBar
+                selectedItems={selectedItems}
+                totalItems={filteredTasks.length}
+                itemType="task"
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkHide={handleBulkHide}
+                onBulkShow={handleBulkShow}
+                onBulkDelete={handleBulkDelete}
+                loading={bulkLoading}
+              />
+            )}
+
             {filteredTasks.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Tasks Found</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {tasks.length === 0 ? 'No Tasks Found' : 'No Tasks Found'}
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  {selectedWorkshop === 'all' 
-                    ? 'Get started by creating your first task.' 
-                    : 'No tasks found for the selected workshop.'}
+                  {tasks.length === 0 
+                    ? 'Get started by creating your first task.'
+                    : 'Try adjusting your search or filter criteria'
+                  }
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
@@ -322,6 +482,14 @@ export function TaskManagement() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === filteredTasks.length && filteredTasks.length > 0}
+                          onChange={selectedItems.length === filteredTasks.length ? handleDeselectAll : handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Task
                       </th>
@@ -348,7 +516,15 @@ export function TaskManagement() {
                       const isOverdue = task.due_date && new Date(task.due_date) < new Date()
                       
                       return (
-                        <tr key={task.id} className="hover:bg-gray-50">
+                        <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.includes(task.id)}
+                              onChange={() => handleItemSelect(task.id)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">

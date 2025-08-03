@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../../services/supabase'
 import { AdminNavigation } from './AdminNavigation'
 import { SessionMaterialsManager } from './SessionMaterialsManager'
+import { SearchAndFilter } from './SearchAndFilter'
+import { BulkActionBar } from './BulkActionBar'
 
 interface Session {
   id: string
@@ -653,6 +655,16 @@ export function SessionManager() {
   const [showAddWorkshopModal, setShowAddWorkshopModal] = useState(false)
   const [showMaterialsModal, setShowMaterialsModal] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+  
+  // Search and Filter State
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [publishedFilter, setPublishedFilter] = useState('all')
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' })
+  
+  // Bulk Actions State
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [bulkLoading, setBulkLoading] = useState(false)
 
   useEffect(() => {
     fetchSessions()
@@ -807,12 +819,139 @@ export function SessionManager() {
       }
 
       await fetchSessions()
+      setSelectedItems(prev => prev.filter(id => id !== sessionId))
       alert('Session deleted successfully')
     } catch (error) {
       console.error('Error deleting session:', error)
       alert('Failed to delete session')
     }
   }
+
+  // Filtering Logic
+  const filteredSessions = useMemo(() => {
+    return sessions.filter(({ session }) => {
+      // Search filter
+      const matchesSearch = !searchTerm || 
+        session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (session.description && session.description.toLowerCase().includes(searchTerm.toLowerCase()))
+
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'active' && session.is_active) ||
+        (statusFilter === 'inactive' && !session.is_active)
+
+      // Published filter
+      const matchesPublished = publishedFilter === 'all' ||
+        (publishedFilter === 'published' && session.is_published) ||
+        (publishedFilter === 'unpublished' && !session.is_published)
+
+      // Date range filter
+      const matchesDateRange = (() => {
+        if (!dateRange.startDate && !dateRange.endDate) return true
+        if (!session.start_date) return !dateRange.startDate && !dateRange.endDate
+        
+        const sessionDate = new Date(session.start_date)
+        const startDate = dateRange.startDate ? new Date(dateRange.startDate) : null
+        const endDate = dateRange.endDate ? new Date(dateRange.endDate) : null
+        
+        if (startDate && sessionDate < startDate) return false
+        if (endDate && sessionDate > endDate) return false
+        
+        return true
+      })()
+
+      return matchesSearch && matchesStatus && matchesPublished && matchesDateRange
+    })
+  }, [sessions, searchTerm, statusFilter, publishedFilter, dateRange])
+
+  // Bulk Actions
+  const handleSelectAll = () => {
+    setSelectedItems(filteredSessions.map(({ session }) => session.id))
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedItems([])
+  }
+
+  const handleBulkHide = async () => {
+    setBulkLoading(true)
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ is_active: false })
+        .in('id', selectedItems)
+
+      if (error) throw error
+
+      await fetchSessions()
+      setSelectedItems([])
+      alert('Selected sessions have been hidden successfully')
+    } catch (error) {
+      console.error('Error hiding sessions:', error)
+      alert('Failed to hide selected sessions')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkShow = async () => {
+    setBulkLoading(true)
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ is_active: true })
+        .in('id', selectedItems)
+
+      if (error) throw error
+
+      await fetchSessions()
+      setSelectedItems([])
+      alert('Selected sessions have been shown successfully')
+    } catch (error) {
+      console.error('Error showing sessions:', error)
+      alert('Failed to show selected sessions')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    setBulkLoading(true)
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .delete()
+        .in('id', selectedItems)
+
+      if (error) throw error
+
+      await fetchSessions()
+      setSelectedItems([])
+      alert('Selected sessions have been deleted successfully')
+    } catch (error) {
+      console.error('Error deleting sessions:', error)
+      alert('Failed to delete selected sessions')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleItemSelect = (sessionId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(sessionId)
+        ? prev.filter(id => id !== sessionId)
+        : [...prev, sessionId]
+    )
+  }
+
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setPublishedFilter('all')
+    setDateRange({ startDate: '', endDate: '' })
+  }
+
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || publishedFilter !== 'all' || dateRange.startDate || dateRange.endDate
 
   if (loading) {
     return (
@@ -849,6 +988,23 @@ export function SessionManager() {
               </svg>
               Create Session
             </button>
+          </div>
+
+          {/* Search and Filter */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <SearchAndFilter
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Search sessions by title or description..."
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              publishedFilter={publishedFilter}
+              onPublishedFilterChange={setPublishedFilter}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              onClearFilters={handleClearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
           </div>
 
           {/* Sessions Overview Stats */}
@@ -902,11 +1058,33 @@ export function SessionManager() {
 
           {/* Sessions Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            {sessions.length === 0 ? (
+            {/* Bulk Action Bar */}
+            {filteredSessions.length > 0 && (
+              <BulkActionBar
+                selectedItems={selectedItems}
+                totalItems={filteredSessions.length}
+                itemType="session"
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkHide={handleBulkHide}
+                onBulkShow={handleBulkShow}
+                onBulkDelete={handleBulkDelete}
+                loading={bulkLoading}
+              />
+            )}
+
+            {filteredSessions.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-4xl mb-4">🎓</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Sessions</h3>
-                <p className="text-gray-600 mb-4">Start by creating your first session</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {sessions.length === 0 ? 'No Sessions' : 'No Sessions Found'}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {sessions.length === 0 
+                    ? 'Start by creating your first session'
+                    : 'Try adjusting your search or filter criteria'
+                  }
+                </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
@@ -919,6 +1097,14 @@ export function SessionManager() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === filteredSessions.length && filteredSessions.length > 0}
+                          onChange={selectedItems.length === filteredSessions.length ? handleDeselectAll : handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Session
                       </th>
@@ -940,8 +1126,16 @@ export function SessionManager() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {sessions.map(({ session, participant_count, workshop_count }) => (
-                      <tr key={session.id} className="hover:bg-gray-50">
+                    {filteredSessions.map(({ session, participant_count, workshop_count }) => (
+                      <tr key={session.id} className={`hover:bg-gray-50 ${selectedItems.includes(session.id) ? 'bg-blue-50' : ''}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.includes(session.id)}
+                            onChange={() => handleItemSelect(session.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
                             <div className="text-sm font-medium text-gray-900">

@@ -1,10 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useAdminWorkshops } from '../../hooks/useAdminData'
 import { AdminNavigation } from '../../components/admin/AdminNavigation'
 import { CreateWorkshopModal } from '../../components/admin/CreateWorkshopModal'
 import { EditWorkshopModal } from '../../components/admin/EditWorkshopModal'
 import { ConfirmDeleteModal } from '../../components/admin/ConfirmDeleteModal'
 import { WorkshopMaterialsManager } from '../../components/admin/WorkshopMaterialsManager'
+import { SearchAndFilter } from '../../components/admin/SearchAndFilter'
+import { BulkActionBar } from '../../components/admin/BulkActionBar'
+import { supabase } from '../../services/supabase'
 
 export function WorkshopManagement() {
   const { workshops, loading, error, createWorkshop, updateWorkshop, deleteWorkshop, refetch } = useAdminWorkshops()
@@ -16,6 +19,19 @@ export function WorkshopManagement() {
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [managingMaterials, setManagingMaterials] = useState<any>(null)
+  
+  // Search and Filter State
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sessionFilter, setSessionFilter] = useState('all')
+  const [instructorFilter, setInstructorFilter] = useState('all')
+  
+  // Bulk Actions State
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [bulkLoading, setBulkLoading] = useState(false)
+  
+  // Sessions for filter
+  const [sessions, setSessions] = useState<any[]>([])
 
   const handleCreateWorkshop = async (workshopData: any, materials?: any[]) => {
     await createWorkshop(workshopData, materials)
@@ -30,6 +46,23 @@ export function WorkshopManagement() {
     setDeleteConfirm({ workshop, show: true })
   }
 
+  // Fetch sessions for filtering
+  React.useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const { data } = await supabase
+          .from('sessions')
+          .select('id, title')
+          .eq('is_active', true)
+          .order('title')
+        setSessions(data || [])
+      } catch (error) {
+        console.error('Error fetching sessions:', error)
+      }
+    }
+    fetchSessions()
+  }, [])
+
   const confirmDeleteWorkshop = async () => {
     if (!deleteConfirm.workshop) return
     
@@ -37,12 +70,130 @@ export function WorkshopManagement() {
       setDeleteLoading(true)
       await deleteWorkshop(deleteConfirm.workshop.id)
       setDeleteConfirm({ workshop: null, show: false })
+      setSelectedItems(prev => prev.filter(id => id !== deleteConfirm.workshop.id))
     } catch (error) {
       console.error('Failed to delete workshop:', error)
     } finally {
       setDeleteLoading(false)
     }
   }
+
+  // Get unique instructors for filter
+  const instructorOptions = useMemo(() => {
+    const instructors = workshops
+      .map(w => w.instructor?.name)
+      .filter((name): name is string => !!name)
+      .filter((name, index, arr) => arr.indexOf(name) === index)
+      .sort()
+    
+    return instructors.map(name => ({ value: name, label: name }))
+  }, [workshops])
+
+  const sessionOptions = useMemo(() => {
+    return sessions.map(session => ({ 
+      value: session.id, 
+      label: session.title 
+    }))
+  }, [sessions])
+
+  // Filtering Logic
+  const filteredWorkshops = useMemo(() => {
+    return workshops.filter(workshop => {
+      // Search filter
+      const matchesSearch = !searchTerm || 
+        workshop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (workshop.description && workshop.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (workshop.instructor?.name && workshop.instructor.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
+      // Status filter
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'active' && workshop.is_active) ||
+        (statusFilter === 'inactive' && !workshop.is_active)
+
+      // Instructor filter
+      const matchesInstructor = instructorFilter === 'all' ||
+        workshop.instructor?.name === instructorFilter
+
+      // Session filter (this would require additional data structure)
+      const matchesSession = sessionFilter === 'all' // TODO: Implement session filtering
+
+      return matchesSearch && matchesStatus && matchesInstructor && matchesSession
+    })
+  }, [workshops, searchTerm, statusFilter, instructorFilter, sessionFilter])
+
+  // Bulk Actions
+  const handleSelectAll = () => {
+    setSelectedItems(filteredWorkshops.map(workshop => workshop.id))
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedItems([])
+  }
+
+  const handleBulkHide = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateWorkshop(id, { is_active: false }))
+      )
+      setSelectedItems([])
+      alert('Selected workshops have been hidden successfully')
+    } catch (error) {
+      console.error('Error hiding workshops:', error)
+      alert('Failed to hide selected workshops')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkShow = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateWorkshop(id, { is_active: true }))
+      )
+      setSelectedItems([])
+      alert('Selected workshops have been shown successfully')
+    } catch (error) {
+      console.error('Error showing workshops:', error)
+      alert('Failed to show selected workshops')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => deleteWorkshop(id))
+      )
+      setSelectedItems([])
+      alert('Selected workshops have been deleted successfully')
+    } catch (error) {
+      console.error('Error deleting workshops:', error)
+      alert('Failed to delete selected workshops')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleItemSelect = (workshopId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(workshopId)
+        ? prev.filter(id => id !== workshopId)
+        : [...prev, workshopId]
+    )
+  }
+
+  const handleClearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setSessionFilter('all')
+    setInstructorFilter('all')
+  }
+
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || sessionFilter !== 'all' || instructorFilter !== 'all'
 
   const handleToggleActive = async (workshop: any) => {
     try {
@@ -114,15 +265,56 @@ export function WorkshopManagement() {
             </button>
           </div>
 
+          {/* Search and Filter */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <SearchAndFilter
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Search workshops by title, description, or instructor..."
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              sessionFilter={sessionFilter}
+              onSessionFilterChange={setSessionFilter}
+              sessionOptions={sessionOptions}
+              instructorFilter={instructorFilter}
+              onInstructorFilterChange={setInstructorFilter}
+              instructorOptions={instructorOptions}
+              onClearFilters={handleClearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
+          </div>
+
           {/* Workshops Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            {workshops.length === 0 ? (
+            {/* Bulk Action Bar */}
+            {filteredWorkshops.length > 0 && (
+              <BulkActionBar
+                selectedItems={selectedItems}
+                totalItems={filteredWorkshops.length}
+                itemType="workshop"
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkHide={handleBulkHide}
+                onBulkShow={handleBulkShow}
+                onBulkDelete={handleBulkDelete}
+                loading={bulkLoading}
+              />
+            )}
+
+            {filteredWorkshops.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Workshops Found</h3>
-                <p className="text-gray-600 mb-4">Get started by creating your first workshop.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {workshops.length === 0 ? 'No Workshops Found' : 'No Workshops Found'}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {workshops.length === 0 
+                    ? 'Get started by creating your first workshop.'
+                    : 'Try adjusting your search or filter criteria'
+                  }
+                </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
@@ -135,6 +327,14 @@ export function WorkshopManagement() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.length === filteredWorkshops.length && filteredWorkshops.length > 0}
+                          onChange={selectedItems.length === filteredWorkshops.length ? handleDeselectAll : handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Workshop
                       </th>
@@ -153,12 +353,20 @@ export function WorkshopManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {workshops.map((workshop) => {
+                    {filteredWorkshops.map((workshop) => {
                       const participantCount = workshop.registrations?.[0]?.count || 0
                       const taskCount = workshop.tasks?.[0]?.count || 0
                       
                       return (
-                        <tr key={workshop.id} className="hover:bg-gray-50">
+                        <tr key={workshop.id} className={`hover:bg-gray-50 ${selectedItems.includes(workshop.id) ? 'bg-blue-50' : ''}`}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.includes(workshop.id)}
+                              onChange={() => handleItemSelect(workshop.id)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
