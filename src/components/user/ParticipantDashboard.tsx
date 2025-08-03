@@ -450,10 +450,6 @@ export function ParticipantDashboard() {
       {/* Dashboard Content - Show only if user has registered for a session */}
       {!showSessionRegistration && (
         <div className="max-w-7xl mx-auto px-8 py-8">
-          {/* Registered Sessions Section */}
-          <RegisteredSessionsSection />
-          
-          
           {/* Stats Grid */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
@@ -515,7 +511,7 @@ export function ParticipantDashboard() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.6 }}
-                className="bg-white rounded-2xl shadow-lg p-6"
+                className="bg-white rounded-2xl shadow-lg p-6 mb-8"
               >
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                     <span className="mr-3">⚡</span>
@@ -550,6 +546,9 @@ export function ParticipantDashboard() {
                     </button>
                   </div>
                 </motion.div>
+
+              {/* Registered Sessions Section - Under Quick Actions */}
+              <RegisteredSessionsSection />
             </div>
 
             {/* All Tasks */}
