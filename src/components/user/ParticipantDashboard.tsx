@@ -107,7 +107,7 @@ function RegisteredSessionsSection() {
       </h2>
       <p className="text-gray-600 mb-6">งานสัมมนาที่คุณลงทะเบียนแล้ว</p>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         {registeredSessions.map((registration, index) => {
           const session = registration.sessions
           if (!session) return null
@@ -122,19 +122,19 @@ function RegisteredSessionsSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors p-4"
+              className="bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors p-6"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-semibold text-xs">✅</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">✅</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+                    <h3 className="font-semibold text-gray-900 text-base leading-tight">
                       {session.title}
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-500 mt-1">
                       {startDate.toLocaleDateString('th-TH', {
                         day: 'numeric',
                         month: 'short'
@@ -145,7 +145,7 @@ function RegisteredSessionsSection() {
                     </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
                   ✅ เข้าร่วม
                 </span>
               </div>
@@ -153,11 +153,11 @@ function RegisteredSessionsSection() {
               {/* Content */}
               <div>
                 {/* Meta info */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-md font-medium">
+                <div className="flex flex-wrap gap-3 mb-4">
+                  <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded-lg font-medium">
                     👥 {session.max_participants} คน
                   </span>
-                  <span className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-md font-medium">
+                  <span className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 text-sm rounded-lg font-medium">
                     📅 {registeredDate.toLocaleDateString('th-TH', {
                       day: 'numeric',
                       month: 'short'
@@ -168,7 +168,7 @@ function RegisteredSessionsSection() {
                 {/* Action Button */}
                 <button
                   onClick={() => navigate('/session-feed')}
-                  className="w-full py-2 px-3 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <span>เข้าสู่งานสัมมนา</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
