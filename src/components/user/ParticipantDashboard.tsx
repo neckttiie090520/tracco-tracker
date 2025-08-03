@@ -353,82 +353,6 @@ export function ParticipantDashboard() {
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [hasActiveSession, setHasActiveSession] = useState<boolean | null>(null)
   const [showUpcomingTasks, setShowUpcomingTasks] = useState(false)
-  const [vantaEffect, setVantaEffect] = useState<any>(null)
-  const heroVantaRef = useRef<HTMLDivElement>(null)
-
-  // Add Vanta.js global interface
-  declare global {
-    interface Window {
-      VANTA: any;
-      p5: any;
-    }
-  }
-
-  // Initialize Vanta.js effect for hero section
-  useEffect(() => {
-    if (!vantaEffect && heroVantaRef.current) {
-      // Load script helper function
-      const loadScript = (src: string) => {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script')
-          script.src = src
-          script.onload = resolve
-          script.onerror = reject
-          document.head.appendChild(script)
-        })
-      }
-
-      const loadVanta = async () => {
-        try {
-          // Load p5.js if not already loaded
-          if (!window.p5) {
-            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js')
-          }
-          
-          // Load Vanta.js if not already loaded
-          if (!window.VANTA) {
-            await loadScript('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js')
-          }
-          
-          // Initialize Vanta effect
-          if (window.VANTA && window.VANTA.WAVES && heroVantaRef.current) {
-            setVantaEffect(
-              window.VANTA.WAVES({
-                el: heroVantaRef.current,
-                mouseControls: true,
-                touchControls: true,
-                gyroControls: false,
-                minHeight: 200.00,
-                minWidth: 200.00,
-                scale: 1.00,
-                scaleMobile: 1.00,
-                color: 0x4338ca,
-                shininess: 30.00,
-                waveHeight: 15.00,
-                waveSpeed: 0.75,
-                zoom: 0.65,
-                forceAnimate: true
-              })
-            )
-          }
-        } catch (error) {
-          console.error('Error loading Vanta.js:', error)
-        }
-      }
-
-      loadVanta()
-    }
-    return () => {
-      if (vantaEffect) vantaEffect.destroy()
-    }
-  }, [vantaEffect])
-
-  // Cleanup Vanta effect on unmount
-  useEffect(() => {
-    return () => {
-      if (vantaEffect) vantaEffect.destroy()
-    }
-  }, [])
 
   // Update hasActiveSession based on stats
   useEffect(() => {
@@ -457,12 +381,8 @@ export function ParticipantDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div 
-        ref={heroVantaRef} 
-        className="relative bg-indigo-600 text-white overflow-hidden"
-        style={{ minHeight: '200px', width: '100%', position: 'relative' }}
-      >
-        <div className="max-w-7xl mx-auto px-8 py-12 relative z-10">
+      <div className="bg-indigo-600 text-white">
+        <div className="max-w-7xl mx-auto px-8 py-12">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
