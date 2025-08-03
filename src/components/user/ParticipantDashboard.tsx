@@ -391,22 +391,23 @@ export function ParticipantDashboard() {
           }
           
           // Initialize Vanta effect
-          if (window.VANTA && window.VANTA.TOPOLOGY && heroVantaRef.current) {
-            const effect = window.VANTA.TOPOLOGY({
-              el: heroVantaRef.current,
-              mouseControls: true,
-              touchControls: true,
-              gyroControls: false,
-              minHeight: 200.00,
-              minWidth: 200.00,
-              scale: 1.00,
-              scaleMobile: 1.00,
-              color: 0xd0d59,
-              backgroundColor: 0x5600ff,
-              spacing: 18.00,
-              noise: 2.00
-            })
-            setVantaEffect(effect)
+          if (window.VANTA && heroVantaRef.current) {
+            setVantaEffect(
+              window.VANTA.TOPOLOGY({
+                el: heroVantaRef.current,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                color: 0xd0d59,
+                backgroundColor: 0x5600ff,
+                spacing: 18.00,
+                noise: 2.00
+              })
+            )
           }
         } catch (error) {
           console.error('Error loading Vanta.js:', error)
@@ -418,14 +419,14 @@ export function ParticipantDashboard() {
     return () => {
       if (vantaEffect) vantaEffect.destroy()
     }
-  }, [])
+  }, [vantaEffect])
 
   // Cleanup Vanta effect on unmount
   useEffect(() => {
     return () => {
       if (vantaEffect) vantaEffect.destroy()
     }
-  }, [vantaEffect])
+  }, [])
 
   // Update hasActiveSession based on stats
   useEffect(() => {
