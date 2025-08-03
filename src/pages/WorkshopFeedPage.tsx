@@ -660,7 +660,7 @@ export function WorkshopFeedPage() {
                     const isOverdue = dueDate < new Date() && !isSubmitted
                     
                     return (
-                      <div key={task.id} className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                      <div key={task.id} className="bg-white border border-gray-200 rounded-lg shadow-sm relative">
                         {/* Task Header */}
                         <div className="p-3 bg-gray-800 text-white">
                           <div className="flex items-center justify-between">
@@ -687,7 +687,7 @@ export function WorkshopFeedPage() {
                         </div>
 
                         {/* Task Content */}
-                        <div className="p-3">
+                        <div className="p-3 pb-12">
                           {/* Submitted Task Display */}
                           {isSubmitted && editingTaskId !== task.id && (
                             <div className="mt-3">
@@ -768,7 +768,7 @@ export function WorkshopFeedPage() {
                                   <button
                                     onClick={() => handleTaskSubmission(task.id)}
                                     disabled={!submissionUrl.trim()}
-                                    className="bg-gray-400 hover:bg-gray-500 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
                                   >
                                     บันทึก
                                   </button>
@@ -789,14 +789,12 @@ export function WorkshopFeedPage() {
                         
                           {/* Submit Button for Unsubmitted Tasks */}
                           {!isSubmitted && editingTaskId !== task.id && (
-                            <div className="mt-3 flex justify-center">
-                              <button
-                                onClick={() => setEditingTaskId(task.id)}
-                                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                              >
-                                ส่งงาน
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => setEditingTaskId(task.id)}
+                              className="absolute bottom-3 right-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                            >
+                              ส่งงาน
+                            </button>
                           )}
                           
                           {/* Submission Form for Unsubmitted Tasks */}
@@ -823,7 +821,7 @@ export function WorkshopFeedPage() {
                                   <button
                                     onClick={() => handleTaskSubmission(task.id)}
                                     disabled={!submissionUrl.trim()}
-                                    className="bg-gray-400 hover:bg-gray-500 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
                                   >
                                     ส่งงาน
                                   </button>

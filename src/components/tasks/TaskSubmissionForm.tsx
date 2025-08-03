@@ -190,26 +190,29 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
       )}
 
       {/* Action Button */}
-      <div className="bg-white rounded-xl shadow-md border-2 border-gray-200 overflow-hidden">
-        <div className="p-6 text-center">
+      <div className="bg-white rounded-xl shadow-md border-2 border-gray-200 overflow-hidden relative">
+        <div className="p-6">
           <button
             onClick={() => setShowModal(true)}
-            className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
+            className="absolute bottom-4 right-4 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
           >
-            <div className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center mr-4">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center mr-2">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={submission ? "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" : "M12 19l9 2-9-18-9 18 9-2zm0 0v-8"} />
               </svg>
             </div>
-            <div className="text-left">
-              <div className="text-lg font-bold">
-                {submission ? '✏️ แก้ไขงานที่ส่ง' : '📝 ส่งงาน'}
-              </div>
-              <div className="text-sm text-blue-100">
-                {submission ? 'แก้ไขหรือเพิ่มเติมงานที่ส่งแล้ว' : 'กรอกข้อมูลเพื่อส่งงาน'}
-              </div>
-            </div>
+            <span className="text-sm">
+              {submission ? 'แก้ไข' : 'ส่งงาน'}
+            </span>
           </button>
+          <div className="pr-32 pb-4">
+            <div className="text-lg font-bold text-gray-800 mb-2">
+              {submission ? 'งานที่ส่งแล้ว' : 'พร้อมส่งงาน'}
+            </div>
+            <div className="text-sm text-gray-600">
+              {submission ? 'คุณสามารถแก้ไขหรือเพิ่มเติมงานที่ส่งแล้ว' : 'กรอกข้อมูลเพื่อส่งงานของคุณ'}
+            </div>
+          </div>
         </div>
       </div>
 

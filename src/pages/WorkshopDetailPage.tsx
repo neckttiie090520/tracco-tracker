@@ -475,11 +475,11 @@ export function WorkshopDetailPage() {
                 return (
                   <div 
                     key={task.id}
-                    className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover-lift ${
+                    className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover-lift relative ${
                       isSubmitted ? 'ring-2 ring-green-400' : isOverdue ? 'ring-2 ring-red-400' : ''
                     }`}
                   >
-                    <div className="p-6">
+                    <div className="p-6 pb-16">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-start gap-4">
                           <div className="text-4xl">
@@ -573,7 +573,7 @@ export function WorkshopDetailPage() {
                           {!isOverdue && activeTaskId !== task.id && (
                             <button
                               onClick={() => setActiveTaskId(task.id)}
-                              className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-medium transition-colors"
+                              className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
                             >
                               ส่งงาน
                             </button>
@@ -627,7 +627,7 @@ export function WorkshopDetailPage() {
                               <button
                                 onClick={() => handleSubmitTask(task.id)}
                                 disabled={!submissionForm.submission_url.trim() || submitting}
-                                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-2 px-4 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-2 px-4 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
                               >
                                 {submitting ? 'กำลังส่ง...' : 'ส่งงาน'}
                               </button>

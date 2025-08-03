@@ -3,10 +3,15 @@ import { supabase } from './supabase'
 export const authService = {
   // Google OAuth login
   async signInWithGoogle() {
+    // Use localhost redirect for local development
+    const redirectUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3000/dashboard'
+      : `${window.location.origin}/dashboard`;
+      
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: redirectUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
