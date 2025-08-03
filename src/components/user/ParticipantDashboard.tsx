@@ -403,7 +403,7 @@ export function ParticipantDashboard() {
                     "ชุมชนนักเรียนรู้",
                     "โอกาสในการเติบโต"
                   ]}
-                  className="text-cyan-200 font-semibold text-xl font-thai"
+                  className="text-cyan-200 font-semibold text-xl font-thai leading-relaxed"
                 />
               </div>
             ) : (
@@ -422,7 +422,7 @@ export function ParticipantDashboard() {
                     "พร้อมพัฒนาตัวเองแล้วหรือยัง?"
                   ]
                 }
-                className="text-cyan-200 font-medium text-lg font-thai"
+                className="text-cyan-200 font-medium text-lg font-thai leading-relaxed"
               />
             )}
           </motion.div>
