@@ -108,25 +108,47 @@ export function LoginPage() {
   return (
     <div ref={vantaRef} className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-md w-full space-y-8 relative z-10">
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20">
+        <div className="group bg-white/10 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-500 hover:shadow-3xl hover:scale-105 transform-gpu perspective-1000"
+             style={{
+               background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+               backdropFilter: 'blur(20px)',
+               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+             }}
+             onMouseMove={(e) => {
+               const rect = e.currentTarget.getBoundingClientRect();
+               const x = e.clientX - rect.left - rect.width / 2;
+               const y = e.clientY - rect.top - rect.height / 2;
+               e.currentTarget.style.transform = `perspective(1000px) rotateY(${x / 20}deg) rotateX(${-y / 20}deg) translateZ(20px)`;
+             }}
+             onMouseLeave={(e) => {
+               e.currentTarget.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px)';
+             }}
+        >
           <div className="flex justify-center mb-6">
-            <img 
-              src="/logo.png" 
-              alt="Traco Logo" 
-              className="h-20 w-20"
-            />
+            <div className="relative">
+              <img 
+                src="/logo.png" 
+                alt="Traco Logo" 
+                className="h-20 w-20 filter drop-shadow-lg"
+              />
+              <div className="absolute inset-0 bg-white/20 rounded-full blur-xl"></div>
+            </div>
           </div>
-          <h2 className="text-center text-4xl font-extrabold text-gray-900 mb-2">
+          <h2 className="text-center text-4xl font-extrabold text-white mb-2 drop-shadow-lg">
             Traco
           </h2>
-          <p className="text-center text-gray-600 mb-8">
+          <p className="text-center text-white/80 mb-8 drop-shadow-md">
             Workshop Tracker Tools - Sign in to access workshops and track your progress
           </p>
           
           <button
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
-            className="group relative w-full flex justify-center py-4 px-6 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="group relative w-full flex justify-center py-4 px-6 border border-white/30 text-sm font-medium rounded-xl text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105 transform-gpu"
+            style={{
+              backdropFilter: 'blur(10px)',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 20px rgba(0, 0, 0, 0.2)'
+            }}
           >
             {isSigningIn ? (
               <span>Signing in...</span>
