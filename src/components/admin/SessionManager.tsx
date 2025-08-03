@@ -107,8 +107,8 @@ function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSession
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Session</h2>
+      <div className="bg-white rounded-xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Session</h2>
         
         {/* Tab Navigation */}
         <div className="flex space-x-1 mb-6">
@@ -394,8 +394,8 @@ function EditSessionModal({ isOpen, session, onClose, onSessionUpdated }: EditSe
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Session</h2>
+      <div className="bg-white rounded-xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Session</h2>
         
         {/* Tab Navigation */}
         <div className="flex space-x-1 mb-6">
