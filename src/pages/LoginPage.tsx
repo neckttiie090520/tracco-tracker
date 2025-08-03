@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { Navigate, useLocation } from 'react-router-dom'
 
+// Extend Window interface for Vanta.js
+declare global {
+  interface Window {
+    VANTA: any;
+    p5: any;
+  }
+}
+
 export function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth()
   const [isSigningIn, setIsSigningIn] = useState(false)
@@ -11,24 +19,54 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!vantaEffect && vantaRef.current) {
-      import('vanta/dist/vanta.topology.min').then((VANTA) => {
-        setVantaEffect(
-          VANTA.default({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0xffffff,
-            backgroundColor: 0x4f46e5, // indigo-600
-            spacing: 18.00,
-            noise: 2.00
-          })
-        )
-      })
+      // Load p5.js first, then Vanta.js from CDN
+      const loadScript = (src: string) => {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+          script.src = src
+          script.onload = resolve
+          script.onerror = reject
+          document.head.appendChild(script)
+        })
+      }
+
+      const loadVanta = async () => {
+        try {
+          // Load p5.js if not already loaded
+          if (!window.p5) {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js')
+          }
+          
+          // Load Vanta.js if not already loaded
+          if (!window.VANTA) {
+            await loadScript('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.topology.min.js')
+          }
+          
+          // Initialize Vanta effect
+          if (window.VANTA && vantaRef.current) {
+            setVantaEffect(
+              window.VANTA.TOPOLOGY({
+                el: vantaRef.current,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                color: 0xffffff,
+                backgroundColor: 0x4f46e5, // indigo-600
+                spacing: 18.00,
+                noise: 2.00
+              })
+            )
+          }
+        } catch (error) {
+          console.error('Error loading Vanta.js:', error)
+        }
+      }
+
+      loadVanta()
     }
     return () => {
       if (vantaEffect) vantaEffect.destroy()
