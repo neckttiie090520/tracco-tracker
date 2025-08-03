@@ -395,35 +395,39 @@ export function ParticipantDashboard() {
             {showSessionRegistration ? (
               <div className="text-blue-100 text-lg space-y-2">
                 <p className="mb-2 font-thai">เริ่มต้นการเรียนรู้ของคุณกับ</p>
-                <TypewriterText 
-                  examples={[
-                    "การพัฒนาทักษะใหม่ๆ",
-                    "เวิร์กช็อปที่น่าสนใจ", 
-                    "ประสบการณ์ที่ไม่เหมือนใคร",
-                    "ชุมชนนักเรียนรู้",
-                    "โอกาสในการเติบโต"
-                  ]}
-                  className="text-cyan-200 font-semibold text-xl font-thai leading-relaxed"
-                />
+                <div className="min-h-[4rem] flex items-center justify-center">
+                  <TypewriterText 
+                    examples={[
+                      "การพัฒนาทักษะใหม่ๆ",
+                      "เวิร์กช็อปที่น่าสนใจ", 
+                      "ประสบการณ์ที่ไม่เหมือนใคร",
+                      "ชุมชนนักเรียนรู้",
+                      "โอกาสในการเติบโต"
+                    ]}
+                    className="text-cyan-200 font-semibold text-xl font-thai text-center"
+                  />
+                </div>
               </div>
             ) : (
-              <TypewriterText 
-                examples={
-                  stats.activeSession ? [
-                    "พัฒนาทักษะการสื่อสารอย่างมืออาชีพ",
-                    "เรียนรู้เครื่องมือ AI ล้ำสมัย",
-                    "สร้างเนื้อหาที่ดึงดูดใจ",
-                    "ประยุกต์ใช้งานจริงในองค์กร",
-                    "เชื่อมต่อกับผู้เชี่ยวชาญ"
-                  ] : [
-                    "ยินดีต้อนรับกลับมา!",
-                    "เริ่มต้นเรียนรู้สิ่งใหม่กันเถอะ",
-                    "ค้นพบโอกาสที่รอคุณอยู่",
-                    "พร้อมพัฒนาตัวเองแล้วหรือยัง?"
-                  ]
-                }
-                className="text-cyan-200 font-medium text-lg font-thai leading-relaxed"
-              />
+              <div className="min-h-[3rem] flex items-center justify-center">
+                <TypewriterText 
+                  examples={
+                    stats.activeSession ? [
+                      "พัฒนาทักษะการสื่อสารอย่างมืออาชีพ",
+                      "เรียนรู้เครื่องมือ AI ล้ำสมัย",
+                      "สร้างเนื้อหาที่ดึงดูดใจ",
+                      "ประยุกต์ใช้งานจริงในองค์กร",
+                      "เชื่อมต่อกับผู้เชี่ยวชาญ"
+                    ] : [
+                      "ยินดีต้อนรับกลับมา!",
+                      "เริ่มต้นเรียนรู้สิ่งใหม่กันเถอะ",
+                      "ค้นพบโอกาสที่รอคุณอยู่",
+                      "พร้อมพัฒนาตัวเองแล้วหรือยัง?"
+                    ]
+                  }
+                  className="text-cyan-200 font-medium text-lg font-thai text-center"
+                />
+              </div>
             )}
           </motion.div>
         </div>

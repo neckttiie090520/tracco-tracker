@@ -24,12 +24,24 @@ export const TypewriterText = ({ examples, className = "" }: TypewriterTextProps
   }, [examples.length]);
 
   return (
-    <span className={`${className} leading-relaxed`} style={{ lineHeight: '1.6' }}>
+    <span 
+      className={`${className}`} 
+      style={{ 
+        lineHeight: '2.2', 
+        display: 'inline-block',
+        paddingTop: '0.5em',
+        paddingBottom: '0.5em'
+      }}
+    >
       {examples[exampleIndex].split("").map((l, i) => (
         <motion.span
           key={`${exampleIndex}-${i}`}
           className="relative inline-block"
-          style={{ lineHeight: '1.6' }}
+          style={{ 
+            lineHeight: '2.2',
+            display: 'inline-block',
+            verticalAlign: 'top'
+          }}
         >
           <motion.span
             initial={{

@@ -1,11 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { Navigate, useLocation } from 'react-router-dom'
 
 export function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth()
   const [isSigningIn, setIsSigningIn] = useState(false)
+  const [vantaEffect, setVantaEffect] = useState<any>(null)
+  const vantaRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
+
+  useEffect(() => {
+    if (!vantaEffect && vantaRef.current) {
+      import('vanta/dist/vanta.topology.min').then((VANTA) => {
+        setVantaEffect(
+          VANTA.default({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0xffffff,
+            backgroundColor: 0x4f46e5, // indigo-600
+            spacing: 18.00,
+            noise: 2.00
+          })
+        )
+      })
+    }
+    return () => {
+      if (vantaEffect) vantaEffect.destroy()
+    }
+  }, [vantaEffect])
+
+  useEffect(() => {
+    return () => {
+      if (vantaEffect) vantaEffect.destroy()
+    }
+  }, [])
 
   // Redirect if already authenticated
   if (user && !loading) {
@@ -27,35 +61,34 @@ export function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg">Loading...</div>
+      <div ref={vantaRef} className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-white">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="flex justify-center mb-4">
+    <div ref={vantaRef} className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="max-w-md w-full space-y-8 relative z-10">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20">
+          <div className="flex justify-center mb-6">
             <img 
               src="/logo.png" 
               alt="Traco Logo" 
-              className="h-16 w-16"
+              className="h-20 w-20"
             />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-4xl font-extrabold text-gray-900 mb-2">
             Traco
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="text-center text-gray-600 mb-8">
             Workshop Tracker Tools - Sign in to access workshops and track your progress
           </p>
-        </div>
-        <div>
+          
           <button
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-full flex justify-center py-4 px-6 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             {isSigningIn ? (
               <span>Signing in...</span>
