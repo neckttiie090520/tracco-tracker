@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../../services/supabase'
 import { AdminNavigation } from './AdminNavigation'
 import { SessionMaterialsManager } from './SessionMaterialsManager'
+import { MaterialManager } from './MaterialManager'
 import { SearchAndFilter } from './SearchAndFilter'
 import { BulkActionBar } from './BulkActionBar'
+import type { WorkshopMaterial } from '../../types/materials'
 
 interface Session {
   id: string
@@ -47,14 +49,14 @@ interface AddWorkshopToSessionModalProps {
 interface CreateSessionModalProps {
   isOpen: boolean
   onClose: () => void
-  onSessionCreated: (sessionData: any) => Promise<void>
+  onSessionCreated: (sessionData: any, materials?: WorkshopMaterial[]) => Promise<void>
 }
 
 interface EditSessionModalProps {
   isOpen: boolean
   session: Session | null
   onClose: () => void
-  onSessionUpdated: (sessionId: string, sessionData: any) => Promise<void>
+  onSessionUpdated: (sessionId: string, sessionData: any, materials?: WorkshopMaterial[]) => Promise<void>
 }
 
 function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSessionModalProps) {
@@ -70,13 +72,15 @@ function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSession
     venue: ''
   })
   const [loading, setLoading] = useState(false)
+  const [currentTab, setCurrentTab] = useState<'details' | 'materials'>('details')
+  const [materials, setMaterials] = useState<WorkshopMaterial[]>([])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      await onSessionCreated(formData)
+      await onSessionCreated(formData, materials)
       setFormData({
         title: '',
         description: '',
@@ -88,6 +92,8 @@ function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSession
         location: '',
         venue: ''
       })
+      setMaterials([])
+      setCurrentTab('details')
       onClose()
     } catch (error) {
       console.error('Error creating session:', error)
@@ -104,6 +110,33 @@ function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSession
       <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Session</h2>
         
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 mb-6">
+          <button
+            type="button"
+            onClick={() => setCurrentTab('details')}
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
+              currentTab === 'details'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Session Details
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('materials')}
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
+              currentTab === 'materials'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Materials ({materials.length})
+          </button>
+        </div>
+        
+        {currentTab === 'details' && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,6 +267,56 @@ function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSession
             </button>
           </div>
         </form>
+        )}
+        
+        {currentTab === 'materials' && (
+          <div>
+            {materials.length === 0 && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-blue-900">Add Learning Materials</h3>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Add materials like Google Docs, Canva presentations, YouTube videos, or any other links to help participants learn.
+                    </p>
+                    <p className="text-xs text-blue-600 mt-2">
+                      💡 You can add materials now or after creating the session
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <MaterialManager
+              workshopId="new-session"
+              materials={materials}
+              onMaterialsChange={setMaterials}
+            />
+            
+            <div className="flex justify-end space-x-4 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSubmit(new Event('submit') as any)}
+                disabled={loading || !formData.title.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              >
+                {loading ? 'Creating...' : 'Create Session'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -252,6 +335,8 @@ function EditSessionModal({ isOpen, session, onClose, onSessionUpdated }: EditSe
     venue: ''
   })
   const [loading, setLoading] = useState(false)
+  const [currentTab, setCurrentTab] = useState<'details' | 'materials'>('details')
+  const [materials, setMaterials] = useState<WorkshopMaterial[]>([])
 
   useEffect(() => {
     if (session) {
@@ -266,6 +351,25 @@ function EditSessionModal({ isOpen, session, onClose, onSessionUpdated }: EditSe
         location: session.location || '',
         venue: session.venue || ''
       })
+      
+      // Load existing materials
+      const loadMaterials = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('session_materials')
+            .select('*')
+            .eq('session_id', session.id)
+            .order('order_index')
+
+          if (!error && data) {
+            setMaterials(data)
+          }
+        } catch (error) {
+          console.error('Error loading materials:', error)
+        }
+      }
+      
+      loadMaterials()
     }
   }, [session])
 
@@ -276,7 +380,7 @@ function EditSessionModal({ isOpen, session, onClose, onSessionUpdated }: EditSe
     setLoading(true)
 
     try {
-      await onSessionUpdated(session.id, formData)
+      await onSessionUpdated(session.id, formData, materials)
       onClose()
     } catch (error) {
       console.error('Error updating session:', error)
@@ -293,6 +397,33 @@ function EditSessionModal({ isOpen, session, onClose, onSessionUpdated }: EditSe
       <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Session</h2>
         
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 mb-6">
+          <button
+            type="button"
+            onClick={() => setCurrentTab('details')}
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
+              currentTab === 'details'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Session Details
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('materials')}
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
+              currentTab === 'materials'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Materials ({materials.length})
+          </button>
+        </div>
+        
+        {currentTab === 'details' && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -423,6 +554,35 @@ function EditSessionModal({ isOpen, session, onClose, onSessionUpdated }: EditSe
             </button>
           </div>
         </form>
+        )}
+        
+        {currentTab === 'materials' && (
+          <div>
+            <MaterialManager
+              workshopId={session.id}
+              materials={materials}
+              onMaterialsChange={setMaterials}
+            />
+            
+            <div className="flex justify-end space-x-4 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSubmit(new Event('submit') as any)}
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              >
+                {loading ? 'Updating...' : 'Update Session'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -653,7 +813,6 @@ export function SessionManager() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showAddWorkshopModal, setShowAddWorkshopModal] = useState(false)
-  const [showMaterialsModal, setShowMaterialsModal] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   
   // Search and Filter State
@@ -725,9 +884,9 @@ export function SessionManager() {
     }
   }
 
-  const handleCreateSession = async (sessionData: any) => {
+  const handleCreateSession = async (sessionData: any, materials?: WorkshopMaterial[]) => {
     try {
-      const { error } = await supabase
+      const { data: sessionResult, error } = await supabase
         .from('sessions')
         .insert({
           title: sessionData.title,
@@ -741,10 +900,36 @@ export function SessionManager() {
           venue: sessionData.venue || null,
           registration_open: true
         })
+        .select()
+        .single()
 
       if (error) {
         console.error('Error creating session:', error)
         throw error
+      }
+
+      // Add materials if provided
+      if (materials && materials.length > 0 && sessionResult) {
+        const materialsToInsert = materials.map((material, index) => ({
+          session_id: sessionResult.id,
+          title: material.title,
+          type: material.type,
+          url: material.url,
+          embed_url: material.embed_url,
+          display_mode: material.display_mode,
+          dimensions: material.dimensions,
+          order_index: index,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }))
+
+        const { error: materialsError } = await supabase
+          .from('session_materials')
+          .insert(materialsToInsert)
+
+        if (materialsError) {
+          console.error('Error adding materials:', materialsError)
+        }
       }
 
       await fetchSessions()
@@ -772,7 +957,7 @@ export function SessionManager() {
     }
   }
 
-  const handleEditSession = async (sessionId: string, sessionData: any) => {
+  const handleEditSession = async (sessionId: string, sessionData: any, materials?: WorkshopMaterial[]) => {
     try {
       const { error } = await supabase
         .from('sessions')
@@ -793,6 +978,8 @@ export function SessionManager() {
         console.error('Error updating session:', error)
         throw error
       }
+
+      // Note: Materials are managed through MaterialManager component which handles its own updates
 
       await fetchSessions()
     } catch (error) {
@@ -1208,15 +1395,6 @@ export function SessionManager() {
                               Edit
                             </button>
                             <button 
-                              onClick={() => {
-                                setSelectedSession(session)
-                                setShowMaterialsModal(true)
-                              }}
-                              className="text-purple-600 hover:text-purple-900 text-xs px-2 py-1 bg-purple-50 rounded"
-                            >
-                              Materials
-                            </button>
-                            <button 
                               onClick={() => handleDeleteSession(session.id, session.title)}
                               className="text-red-600 hover:text-red-900 text-xs px-2 py-1 bg-red-50 rounded"
                             >
@@ -1263,44 +1441,6 @@ export function SessionManager() {
         onWorkshopAdded={fetchSessions}
       />
 
-      {/* Session Materials Management Modal */}
-      {showMaterialsModal && selectedSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">จัดการเอกสาร Session</h2>
-                <button
-                  onClick={() => {
-                    setShowMaterialsModal(false)
-                    setSelectedSession(null)
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-              <SessionMaterialsManager
-                sessionId={selectedSession.id}
-                sessionTitle={selectedSession.title}
-              />
-              
-              {/* Done Button */}
-              <div className="flex justify-end pt-6 border-t border-gray-200 mt-6">
-                <button
-                  onClick={() => {
-                    setShowMaterialsModal(false)
-                    setSelectedSession(null)
-                  }}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
