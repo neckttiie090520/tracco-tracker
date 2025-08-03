@@ -387,13 +387,13 @@ export function ParticipantDashboard() {
           
           // Load Vanta.js if not already loaded
           if (!window.VANTA) {
-            await loadScript('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.topology.min.js')
+            await loadScript('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js')
           }
           
           // Initialize Vanta effect
-          if (window.VANTA && heroVantaRef.current) {
+          if (window.VANTA && window.VANTA.WAVES && heroVantaRef.current) {
             setVantaEffect(
-              window.VANTA.TOPOLOGY({
+              window.VANTA.WAVES({
                 el: heroVantaRef.current,
                 mouseControls: true,
                 touchControls: true,
@@ -402,10 +402,12 @@ export function ParticipantDashboard() {
                 minWidth: 200.00,
                 scale: 1.00,
                 scaleMobile: 1.00,
-                color: 0xd0d59,
-                backgroundColor: 0x5600ff,
-                spacing: 18.00,
-                noise: 2.00
+                color: 0x4338ca,
+                shininess: 30.00,
+                waveHeight: 15.00,
+                waveSpeed: 0.75,
+                zoom: 0.65,
+                forceAnimate: true
               })
             )
           }
@@ -455,7 +457,11 @@ export function ParticipantDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div ref={heroVantaRef} className="relative bg-indigo-600 text-white overflow-hidden">
+      <div 
+        ref={heroVantaRef} 
+        className="relative bg-indigo-600 text-white overflow-hidden"
+        style={{ minHeight: '200px', width: '100%', position: 'relative' }}
+      >
         <div className="max-w-7xl mx-auto px-8 py-12 relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
