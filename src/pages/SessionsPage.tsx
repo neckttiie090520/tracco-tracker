@@ -132,7 +132,7 @@ export function SessionsPage() {
     <div className="min-h-screen bg-gray-50">
       <UserNavigation />
       
-      <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
           <BackButton to="/dashboard" />
         </div>
@@ -172,7 +172,7 @@ export function SessionsPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
             {sessions.map((session) => {
               const startDate = new Date(session.start_date)
               const endDate = new Date(session.end_date)
@@ -186,10 +186,10 @@ export function SessionsPage() {
               return (
                 <div 
                   key={session.id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200"
+                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 max-w-sm"
                 >
                   {/* Post Header */}
-                  <div className="p-4 border-b border-gray-100">
+                  <div className="p-3 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -220,7 +220,7 @@ export function SessionsPage() {
                   </div>
 
                   {/* Post Content */}
-                  <div className="p-4">
+                  <div className="p-3">
                     {/* Facebook-style Description */}
                     {session.description && (
                       <div className="text-gray-700 text-sm mb-3 whitespace-pre-line leading-relaxed">
