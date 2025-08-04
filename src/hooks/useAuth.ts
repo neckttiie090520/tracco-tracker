@@ -2,6 +2,8 @@ import { useState, useEffect, createContext, useContext } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { authService } from '../services/auth'
 import { supabase } from '../services/supabase'
+import { sessionManager, setupActivityListeners } from '../services/sessionManager'
+import { isSessionManagementEnabled } from '../config/sessionConfig'
 
 async function createUserIfNotExists(user: User) {
   try {
@@ -56,6 +58,21 @@ export function useAuthState() {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+      
+      // Initialize session manager if user is authenticated and enabled
+      if (session?.user && isSessionManagementEnabled()) {
+        setupActivityListeners()
+        sessionManager.init({
+          onWarning: () => {
+            // You can add a warning notification here
+            console.log('Session will expire soon')
+          },
+          onTimeout: () => {
+            // Session timeout handled by sessionManager
+            console.log('Session expired due to inactivity or timeout')
+          }
+        })
+      }
     })
 
     // Listen for auth changes
@@ -73,10 +90,29 @@ export function useAuthState() {
         createUserIfNotExists(session.user).catch(err => 
           console.error('Failed to create user profile:', err)
         )
+        
+        // Initialize session manager if enabled
+        if (isSessionManagementEnabled()) {
+          setupActivityListeners()
+          sessionManager.init({
+            onWarning: () => {
+              console.log('Session will expire soon')
+            },
+            onTimeout: () => {
+              console.log('Session expired due to inactivity or timeout')
+            }
+          })
+        }
+      } else if (event === 'SIGNED_OUT') {
+        // Stop session manager
+        sessionManager.stop()
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      sessionManager.stop()
+    }
   }, [])
 
   const signInWithGoogle = async () => {

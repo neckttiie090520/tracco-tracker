@@ -2,6 +2,7 @@ import React from 'react'
 import { supabase } from './supabase'
 import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { Database } from '../types/database'
+import { realtimePool } from './realtimePool'
 
 // Type definitions for real-time events
 export type RealtimeEventType = 'INSERT' | 'UPDATE' | 'DELETE'
@@ -104,7 +105,18 @@ class RealtimeService {
     filter?: string,
     callback?: (event: RealtimeEvent<T>) => void
   ): RealtimeSubscription {
-    const channel = supabase.channel(channelName)
+    // Use pooled channel instead of creating new one
+    const subscriberId = `${channelName}-${Date.now()}`
+    const channel = realtimePool.getChannel(channelName, subscriberId)
+    
+    if (!channel) {
+      console.warn(`Failed to get channel: ${channelName}`)
+      return {
+        id: channelName,
+        channel: supabase.channel(channelName), // Fallback
+        cleanup: () => {}
+      }
+    }
 
     // Set up postgres changes listener
     let channelWithChanges = filter 
@@ -140,9 +152,10 @@ class RealtimeService {
       id: channelName,
       channel,
       cleanup: () => {
-        channel.unsubscribe()
+        // Release from pool instead of unsubscribing
+        realtimePool.releaseChannel(channelName, subscriberId)
         this.subscriptions.delete(channelName)
-        console.log(`🧹 Cleaned up subscription: ${channelName}`)
+        console.log(`🧹 Released subscription: ${channelName}`)
       }
     }
 

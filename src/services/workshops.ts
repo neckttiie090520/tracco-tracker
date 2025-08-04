@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { Database } from '../types/database'
 import { notificationManager } from './notificationManager'
+import { cacheService, CACHE_KEYS } from './cacheService'
 
 type Workshop = Database['public']['Tables']['workshops']['Row']
 type WorkshopInsert = Database['public']['Tables']['workshops']['Insert']
@@ -14,6 +15,13 @@ export const workshopService = {
 
   // Get all active workshops
   async getWorkshops() {
+    // Check cache first
+    const cacheKey = CACHE_KEYS.workshops
+    const cached = cacheService.get<Workshop[]>(cacheKey)
+    if (cached) {
+      return cached
+    }
+
     const { data, error } = await supabase
       .from('workshops')
       .select('*')
@@ -49,11 +57,23 @@ export const workshopService = {
       }
     }
 
+    // Cache the result
+    if (data) {
+      cacheService.set(cacheKey, data, 5 * 60 * 1000) // 5 minutes
+    }
+
     return data
   },
 
   // Get workshop by ID with details
   async getWorkshopById(id: string) {
+    // Check cache first
+    const cacheKey = CACHE_KEYS.workshop(id)
+    const cached = cacheService.get<Workshop>(cacheKey)
+    if (cached) {
+      return cached
+    }
+
     const { data, error } = await supabase
       .from('workshops')
       .select('*')
@@ -77,6 +97,11 @@ export const workshopService = {
       if (instructor) {
         (data as any).instructor_user = { name: instructor.name }
       }
+    }
+
+    // Cache the result
+    if (data) {
+      cacheService.set(cacheKey, data, 5 * 60 * 1000) // 5 minutes
     }
 
     return data
