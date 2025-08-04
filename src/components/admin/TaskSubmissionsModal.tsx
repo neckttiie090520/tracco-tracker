@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
+import { InlineSlotMachine } from './InlineSlotMachine'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -19,6 +20,7 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const [showRandomizer, setShowRandomizer] = useState(false)
 
   const [reviewData, setReviewData] = useState({
     feedback: '',
@@ -138,6 +140,21 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
     })
   }
 
+  // Convert submissions to participant format for SlotMachine
+  const getParticipantsFromSubmissions = () => {
+    if (!submissions || submissions.length === 0) return []
+    
+    return submissions
+      .filter(submission => submission.user && submission.status === 'submitted')
+      .map(submission => ({
+        id: submission.user.id,
+        name: submission.user.name || 'Unknown',
+        email: submission.user.email || '',
+        faculty: '', // You can add faculty data if available in submissions
+        department: ''
+      }))
+  }
+
   if (!task) return null
 
   const modalContent = (
@@ -153,19 +170,41 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
               <h2 className="text-xl font-semibold text-gray-900">{task.title} - Submissions</h2>
               <p className="text-gray-600 mt-1">
                 {task.workshop?.title} • {submissions?.length || 0} submission{submissions?.length !== 1 ? 's' : ''}
+                {submissions && submissions.length > 0 && (
+                  <span className="ml-2 text-purple-600 font-medium">
+                    (สามารถสุ่มได้ {getParticipantsFromSubmissions().length} คน)
+                  </span>
+                )}
               </p>
             </div>
             <div className="flex items-center space-x-3">
               {submissions && submissions.length > 0 && (
-                <button
-                  onClick={exportSubmissions}
-                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md font-medium flex items-center"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Export CSV
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowRandomizer(true)}
+                    disabled={getParticipantsFromSubmissions().length === 0}
+                    className={`text-sm px-4 py-2 rounded-lg font-medium flex items-center mr-3 shadow-md transition-all duration-200 ${
+                      getParticipantsFromSubmissions().length === 0
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white hover:shadow-lg'
+                    }`}
+                    title={getParticipantsFromSubmissions().length === 0 ? "ไม่มีผู้ส่งงานที่สามารถสุ่มได้" : "สุ่มรายชื่อจากผู้ส่งงาน"}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    🎲 สุ่มรายชื่อ
+                  </button>
+                  <button
+                    onClick={exportSubmissions}
+                    className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md font-medium flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export CSV
+                  </button>
+                </>
               )}
               <button
                 onClick={onClose}
@@ -597,6 +636,55 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
                   className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
                 >
                   {selectedSubmissionDetail.status === 'reviewed' ? 'Edit Review' : 'Add Review'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Randomizer Modal */}
+      {showRandomizer && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[10000]">
+          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  🎰 สุ่มรายชื่อผู้ส่งงาน - {task.title}
+                </h3>
+                <button
+                  onClick={() => setShowRandomizer(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {getParticipantsFromSubmissions().length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">😔</div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">ไม่มีผู้ส่งงาน</h3>
+                  <p className="text-gray-600">ยังไม่มีผู้ส่งงานใน Task นี้ หรือผู้ส่งงานยังไม่ได้ส่งงาน (status: submitted)</p>
+                </div>
+              ) : (
+                <div className="randomizer-container min-h-[500px] flex items-center justify-center">
+                  <div className="w-full max-w-lg">
+                    <InlineSlotMachine 
+                      participants={getParticipantsFromSubmissions()}
+                      taskTitle={task.title}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setShowRandomizer(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                >
+                  ปิด
                 </button>
               </div>
             </div>
