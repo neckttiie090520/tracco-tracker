@@ -32,6 +32,30 @@ export class MaterialService {
   }
 
   /**
+   * Replace all materials for a workshop with the provided list (admin)
+   * This is used by edit flows to ensure ordering and adds/removes are persisted.
+   */
+  static async replaceWorkshopMaterials(
+    workshopId: string,
+    items: Array<Partial<WorkshopMaterial> & { url: string; display_mode: any; title?: string; dimensions?: any }>
+  ): Promise<void> {
+    await supabaseAdmin.client
+      .from('workshop_materials')
+      .delete()
+      .eq('workshop_id', workshopId)
+
+    for (const item of items) {
+      await this.createMaterial({
+        workshop_id: workshopId,
+        url: item.url,
+        display_mode: item.display_mode,
+        title: item.title,
+        dimensions: item.dimensions
+      } as CreateMaterialRequest)
+    }
+  }
+
+  /**
    * Create a new material
    */
   static async createMaterial(request: CreateMaterialRequest): Promise<WorkshopMaterial> {
@@ -88,6 +112,29 @@ export class MaterialService {
     } catch (error) {
       console.error('Error in createMaterial:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Replace all materials for a session with the provided list (admin)
+   */
+  static async replaceSessionMaterials(
+    sessionId: string,
+    items: Array<Partial<SessionMaterial> & { url: string; display_mode: any; title?: string; dimensions?: any }>
+  ): Promise<void> {
+    await supabaseAdmin.client
+      .from('session_materials')
+      .delete()
+      .eq('session_id', sessionId)
+
+    for (const item of items) {
+      await this.createSessionMaterial({
+        session_id: sessionId,
+        url: item.url,
+        display_mode: item.display_mode,
+        title: item.title,
+        dimensions: item.dimensions
+      } as CreateSessionMaterialRequest)
     }
   }
 

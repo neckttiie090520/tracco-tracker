@@ -92,6 +92,17 @@ export function EditWorkshopModal({ workshop, onClose, onWorkshopUpdated }: Edit
       }
 
       await onWorkshopUpdated(workshop.id, updates)
+
+      // Replace workshop materials with current list
+      if (materials) {
+        const items = materials.map(m => ({
+          url: m.url,
+          display_mode: m.display_mode,
+          title: m.title,
+          dimensions: m.dimensions
+        }))
+        await MaterialService.replaceWorkshopMaterials(workshop.id, items as any)
+      }
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update workshop')

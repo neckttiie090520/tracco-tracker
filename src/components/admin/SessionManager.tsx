@@ -979,7 +979,16 @@ export function SessionManager() {
         throw error
       }
 
-      // Note: Materials are managed through MaterialManager component which handles its own updates
+      // Replace session materials with current list from editor
+      if (materials) {
+        const items = materials.map((m) => ({
+          url: (m as any).url,
+          display_mode: (m as any).display_mode,
+          title: (m as any).title,
+          dimensions: (m as any).dimensions
+        }))
+        await MaterialService.replaceSessionMaterials(sessionId, items as any)
+      }
 
       await fetchSessions()
     } catch (error) {
