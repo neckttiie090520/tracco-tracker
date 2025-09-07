@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Slot from '../../lib/Slot'
+import { startSpinSound, stopSpinSound, playWinJingle } from '../../utils/sfx'
+import { burstConfetti } from '../../utils/confetti'
 
 interface LuckyDrawSlotProps {
   names: string[]
@@ -12,6 +14,8 @@ export function LuckyDrawSlot({ names, reelId, onWinner }: LuckyDrawSlotProps) {
   const [removal, setRemoval] = useState(true)
   const [spinning, setSpinning] = useState(false)
   const [remaining, setRemaining] = useState<string[]>([])
+  const [winner, setWinner] = useState<string | null>(null)
+  const stopConfettiRef = useRef<null | (() => void)>(null)
 
   const cleanNames = useMemo(() => {
     // Deduplicate and remove falsy values
@@ -23,8 +27,20 @@ export function LuckyDrawSlot({ names, reelId, onWinner }: LuckyDrawSlotProps) {
     slotRef.current = new Slot({
       reelContainerSelector: `#${reelId}`,
       removeWinner: removal,
-      onSpinStart: () => setSpinning(true),
-      onSpinEnd: () => setSpinning(false),
+      onSpinStart: () => {
+        setSpinning(true)
+        startSpinSound()
+        setWinner(null)
+      },
+      onSpinEnd: () => {
+        setSpinning(false)
+        stopSpinSound()
+        const w = slotRef.current?.lastWinner || null
+        setWinner(w)
+        playWinJingle()
+        try { stopConfettiRef.current?.() } catch {}
+        stopConfettiRef.current = burstConfetti()
+      },
       onNameListChanged: () => setRemaining(slotRef.current?.names || [])
     })
     slotRef.current.names = cleanNames
@@ -48,20 +64,17 @@ export function LuckyDrawSlot({ names, reelId, onWinner }: LuckyDrawSlotProps) {
     const ok = await slotRef.current.spin()
     if (ok) {
       const after = slotRef.current.names
-      // winner is the element removed (if removal), or the last displayed; infer from diff
-      let winner = ''
-      if (removal) {
-        winner = before.find((n) => !after.includes(n)) || ''
-      }
-      // Fallback: we can’t easily read rendered last item; skip
-      if (winner && onWinner) onWinner(winner)
+      // prefer Slot.lastWinner
+      const w = slotRef.current.lastWinner || (removal ? before.find((n) => !after.includes(n)) || '' : '')
+      if (w && onWinner) onWinner(w)
       setRemaining(after)
     }
   }
 
   return (
-    <div className="w-full">
-      <div className="bg-white border rounded-lg p-4">
+    <div className={`w-full lucky-slot ${spinning ? 'spinning' : ''}`}>
+      <div className="bg-white border rounded-lg p-4 slot-frame relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none lights" aria-hidden="true" />
         <div className="mb-3 flex items-center justify-between">
           <div className="text-sm text-gray-600">Eligible: {cleanNames.length} • Remaining: {remaining.length}</div>
           <label className="inline-flex items-center space-x-2 text-sm text-gray-700">
@@ -87,8 +100,13 @@ export function LuckyDrawSlot({ names, reelId, onWinner }: LuckyDrawSlotProps) {
           </button>
           <div className="text-xs text-gray-500">Uses the slot animation to pick a random name.</div>
         </div>
+        {winner && (
+          <div className="mt-3 p-3 rounded-md bg-gradient-to-r from-yellow-100 to-pink-100 border border-yellow-300 animate-winner">
+            <span className="text-sm font-semibold text-yellow-800">Winner:</span>
+            <span className="ml-2 text-sm font-bold text-pink-700">{winner}</span>
+          </div>
+        )}
       </div>
     </div>
   )
 }
-

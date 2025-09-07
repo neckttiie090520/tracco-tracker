@@ -18,6 +18,7 @@ export default class Slot {
   private onSpinStart?: NonNullable<SlotConfigurations['onSpinStart']>
   private onSpinEnd?: NonNullable<SlotConfigurations['onSpinEnd']>
   private onNameListChanged?: NonNullable<SlotConfigurations['onNameListChanged']>
+  private _lastWinner: string | null = null
 
   constructor({
     maxReelItems = 30,
@@ -113,9 +114,11 @@ export default class Slot {
     })
     reelContainer.appendChild(fragment)
 
+    // record winner
+    this._lastWinner = randomNames[randomNames.length - 1]
     if (shouldRemoveWinner) {
       this.nameList.splice(
-        this.nameList.findIndex((name) => name === randomNames[randomNames.length - 1]),
+        this.nameList.findIndex((name) => name === this._lastWinner),
         1
       )
     }
@@ -136,5 +139,8 @@ export default class Slot {
     if (this.onSpinEnd) this.onSpinEnd()
     return true
   }
-}
 
+  public get lastWinner(): string | null {
+    return this._lastWinner
+  }
+}
