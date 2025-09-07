@@ -37,6 +37,18 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
     return Array.from(new Set(list))
   }, [submissions])
 
+  const openWinnerDetail = (winnerNameOrEmail: string) => {
+    if (!submissions || !winnerNameOrEmail) return
+    const match = submissions.find((s: any) => {
+      const name = s?.user?.name || ''
+      const email = s?.user?.email || ''
+      return name === winnerNameOrEmail || email === winnerNameOrEmail
+    })
+    if (match) {
+      setSelectedSubmissionDetail(match)
+    }
+  }
+
   // Handle escape key and focus management
   useEffect(() => {
     if (!task) return
@@ -216,6 +228,7 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
                 onWinner={(name) => {
                   // optional: toast or console
                   console.log('Lucky winner:', name)
+                  openWinnerDetail(name)
                 }}
               />
             </div>
@@ -352,7 +365,14 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {formatDate(submission.submitted_at)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <button
+                              onClick={() => setSelectedSubmissionDetail(submission)}
+                              className="text-gray-700 hover:text-gray-900 text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-md transition-colors font-medium"
+                              title="View submission details"
+                            >
+                              View
+                            </button>
                             <button
                               onClick={() => handleReviewSubmission(submission)}
                               className="text-blue-600 hover:text-blue-900 text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors font-medium"
@@ -538,14 +558,14 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-medium text-gray-900 mb-4">Submission Content</h4>
                 
-                {selectedSubmissionDetail.notes && (
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Notes:</p>
-                    <div className="bg-white p-3 rounded border">
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">{selectedSubmissionDetail.notes}</p>
-                    </div>
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Notes:</p>
+                  <div className="bg-white p-3 rounded border">
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                      {selectedSubmissionDetail.notes ? selectedSubmissionDetail.notes : 'No notes provided'}
+                    </p>
                   </div>
-                )}
+                </div>
 
                 {selectedSubmissionDetail.submission_url && (
                   <div className="mb-4">
