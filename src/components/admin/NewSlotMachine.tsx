@@ -511,7 +511,7 @@ export function NewSlotMachine({
                   <label className={`block text-gray-700 font-medium mb-2 ${
                     isFullscreen ? 'text-lg' : 'text-base'
                   }`} style={{ fontFamily: 'Concert One, cursive' }}>
-                    à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡:
+                    Pick Type:
                   </label>
                   <div className="grid grid-cols-2 gap-2 mode-grid">
                     {[
@@ -523,7 +523,7 @@ export function NewSlotMachine({
                         onClick={() => onModeChange(value as RandomizerMode)}
                         className={`p-3 rounded-lg border-2 text-center transition-all ${
                           mode === value
-                    Pick Type:
+                            ? 'border-pink-500 bg-pink-50 text-pink-700'
                             : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300'
                         } ${isFullscreen ? 'text-base' : 'text-sm'}`}
                         style={{ fontFamily: 'Concert One, cursive' }}
