@@ -187,24 +187,24 @@ export function TaskManagement() {
   const createSampleTasks = async (workshopId: string) => {
     const sampleTasks = [
       {
-        title: 'สร้างโมเดลจำแนกภาพด้วย AI',
-        description: 'สร้างโมเดล AI สำหรับจำแนกประเภทภาพ โดยใช้ TensorFlow หรือ PyTorch ให้สามารถจำแนกภาพได้อย่างน้อย 5 ประเภท พร้อมทั้งอธิบายวิธีการทำงานและแสดงผลลัพธ์',
+        title: 'à¸ªà¸£à¹‰à¸²à¸‡à¹‚à¸¡à¹€à¸”à¸¥à¸ˆà¸³à¹à¸™à¸à¸ à¸²à¸žà¸”à¹‰à¸§à¸¢ AI',
+        description: 'à¸ªà¸£à¹‰à¸²à¸‡à¹‚à¸¡à¹€à¸”à¸¥ AI à¸ªà¸³à¸«à¸£à¸±à¸šà¸ˆà¸³à¹à¸™à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸ à¸²à¸ž à¹‚à¸”à¸¢à¹ƒà¸Šà¹‰ TensorFlow à¸«à¸£à¸·à¸­ PyTorch à¹ƒà¸«à¹‰à¸ªà¸²à¸¡à¸²à¸£à¸–à¸ˆà¸³à¹à¸™à¸à¸ à¸²à¸žà¹„à¸”à¹‰à¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 5 à¸›à¸£à¸°à¹€à¸ à¸— à¸žà¸£à¹‰à¸­à¸¡à¸—à¸±à¹‰à¸‡à¸­à¸˜à¸´à¸šà¸²à¸¢à¸§à¸´à¸˜à¸µà¸à¸²à¸£à¸—à¸³à¸‡à¸²à¸™à¹à¸¥à¸°à¹à¸ªà¸”à¸‡à¸œà¸¥à¸¥à¸±à¸žà¸˜à¹Œ',
         due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         workshop_id: workshopId,
         order_index: 1,
         is_active: true
       },
       {
-        title: 'วิเคราะห์ข้อมูลด้วย Machine Learning',
-        description: 'ใช้เทคนิค Machine Learning ในการวิเคราะห์ชุดข้อมูลที่กำหนดให้ สร้างรายงานผลการวิเคราะห์ และนำเสนอ insights ที่ได้',
+        title: 'à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸”à¹‰à¸§à¸¢ Machine Learning',
+        description: 'à¹ƒà¸Šà¹‰à¹€à¸—à¸„à¸™à¸´à¸„ Machine Learning à¹ƒà¸™à¸à¸²à¸£à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸Šà¸¸à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸à¸³à¸«à¸™à¸”à¹ƒà¸«à¹‰ à¸ªà¸£à¹‰à¸²à¸‡à¸£à¸²à¸¢à¸‡à¸²à¸™à¸œà¸¥à¸à¸²à¸£à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œ à¹à¸¥à¸°à¸™à¸³à¹€à¸ªà¸™à¸­ insights à¸—à¸µà¹ˆà¹„à¸”à¹‰',
         due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         workshop_id: workshopId,
         order_index: 2,
         is_active: true
       },
       {
-        title: 'พัฒนา Chatbot ด้วย AI',
-        description: 'สร้าง Chatbot ที่สามารถตอบคำถามพื้นฐานเกี่ยวกับหัวข้อที่เรียนรู้ในคอร์สนี้ โดยใช้ NLP และ AI technologies',
+        title: 'à¸žà¸±à¸’à¸™à¸² Chatbot à¸”à¹‰à¸§à¸¢ AI',
+        description: 'à¸ªà¸£à¹‰à¸²à¸‡ Chatbot à¸—à¸µà¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸•à¸­à¸šà¸„à¸³à¸–à¸²à¸¡à¸žà¸·à¹‰à¸™à¸à¸²à¸™à¹€à¸à¸µà¹ˆà¸¢à¸§à¸à¸±à¸šà¸«à¸±à¸§à¸‚à¹‰à¸­à¸—à¸µà¹ˆà¹€à¸£à¸µà¸¢à¸™à¸£à¸¹à¹‰à¹ƒà¸™à¸„à¸­à¸£à¹Œà¸ªà¸™à¸µà¹‰ à¹‚à¸”à¸¢à¹ƒà¸Šà¹‰ NLP à¹à¸¥à¸° AI technologies',
         due_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
         workshop_id: workshopId,
         order_index: 3,
@@ -216,10 +216,10 @@ export function TaskManagement() {
       for (const task of sampleTasks) {
         await createTask(task)
       }
-      alert('สร้าง sample tasks สำเร็จ!')
+      alert('à¸ªà¸£à¹‰à¸²à¸‡ sample tasks à¸ªà¸³à¹€à¸£à¹‡à¸ˆ!')
     } catch (error) {
       console.error('Error creating sample tasks:', error)
-      alert('เกิดข้อผิดพลาดในการสร้าง sample tasks')
+      alert('à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¸ªà¸£à¹‰à¸²à¸‡ sample tasks')
     }
   }
 
@@ -491,10 +491,10 @@ export function TaskManagement() {
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Submissions
+                        Task / Workshop
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Task / Workshop
+                        Submissions
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -508,34 +508,7 @@ export function TaskManagement() {
                       
                       return (
                         <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`}>
-                          {/* Submissions cell (now first) */}
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className=\"flex items-center gap-2\">
-                              <button
-                                onClick={() => setViewingSubmissions(task)}
-                                className=\"inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors\"
-                                title=\"View all submissions\"
-                              >
-                                <svg className=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" aria-hidden=\"true\">
-                                  <path d=\"M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z\" />
-                                </svg>
-                                <span>View</span>
-                                <span className=\"ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200\">{submissionCount}</span>
-                              </button>
-                              {submissionCount > 0 && (
-                                <button
-                                  onClick={() => { setViewingSubmissions(task); (window as any).__openLuckyDrawForTask = task?.id; }}
-                                  className=\"inline-flex items-center gap-1.5 text-xs font-medium text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1.5 rounded-md border border-pink-200\"
-                                  title=\"Open Lucky Draw\"
-                                >
-                                  <svg className=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 10V3L4 14h7v7l9-11h-7z\" />
-                                  </svg>
-                                  Lucky
-                                </button>
-                              )}
-                            </div>
-                          </td>
+                          {/* Task / Workshop first, submissions column follows below */}
 
                           {/* Task / Workshop with due date + status toggle */}
                           <td className="px-6 py-4 align-top">
@@ -581,7 +554,35 @@ export function TaskManagement() {
                               </div>
                             </div>
                           </td>
-                          
+                          {/* Submissions cell (after Task/Workshop) */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className=\"flex items-center gap-2\">
+                              <button
+                                onClick={() => setViewingSubmissions(task)}
+                                className=\"inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors\"
+                                title=\"View all submissions\"
+                              >
+                                <svg className=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" aria-hidden=\"true\">
+                                  <path d=\"M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z\" />
+                                </svg>
+                                <span>View</span>
+                                <span className=\"ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200\">{submissionCount}</span>
+                              </button>
+                              {submissionCount > 0 && (
+                                <button
+                                  onClick={() => { setViewingSubmissions(task); (window as any).__openLuckyDrawForTask = task?.id; }}
+                                  className=\"inline-flex items-center gap-1.5 text-xs font-medium text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1.5 rounded-md border border-pink-200\"
+                                  title=\"Open Lucky Draw\"
+                                >
+                                  <svg className=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
+                                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 10V3L4 14h7v7l9-11h-7z\" />
+                                  </svg>
+                                  Lucky
+                                </button>
+                              )}
+                            </div>
+                          </td>
+
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                             <button
                               onClick={() => setEditingTask(task)}
