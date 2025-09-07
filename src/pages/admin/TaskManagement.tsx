@@ -491,13 +491,10 @@ export function TaskManagement() {
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Task / Workshop
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Due Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Submissions
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Task / Workshop
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -511,7 +508,8 @@ export function TaskManagement() {
                       
                       return (
                         <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`}>
-                                                    <td className=\"px-6 py-4 whitespace-nowrap\">
+                          {/* Submissions cell (now first) */}
+                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className=\"flex items-center gap-2\">
                               <button
                                 onClick={() => setViewingSubmissions(task)}
@@ -536,6 +534,51 @@ export function TaskManagement() {
                                   Lucky
                                 </button>
                               )}
+                            </div>
+                          </td>
+
+                          {/* Task / Workshop with due date + status toggle */}
+                          <td className="px-6 py-4 align-top">
+                            <div className="flex flex-col">
+                              <div className="text-sm font-semibold text-gray-900">
+                                {task.title}
+                              </div>
+                              {task.description && (
+                                <div className="text-xs text-gray-600 truncate max-w-md">
+                                  {task.description.length > 80 ? `${task.description.substring(0, 80)}...` : task.description}
+                                </div>
+                              )}
+                              <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                                <div className="flex items-center flex-wrap gap-2">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700">Order {task.order_index}</span>
+                                  {task.workshop?.title && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">{task.workshop.title}</span>
+                                  )}
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded ${isOverdue ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                                    {formatDate(task.due_date)}{isOverdue && <span className="ml-1">(Overdue)</span>}
+                                  </span>
+                                </div>
+                                <div className="ml-3">
+                                  <button
+                                    onClick={() => handleUpdateTask(task.id, { is_active: !task.is_active })}
+                                    aria-pressed={task.is_active}
+                                    title={task.is_active ? 'Click to hide this task' : 'Click to show this task'}
+                                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full transition-colors shadow-sm border ${task.is_active ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'}`}
+                                  >
+                                    {task.is_active ? (
+                                      <>
+                                        <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/></svg>
+                                        Show
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd"/><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/></svg>
+                                        Hide
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </td>
                           
