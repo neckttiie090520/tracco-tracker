@@ -491,10 +491,7 @@ export function TaskManagement() {
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Task
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Workshop
+                        Task / Workshop
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Due Date
@@ -525,27 +522,29 @@ export function TaskManagement() {
                               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <div className="text-sm font-semibold text-gray-900">
                                 {task.title}
                               </div>
                               {task.description && (
-                                <div className="text-sm text-gray-500 truncate max-w-xs">
-                                  {task.description.length > 30 
-                                    ? `${task.description.substring(0, 30)}...` 
+                                <div className="text-xs text-gray-600 truncate max-w-md">
+                                  {task.description.length > 80 
+                                    ? `${task.description.substring(0, 80)}...` 
                                     : task.description
                                   }
                                 </div>
                               )}
-                              <div className="text-xs text-gray-400 mt-1">
-                                Order: {task.order_index}
+                              <div className="mt-1 flex items-center text-xs text-gray-500">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700 mr-2">
+                                  Order {task.order_index}
+                                </span>
+                                {task.workshop?.title && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">
+                                    {task.workshop.title}
+                                  </span>
+                                )}
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {task.workshop?.title}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
