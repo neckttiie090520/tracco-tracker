@@ -18,12 +18,37 @@ interface Session {
   is_active: boolean
 }
 
+interface Workshop {
+  id: string
+  title: string
+  description?: string
+  instructor?: string
+}
+
+interface Task {
+  id: string
+  title: string
+  description?: string
+  workshop_id: string
+  workshop?: Workshop
+}
+
+type RandomizerMode = 'session' | 'workshop' | 'task'
+
 interface SlotMachineProps {
   participants: Participant[]
   sessionTitle: string
   sessions: Session[]
+  workshops: Workshop[]
+  tasks: Task[]
   selectedSession: string
+  selectedWorkshop: string
+  selectedTask: string
+  mode: RandomizerMode
+  onModeChange: (mode: RandomizerMode) => void
   onSessionChange: (sessionId: string) => void
+  onWorkshopChange: (workshopId: string) => void
+  onTaskChange: (taskId: string) => void
   loadingParticipants: boolean
 }
 
@@ -44,9 +69,26 @@ const PIANO_KEYS: { [key: string]: number } = {
   'C3': 130.8128
 }
 
-export function NewSlotMachine({ participants, sessionTitle, sessions, selectedSession, onSessionChange, loadingParticipants }: SlotMachineProps) {
-  const [showSessionSelection, setShowSessionSelection] = useState(true)
+export function NewSlotMachine({ 
+  participants, 
+  sessionTitle, 
+  sessions, 
+  workshops, 
+  tasks, 
+  selectedSession, 
+  selectedWorkshop, 
+  selectedTask, 
+  mode, 
+  onModeChange, 
+  onSessionChange, 
+  onWorkshopChange, 
+  onTaskChange, 
+  loadingParticipants 
+}: SlotMachineProps) {
+  const [showSelectionModal, setShowSelectionModal] = useState(true)
   const [tempSelectedSession, setTempSelectedSession] = useState('')
+  const [tempSelectedWorkshop, setTempSelectedWorkshop] = useState('')
+  const [tempSelectedTask, setTempSelectedTask] = useState('')
   const [isSpinning, setIsSpinning] = useState(false)
   const [winner, setWinner] = useState<Participant | null>(null)
   const [availableParticipants, setAvailableParticipants] = useState<Participant[]>(participants)
@@ -125,30 +167,81 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
     setWinner(null)
   }, [participants])
 
-  // Show session selection again when no session is selected
+  // Show selection modal when no selection is made
   useEffect(() => {
-    if (!selectedSession) {
-      setShowSessionSelection(true)
+    const hasSelection = 
+      (mode === 'session' && selectedSession) ||
+      (mode === 'workshop' && selectedWorkshop) ||
+      (mode === 'task' && selectedTask)
+    
+    if (!hasSelection) {
+      setShowSelectionModal(true)
       setTempSelectedSession('')
+      setTempSelectedWorkshop('')
+      setTempSelectedTask('')
     }
-  }, [selectedSession])
+  }, [mode, selectedSession, selectedWorkshop, selectedTask])
 
-  // Handle session confirmation
-  const handleConfirmSession = () => {
-    if (tempSelectedSession) {
-      onSessionChange(tempSelectedSession)
-      setShowSessionSelection(false)
+  // Handle confirmation based on mode
+  const handleConfirm = () => {
+    switch (mode) {
+      case 'session':
+        if (tempSelectedSession) {
+          onSessionChange(tempSelectedSession)
+          setShowSelectionModal(false)
+        }
+        break
+      case 'workshop':
+        if (tempSelectedWorkshop) {
+          onWorkshopChange(tempSelectedWorkshop)
+          setShowSelectionModal(false)
+        }
+        break
+      case 'task':
+        if (tempSelectedTask) {
+          onTaskChange(tempSelectedTask)
+          setShowSelectionModal(false)
+        }
+        break
     }
   }
 
-  // Handle back to session selection
+  // Handle back to selection
   const handleBackToSelection = () => {
-    setShowSessionSelection(true)
+    setShowSelectionModal(true)
     setTempSelectedSession(selectedSession)
-    onSessionChange('')
+    setTempSelectedWorkshop(selectedWorkshop)
+    setTempSelectedTask(selectedTask)
+    
+    // Clear selections based on mode
+    switch (mode) {
+      case 'session':
+        onSessionChange('')
+        break
+      case 'workshop':
+        onWorkshopChange('')
+        break
+      case 'task':
+        onTaskChange('')
+        break
+    }
+    
     setWinner(null)
     if (reelRef.current) {
       reelRef.current.innerHTML = ''
+    }
+  }
+
+  const isValidSelection = () => {
+    switch (mode) {
+      case 'session':
+        return tempSelectedSession
+      case 'workshop':
+        return tempSelectedWorkshop
+      case 'task':
+        return tempSelectedTask
+      default:
+        return false
     }
   }
 
@@ -404,8 +497,8 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
           : 'max-w-none p-8 rounded-t-3xl'
       } shadow-2xl border-4 border-pink-300`}>
         
-        {/* Session Selection Center Modal */}
-        {showSessionSelection && (
+        {/* Selection Center Modal */}
+        {showSelectionModal && (
           <div className="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-30">
             <div className={`bg-white rounded-2xl p-8 shadow-2xl max-w-md w-full mx-4 ${
               isFullscreen ? 'max-w-lg p-12' : ''
@@ -420,37 +513,144 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
                 <p className={`text-gray-600 ${
                   isFullscreen ? 'text-xl' : 'text-base'
                 }`} style={{ fontFamily: 'Concert One, cursive' }}>
-                  กรุณาเลือก Session ที่ต้องการนำเข้า
+                  เลือกประเภทการสุ่มและข้อมูลที่ต้องการ
                 </p>
               </div>
 
               <div className="space-y-4">
+                {/* Mode Selection */}
                 <div>
-                  <select
-                    value={tempSelectedSession}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      setTempSelectedSession(value)
-                      // Trigger data loading immediately when session is selected
-                      if (value) {
-                        onSessionChange(value)
-                      }
-                    }}
-                    className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
-                      isFullscreen ? 'text-lg' : 'text-base'
-                    }`}
-                    style={{ fontFamily: 'Concert One, cursive' }}
-                  >
-                    <option value="">เลือก Session</option>
-                    {sessions.map(session => (
-                      <option key={session.id} value={session.id}>
-                        {session.title}
-                      </option>
+                  <label className={`block text-gray-700 font-medium mb-2 ${
+                    isFullscreen ? 'text-lg' : 'text-base'
+                  }`} style={{ fontFamily: 'Concert One, cursive' }}>
+                    ประเภทการสุ่ม:
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { value: 'session', label: '👥 Session', desc: 'สุ่มจากผู้เข้าร่วม' },
+                      { value: 'workshop', label: '🎯 Workshop', desc: 'สุ่มจากผู้ส่งงาน' },
+                      { value: 'task', label: '📝 Task', desc: 'สุ่มจากงานเฉพาะ' }
+                    ].map(({ value, label, desc }) => (
+                      <button
+                        key={value}
+                        onClick={() => onModeChange(value as RandomizerMode)}
+                        className={`p-3 rounded-lg border-2 text-center transition-all ${
+                          mode === value
+                            ? 'border-pink-500 bg-pink-50 text-pink-700'
+                            : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300'
+                        } ${isFullscreen ? 'text-base' : 'text-sm'}`}
+                        style={{ fontFamily: 'Concert One, cursive' }}
+                      >
+                        <div className="font-bold">{label}</div>
+                        <div className="text-xs mt-1">{desc}</div>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
-                {tempSelectedSession && (
+                {/* Selection based on mode */}
+                <div>
+                  {mode === 'session' && (
+                    <select
+                      value={tempSelectedSession}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setTempSelectedSession(value)
+                        if (value) {
+                          onSessionChange(value)
+                        }
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
+                        isFullscreen ? 'text-lg' : 'text-base'
+                      }`}
+                      style={{ fontFamily: 'Concert One, cursive' }}
+                    >
+                      <option value="">เลือก Session</option>
+                      {sessions.map(session => (
+                        <option key={session.id} value={session.id}>
+                          {session.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {mode === 'workshop' && (
+                    <select
+                      value={tempSelectedWorkshop}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setTempSelectedWorkshop(value)
+                        if (value) {
+                          onWorkshopChange(value)
+                        }
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
+                        isFullscreen ? 'text-lg' : 'text-base'
+                      }`}
+                      style={{ fontFamily: 'Concert One, cursive' }}
+                    >
+                      <option value="">เลือก Workshop</option>
+                      {workshops.map(workshop => (
+                        <option key={workshop.id} value={workshop.id}>
+                          {workshop.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {mode === 'task' && (
+                    <div className="space-y-3">
+                      <select
+                        value={tempSelectedWorkshop}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          setTempSelectedWorkshop(value)
+                          setTempSelectedTask('')
+                          if (value) {
+                            onWorkshopChange(value)
+                          }
+                        }}
+                        className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
+                          isFullscreen ? 'text-lg' : 'text-base'
+                        }`}
+                        style={{ fontFamily: 'Concert One, cursive' }}
+                      >
+                        <option value="">เลือก Workshop ก่อน</option>
+                        {workshops.map(workshop => (
+                          <option key={workshop.id} value={workshop.id}>
+                            {workshop.title}
+                          </option>
+                        ))}
+                      </select>
+
+                      {tempSelectedWorkshop && (
+                        <select
+                          value={tempSelectedTask}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            setTempSelectedTask(value)
+                            if (value) {
+                              onTaskChange(value)
+                            }
+                          }}
+                          className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
+                            isFullscreen ? 'text-lg' : 'text-base'
+                          }`}
+                          style={{ fontFamily: 'Concert One, cursive' }}
+                        >
+                          <option value="">เลือก Task</option>
+                          {tasks.map(task => (
+                            <option key={task.id} value={task.id}>
+                              {task.title}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {isValidSelection() && (
                   <div className={`px-4 py-3 rounded-lg bg-cyan-50 border-2 border-cyan-200 ${
                     isFullscreen ? 'text-lg' : 'text-base'
                   }`}>
@@ -461,7 +661,9 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
                       </div>
                     ) : (
                       <div className="flex items-center justify-between text-cyan-700">
-                        <span style={{ fontFamily: 'Concert One, cursive' }}>👥 จำนวนผู้เข้าร่วม</span>
+                        <span style={{ fontFamily: 'Concert One, cursive' }}>
+                          {mode === 'session' ? '👥 จำนวนผู้เข้าร่วม' : '📝 จำนวนผู้ส่งงาน'}
+                        </span>
                         <span className="font-bold" style={{ fontFamily: 'Concert One, cursive' }}>{participants.length} คน</span>
                       </div>
                     )}
@@ -469,12 +671,12 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
                 )}
 
                 <button
-                  onClick={handleConfirmSession}
-                  disabled={!tempSelectedSession || loadingParticipants}
+                  onClick={handleConfirm}
+                  disabled={!isValidSelection() || loadingParticipants}
                   className={`w-full py-4 rounded-lg font-bold transition-all duration-200 ${
                     isFullscreen ? 'text-xl' : 'text-lg'
                   } ${
-                    !tempSelectedSession || loadingParticipants
+                    !isValidSelection() || loadingParticipants
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white transform hover:scale-105 active:scale-95 shadow-lg'
                   }`}
@@ -487,8 +689,8 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
           </div>
         )}
 
-        {/* Back Button - only show when not in session selection */}
-        {!showSessionSelection && selectedSession && (
+        {/* Back Button - only show when not in selection modal */}
+        {!showSelectionModal && (selectedSession || selectedWorkshop || selectedTask) && (
           <button
             onClick={handleBackToSelection}
             className={`absolute top-4 left-4 z-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-lg p-3 shadow-lg transition-all duration-200 ${
@@ -503,8 +705,8 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
             </div>
           </button>
         )}
-        {/* Show Lucky Draw Title only if session is selected and not showing selection */}
-        {selectedSession && !showSessionSelection && (
+        {/* Show Lucky Draw Title only if something is selected and not showing selection */}
+        {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && (
           <>
             <h2 className={`font-bold text-center text-white mb-8 ${
               isFullscreen ? 'text-7xl' : 'text-6xl'
@@ -519,8 +721,8 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
           </>
         )}
 
-        {/* Sound Controls - only show if session is selected and not showing selection */}
-        {selectedSession && !showSessionSelection && (
+        {/* Sound Controls - only show if something is selected and not showing selection */}
+        {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && (
         <div className={`flex items-center justify-center gap-6 ${
           isFullscreen ? 'mb-12' : 'mb-10'
         }`}>
@@ -555,8 +757,8 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
         </div>
         )}
 
-        {/* Slot Window - only show if session is selected and has participants and not showing selection */}
-        {selectedSession && !showSessionSelection && participants.length > 0 && (
+        {/* Slot Window - only show if something is selected and has participants and not showing selection */}
+        {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && participants.length > 0 && (
         <div className={`slot-window bg-gradient-to-b from-pink-300 to-pink-400 rounded-2xl p-8 mb-12 relative overflow-hidden border-4 border-yellow-400 ${
           isFullscreen ? 'w-full max-w-none mx-auto' : 'w-full max-w-none mx-auto'
         }`}>
@@ -580,7 +782,7 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
         )}
 
         {/* Winner Details */}
-        {selectedSession && !showSessionSelection && winner && (
+        {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && winner && (
           <div className="text-center mb-6 p-4 bg-white bg-opacity-20 rounded-xl">
             <p className="text-white text-lg" style={{ fontFamily: 'Concert One, cursive' }}>
               📧 {winner.email}
@@ -593,8 +795,8 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
           </div>
         )}
 
-        {/* Controls - only show if session is selected and not showing selection */}
-        {selectedSession && !showSessionSelection && (
+        {/* Controls - only show if something is selected and not showing selection */}
+        {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && (
         <div className={`text-center ${isFullscreen ? 'space-y-6' : 'space-y-5'}`}>
           <button
             onClick={spin}
@@ -632,19 +834,24 @@ export function NewSlotMachine({ participants, sessionTitle, sessions, selectedS
         </div>
         )}
 
-        {/* Empty State Messages - only show when not showing session selection */}
-        {selectedSession && !showSessionSelection && participants.length === 0 && !loadingParticipants && (
+        {/* Empty State Messages - only show when not showing selection modal */}
+        {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && participants.length === 0 && !loadingParticipants && (
           <div className="text-center py-16">
             <div className={`${isFullscreen ? 'text-8xl' : 'text-6xl'} mb-4`}>😔</div>
             <h3 className={`font-bold text-white mb-2 ${
               isFullscreen ? 'text-4xl' : 'text-2xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
-              ไม่มีผู้เข้าร่วมใน Session นี้
+              {mode === 'session' ? 'ไม่มีผู้เข้าร่วม' : 'ไม่มีผู้ส่งงาน'}
             </h3>
             <p className={`text-cyan-100 ${
               isFullscreen ? 'text-2xl' : 'text-lg'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
-              กรุณาเลือก Session อื่นที่มีผู้ลงทะเบียนแล้ว
+              {mode === 'session' 
+                ? 'กรุณาเลือก Session อื่นที่มีผู้ลงทะเบียนแล้ว'
+                : mode === 'workshop'
+                ? 'กรุณาเลือก Workshop อื่นที่มีผู้ส่งงานแล้ว'
+                : 'กรุณาเลือก Task อื่นที่มีผู้ส่งงานแล้ว'
+              }
             </p>
           </div>
         )}

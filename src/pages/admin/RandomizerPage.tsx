@@ -24,31 +24,76 @@ interface SessionParticipant {
   department?: string
 }
 
+interface Workshop {
+  id: string
+  title: string
+  description?: string
+  instructor?: string
+  session_id?: string
+}
+
+interface Task {
+  id: string
+  title: string
+  description?: string
+  workshop_id: string
+  workshop?: Workshop
+}
+
+interface SubmissionParticipant extends SessionParticipant {
+  submissionCount?: number
+  latestSubmission?: string
+}
+
+type RandomizerMode = 'session' | 'workshop' | 'task'
+
 export function RandomizerPage() {
   const { user } = useAuth()
   const { isAdmin } = useAdmin()
   const navigate = useNavigate()
+  const [mode, setMode] = useState<RandomizerMode>('session')
   const [sessions, setSessions] = useState<Session[]>([])
+  const [workshops, setWorkshops] = useState<Workshop[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
   const [selectedSession, setSelectedSession] = useState<string>('')
+  const [selectedWorkshop, setSelectedWorkshop] = useState<string>('')
+  const [selectedTask, setSelectedTask] = useState<string>('')
   const [participants, setParticipants] = useState<SessionParticipant[]>([])
+  const [submissionParticipants, setSubmissionParticipants] = useState<SubmissionParticipant[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingParticipants, setLoadingParticipants] = useState(false)
 
   // Note: Admin check is handled by AdminRoute wrapper
 
-  // Fetch sessions
+  // Fetch initial data
   useEffect(() => {
     fetchSessions()
+    fetchWorkshops()
   }, [])
 
-  // Fetch participants when session is selected
+  // Fetch participants based on mode and selection
   useEffect(() => {
-    if (selectedSession) {
+    if (mode === 'session' && selectedSession) {
       fetchParticipants(selectedSession)
+    } else if (mode === 'workshop' && selectedWorkshop) {
+      fetchWorkshopSubmitters(selectedWorkshop)
+    } else if (mode === 'task' && selectedTask) {
+      fetchTaskSubmitters(selectedTask)
     } else {
       setParticipants([])
+      setSubmissionParticipants([])
     }
-  }, [selectedSession])
+  }, [mode, selectedSession, selectedWorkshop, selectedTask])
+
+  // Fetch tasks when workshop is selected
+  useEffect(() => {
+    if (selectedWorkshop) {
+      fetchTasks(selectedWorkshop)
+    } else {
+      setTasks([])
+      setSelectedTask('')
+    }
+  }, [selectedWorkshop])
 
   const fetchSessions = async () => {
     try {
@@ -65,6 +110,40 @@ export function RandomizerPage() {
       console.error('Error fetching sessions:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchWorkshops = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('workshops')
+        .select('*')
+        .eq('is_active', true)
+        .order('title', { ascending: true })
+
+      if (error) throw error
+      setWorkshops(data || [])
+    } catch (error) {
+      console.error('Error fetching workshops:', error)
+    }
+  }
+
+  const fetchTasks = async (workshopId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          workshop:workshops!tasks_workshop_id_fkey(id, title)
+        `)
+        .eq('workshop_id', workshopId)
+        .eq('is_active', true)
+        .order('order_index', { ascending: true })
+
+      if (error) throw error
+      setTasks(data || [])
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
     }
   }
 
@@ -105,6 +184,105 @@ export function RandomizerPage() {
     }
   }
 
+  const fetchWorkshopSubmitters = async (workshopId: string) => {
+    try {
+      setLoadingParticipants(true)
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(`
+          user_id,
+          status,
+          submitted_at,
+          task:tasks!submissions_task_id_fkey(
+            id,
+            title,
+            workshop_id
+          ),
+          user:users!submissions_user_id_fkey(
+            id,
+            name,
+            email,
+            faculty,
+            department
+          )
+        `)
+        .eq('task.workshop_id', workshopId)
+        .eq('status', 'submitted')
+
+      if (error) throw error
+
+      // Group by user and count submissions
+      const userSubmissions = data?.reduce((acc, submission) => {
+        const userId = submission.user_id
+        if (!acc[userId]) {
+          acc[userId] = {
+            id: submission.user.id,
+            name: submission.user.name || submission.user.email.split('@')[0],
+            email: submission.user.email,
+            faculty: submission.user.faculty,
+            department: submission.user.department,
+            submissionCount: 0,
+            latestSubmission: submission.submitted_at
+          }
+        }
+        acc[userId].submissionCount += 1
+        if (new Date(submission.submitted_at) > new Date(acc[userId].latestSubmission || '')) {
+          acc[userId].latestSubmission = submission.submitted_at
+        }
+        return acc
+      }, {} as Record<string, SubmissionParticipant>) || {}
+
+      const submitters = Object.values(userSubmissions)
+      setSubmissionParticipants(submitters)
+    } catch (error) {
+      console.error('Error fetching workshop submitters:', error)
+      setSubmissionParticipants([])
+    } finally {
+      setLoadingParticipants(false)
+    }
+  }
+
+  const fetchTaskSubmitters = async (taskId: string) => {
+    try {
+      setLoadingParticipants(true)
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(`
+          user_id,
+          status,
+          submitted_at,
+          user:users!submissions_user_id_fkey(
+            id,
+            name,
+            email,
+            faculty,
+            department
+          )
+        `)
+        .eq('task_id', taskId)
+        .eq('status', 'submitted')
+
+      if (error) throw error
+
+      const submitters = data?.map(submission => ({
+        id: submission.user.id,
+        name: submission.user.name || submission.user.email.split('@')[0],
+        email: submission.user.email,
+        faculty: submission.user.faculty,
+        department: submission.user.department,
+        submissionCount: 1,
+        latestSubmission: submission.submitted_at
+      })) || []
+
+      setSubmissionParticipants(submitters)
+    } catch (error) {
+      console.error('Error fetching task submitters:', error)
+      setSubmissionParticipants([])
+    } finally {
+      setLoadingParticipants(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen bg-gray-50">
@@ -120,6 +298,34 @@ export function RandomizerPage() {
     return null
   }
 
+  // Get current title and participants based on mode
+  const getCurrentTitle = () => {
+    switch (mode) {
+      case 'session':
+        return sessions.find(s => s.id === selectedSession)?.title || ''
+      case 'workshop':
+        return workshops.find(w => w.id === selectedWorkshop)?.title || ''
+      case 'task':
+        return tasks.find(t => t.id === selectedTask)?.title || ''
+      default:
+        return ''
+    }
+  }
+
+  const getCurrentParticipants = () => {
+    return mode === 'session' ? participants : submissionParticipants
+  }
+
+  const handleModeChange = (newMode: RandomizerMode) => {
+    setMode(newMode)
+    // Reset selections when changing mode
+    setSelectedSession('')
+    setSelectedWorkshop('')
+    setSelectedTask('')
+    setParticipants([])
+    setSubmissionParticipants([])
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
@@ -128,11 +334,19 @@ export function RandomizerPage() {
         <div className="p-0 h-full">
           {/* Slot Machine - now takes full width and height */}
           <NewSlotMachine
-            participants={participants}
-            sessionTitle={sessions.find(s => s.id === selectedSession)?.title || ''}
+            participants={getCurrentParticipants()}
+            sessionTitle={getCurrentTitle()}
             sessions={sessions}
+            workshops={workshops}
+            tasks={tasks}
             selectedSession={selectedSession}
+            selectedWorkshop={selectedWorkshop}
+            selectedTask={selectedTask}
+            mode={mode}
+            onModeChange={handleModeChange}
             onSessionChange={setSelectedSession}
+            onWorkshopChange={setSelectedWorkshop}
+            onTaskChange={setSelectedTask}
             loadingParticipants={loadingParticipants}
           />
         </div>
