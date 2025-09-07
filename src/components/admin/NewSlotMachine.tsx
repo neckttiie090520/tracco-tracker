@@ -495,12 +495,12 @@ export function NewSlotMachine({
                 <div className={`${isFullscreen ? 'text-6xl' : 'text-4xl'} mb-4`}>ðŸŽ°</div>
                 <h2 className={`font-bold text-gray-900 mb-2 ${
                   isFullscreen ? 'text-3xl' : 'text-2xl'
-                }`} style={{ fontFamily: 'Concert One, cursive' }}>
+                }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
                   Lucky Draw Randomizer
                 </h2>
                 <p className={`text-gray-600 ${
                   isFullscreen ? 'text-xl' : 'text-base'
-                }`} style={{ fontFamily: 'Concert One, cursive' }}>
+                }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
                   à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡à¹à¸¥à¸°à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£
                 </p>
               </div>
@@ -510,7 +510,7 @@ export function NewSlotMachine({
                 <div>
                   <label className={`block text-gray-700 font-medium mb-2 ${
                     isFullscreen ? 'text-lg' : 'text-base'
-                  }`} style={{ fontFamily: 'Concert One, cursive' }}>
+                  }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
                     Pick Type:
                   </label>
                   <div className="grid grid-cols-2 gap-2 mode-grid">
@@ -526,7 +526,7 @@ export function NewSlotMachine({
                             ? 'border-pink-500 bg-pink-50 text-pink-700'
                             : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300'
                         } ${isFullscreen ? 'text-base' : 'text-sm'}`}
-                        style={{ fontFamily: 'Concert One, cursive' }}
+                        style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
                       >
                         <div className="font-bold">{label}</div>
                         <div className="text-xs mt-1">{desc}</div>
@@ -550,7 +550,7 @@ export function NewSlotMachine({
                       className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                         isFullscreen ? 'text-lg' : 'text-base'
                       }`}
-                      style={{ fontFamily: 'Concert One, cursive' }}
+                      style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
                     >
                       <option value="">Choose Session</option>
                       {sessions.map(session => (
@@ -574,7 +574,7 @@ export function NewSlotMachine({
                       className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                         isFullscreen ? 'text-lg' : 'text-base'
                       }`}
-                      style={{ fontFamily: 'Concert One, cursive' }}
+                      style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
                     >
                       <option value="">à¹€à¸¥à¸·à¸­à¸ Workshop</option>
                       {workshops.map(workshop => (
@@ -600,7 +600,7 @@ export function NewSlotMachine({
                         className={`hidden w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                           isFullscreen ? 'text-lg' : 'text-base'
                         }`}
-                        style={{ fontFamily: 'Concert One, cursive' }}
+                        style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
                       >
                         <option value="">à¹€à¸¥à¸·à¸­à¸ Workshop à¸à¹ˆà¸­à¸™</option>
                         {workshops.map(workshop => (
@@ -623,7 +623,7 @@ export function NewSlotMachine({
                           className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                             isFullscreen ? 'text-lg' : 'text-base'
                           }`}
-                          style={{ fontFamily: 'Concert One, cursive' }}
+                          style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
                         >
                           <option value="">Choose Task</option>
                           {tasks.map(task => (
@@ -644,14 +644,14 @@ export function NewSlotMachine({
                     {loadingParticipants ? (
                       <div className="flex items-center gap-2 text-cyan-700">
                         <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                        <span style={{ fontFamily: 'Concert One, cursive' }}>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...</span>
+                        <span style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-between text-cyan-700">
-                        <span style={{ fontFamily: 'Concert One, cursive' }}>
+                        <span style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
                           {mode === 'session' ? 'ðŸ‘¥ à¸ˆà¸³à¸™à¸§à¸™à¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡' : 'ðŸ“ à¸ˆà¸³à¸™à¸§à¸™à¸œà¸¹à¹‰à¸ªà¹ˆà¸‡à¸‡à¸²à¸™'}
                         </span>
-                        <span className="font-bold" style={{ fontFamily: 'Concert One, cursive' }}>{participants.length} à¸„à¸™</span>
+                        <span className="font-bold" style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>{participants.length} à¸„à¸™</span>
                       </div>
                     )}
                   </div>
@@ -667,7 +667,7 @@ export function NewSlotMachine({
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white transform hover:scale-105 active:scale-95 shadow-lg'
                   }`}
-                  style={{ fontFamily: 'Concert One, cursive' }}
+                  style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
                 >
                   {loadingParticipants ? 'Loading...' : 'Start Lucky Draw!'}
                 </button>
@@ -683,7 +683,7 @@ export function NewSlotMachine({
             className={`absolute top-4 left-4 z-10 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-lg p-3 shadow-lg transition-all duration-200 ${
               isFullscreen ? 'text-lg' : 'text-base'
             }`}
-            style={{ fontFamily: 'Concert One, cursive' }}
+            style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
             title="à¸à¸¥à¸±à¸šà¹„à¸›à¹€à¸¥à¸·à¸­à¸ Session à¹ƒà¸«à¸¡à¹ˆ"
           >
             <div className="flex items-center gap-2 text-gray-700">
@@ -697,12 +697,12 @@ export function NewSlotMachine({
           <>
             <h2 className={`font-bold text-center text-white mb-8 ${
               isFullscreen ? 'text-7xl' : 'text-6xl'
-            }`} style={{ fontFamily: 'Concert One, cursive' }}>
+            }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
               Lucky Draw
             </h2>
             <p className={`text-center text-cyan-100 mb-12 font-medium ${
               isFullscreen ? 'text-3xl' : 'text-2xl'
-            }`} style={{ fontFamily: 'Concert One, cursive' }}>
+            }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
               {sessionTitle}
             </p>
           </>
@@ -719,7 +719,7 @@ export function NewSlotMachine({
                 ? 'bg-pink-300 bg-opacity-30 text-white hover:bg-opacity-40'
                 : 'bg-purple-300 bg-opacity-30 text-purple-100 hover:bg-opacity-40'
             }`}
-            style={{ fontFamily: 'Concert One, cursive' }}
+            style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
           >
             {soundEnabled ? 'ðŸ”Š' : 'ðŸ”‡'}
             {soundEnabled ? 'à¹€à¸ªà¸µà¸¢à¸‡' : 'à¸›à¸´à¸”à¹€à¸ªà¸µà¸¢à¸‡'}
@@ -770,11 +770,11 @@ export function NewSlotMachine({
         {/* Winner Details */}
         {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && winner && (
           <div className="text-center mb-6 p-4 bg-white bg-opacity-20 rounded-xl">
-            <p className="text-white text-lg" style={{ fontFamily: 'Concert One, cursive' }}>
+            <p className="text-white text-lg" style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
               ðŸ“§ {winner.email}
             </p>
             {winner.faculty && (
-              <p className="text-cyan-100 text-base mt-1" style={{ fontFamily: 'Concert One, cursive' }}>
+              <p className="text-cyan-100 text-base mt-1" style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
                 ðŸ« {winner.faculty} {winner.department && `â€¢ ${winner.department}`}
               </p>
             )}
@@ -794,7 +794,7 @@ export function NewSlotMachine({
                 : 'bg-yellow-500 hover:bg-yellow-600 text-white transform hover:scale-105 active:scale-95'
               }
             `}
-            style={{ fontFamily: 'Concert One, cursive' }}
+            style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
           >
             {isSpinning ? (
               <span className="flex items-center gap-3">
@@ -812,7 +812,7 @@ export function NewSlotMachine({
             <button
               onClick={reset}
               className={`${isFullscreen ? 'px-12 py-4 text-xl' : 'px-10 py-4 text-lg'} bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors`}
-              style={{ fontFamily: 'Concert One, cursive' }}
+              style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
             >
               ðŸ”„ à¹€à¸£à¸´à¹ˆà¸¡à¹ƒà¸«à¸¡à¹ˆ
             </button>
@@ -826,12 +826,12 @@ export function NewSlotMachine({
             <div className={`${isFullscreen ? 'text-8xl' : 'text-6xl'} mb-4`}>ðŸ˜”</div>
             <h3 className={`font-bold text-white mb-2 ${
               isFullscreen ? 'text-4xl' : 'text-2xl'
-            }`} style={{ fontFamily: 'Concert One, cursive' }}>
+            }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
               {mode === 'session' ? 'à¹„à¸¡à¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡' : 'à¹„à¸¡à¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¸ªà¹ˆà¸‡à¸‡à¸²à¸™'}
             </h3>
             <p className={`text-cyan-100 ${
               isFullscreen ? 'text-2xl' : 'text-lg'
-            }`} style={{ fontFamily: 'Concert One, cursive' }}>
+            }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
               {mode === 'session' 
                 ? 'à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸ Session à¸­à¸·à¹ˆà¸™à¸—à¸µà¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹à¸¥à¹‰à¸§'
                 : mode === 'workshop'
@@ -855,7 +855,7 @@ export function NewSlotMachine({
           justify-content: center;
           font-size: ${isFullscreen ? '3.5rem' : '2.5rem'};
           font-weight: bold;
-          font-family: 'Concert One', cursive;
+          font-family: 'Concert One', 'Prompt', sans-serif;
           color: white;
           text-align: center;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -942,6 +942,8 @@ export function NewSlotMachine({
     </div>
   )
 }
+
+
 
 
 
