@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { adminService } from '../../services/admin'
 import { useAdmin } from '../../hooks/useAdmin'
 import { AdminNavigation } from '../../components/admin/AdminNavigation'
 import { supabase } from '../../services/supabase'
@@ -132,10 +133,21 @@ export function RandomizerPage() {
       const { data, error } = await supabase
         .from('tasks')
         .select(`id, title, description, workshop_id`)
-        .eq('is_active', true)
         .order('created_at', { ascending: false })
       if (error) throw error
-      setTasks(data || [])
+      if (data && data.length > 0) {
+        setTasks(data)
+        return
+      }
+      // Fallback to admin service if user query returns no tasks
+      const adminTasks = await adminService.getAllTasks()
+      const simplified = (adminTasks || []).map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        workshop_id: t.workshop_id
+      }))
+      setTasks(simplified)
     } catch (error) {
       console.error('Error fetching all tasks:', error)
     }

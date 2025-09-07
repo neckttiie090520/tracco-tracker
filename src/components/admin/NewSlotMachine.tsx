@@ -171,7 +171,6 @@ export function NewSlotMachine({
   useEffect(() => {
     const hasSelection = 
       (mode === 'session' && selectedSession) ||
-      (mode === 'workshop' && selectedWorkshop) ||
       (mode === 'task' && selectedTask)
     
     if (!hasSelection) {
@@ -180,7 +179,7 @@ export function NewSlotMachine({
       setTempSelectedWorkshop('')
       setTempSelectedTask('')
     }
-  }, [mode, selectedSession, selectedWorkshop, selectedTask])
+  }, [mode, selectedSession, selectedTask])
 
   // Handle confirmation based on mode
   const handleConfirm = () => {
@@ -188,12 +187,6 @@ export function NewSlotMachine({
       case 'session':
         if (tempSelectedSession) {
           onSessionChange(tempSelectedSession)
-          setShowSelectionModal(false)
-        }
-        break
-      case 'workshop':
-        if (tempSelectedWorkshop) {
-          onWorkshopChange(tempSelectedWorkshop)
           setShowSelectionModal(false)
         }
         break
@@ -218,9 +211,6 @@ export function NewSlotMachine({
       case 'session':
         onSessionChange('')
         break
-      case 'workshop':
-        onWorkshopChange('')
-        break
       case 'task':
         onTaskChange('')
         break
@@ -236,8 +226,6 @@ export function NewSlotMachine({
     switch (mode) {
       case 'session':
         return tempSelectedSession
-      case 'workshop':
-        return tempSelectedWorkshop
       case 'task':
         return tempSelectedTask
       default:
@@ -527,16 +515,15 @@ export function NewSlotMachine({
                   </label>
                   <div className="grid grid-cols-2 gap-2 mode-grid">
                     {[
-                      { value: 'session', label: 'ðŸ‘¥ Session', desc: 'à¸ªà¸¸à¹ˆà¸¡à¸ˆà¸²à¸à¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡' },
-                      { value: 'workshop', label: 'ðŸŽ¯ Workshop', desc: 'à¸ªà¸¸à¹ˆà¸¡à¸ˆà¸²à¸à¸œà¸¹à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™' },
-                      { value: 'task', label: 'ðŸ“ Task', desc: 'à¸ªà¸¸à¹ˆà¸¡à¸ˆà¸²à¸à¸‡à¸²à¸™à¹€à¸‰à¸žà¸²à¸°' }
+                      { value: 'session', label: 'Session', desc: 'Pick from participants' },
+                      { value: 'task', label: 'Task', desc: 'Pick from task submitters' }
                     ].map(({ value, label, desc }) => (
                       <button
                         key={value}
                         onClick={() => onModeChange(value as RandomizerMode)}
                         className={`p-3 rounded-lg border-2 text-center transition-all ${
                           mode === value
-                            ? 'border-pink-500 bg-pink-50 text-pink-700'
+                    Pick Type:
                             : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300'
                         } ${isFullscreen ? 'text-base' : 'text-sm'}`}
                         style={{ fontFamily: 'Concert One, cursive' }}
@@ -565,7 +552,7 @@ export function NewSlotMachine({
                       }`}
                       style={{ fontFamily: 'Concert One, cursive' }}
                     >
-                      <option value="">à¹€à¸¥à¸·à¸­à¸ Session</option>
+                      <option value="">Choose Session</option>
                       {sessions.map(session => (
                         <option key={session.id} value={session.id}>
                           {session.title}
@@ -638,7 +625,7 @@ export function NewSlotMachine({
                           }`}
                           style={{ fontFamily: 'Concert One, cursive' }}
                         >
-                          <option value="">à¹€à¸¥à¸·à¸­à¸ Task</option>
+                          <option value="">Choose Task</option>
                           {tasks.map(task => (
                             <option key={task.id} value={task.id}>
                               {task.title}
@@ -956,3 +943,4 @@ export function NewSlotMachine({
     </div>
   )
 }
+
