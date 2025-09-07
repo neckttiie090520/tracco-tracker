@@ -69,6 +69,7 @@ export function RandomizerPage() {
   useEffect(() => {
     fetchSessions()
     fetchWorkshops()
+    fetchAllTasks()
   }, [])
 
   // Fetch participants based on mode and selection
@@ -85,13 +86,10 @@ export function RandomizerPage() {
     }
   }, [mode, selectedSession, selectedWorkshop, selectedTask])
 
-  // Fetch tasks when workshop is selected
+  // If workshop changes (legacy path), still allow filtering tasks, otherwise we already have all tasks
   useEffect(() => {
     if (selectedWorkshop) {
       fetchTasks(selectedWorkshop)
-    } else {
-      setTasks([])
-      setSelectedTask('')
     }
   }, [selectedWorkshop])
 
@@ -125,6 +123,21 @@ export function RandomizerPage() {
       setWorkshops(data || [])
     } catch (error) {
       console.error('Error fetching workshops:', error)
+    }
+  }
+
+  // Fetch all tasks for task-mode selection (no workshop prerequisite)
+  const fetchAllTasks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`id, title, description, workshop_id`)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setTasks(data || [])
+    } catch (error) {
+      console.error('Error fetching all tasks:', error)
     }
   }
 

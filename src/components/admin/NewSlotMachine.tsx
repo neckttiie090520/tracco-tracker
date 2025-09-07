@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+﻿import React, { useState, useRef, useEffect } from 'react'
 
 interface Participant {
   id: string
@@ -407,7 +407,7 @@ export function NewSlotMachine({
         winnerElement.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)'
         
         // Add winner indicator
-        winnerElement.innerHTML = `🎉 ${selectedWinner.name} 🎉`
+        winnerElement.innerHTML = `ðŸŽ‰ ${selectedWinner.name} ðŸŽ‰`
       }
 
       // Show winner effects
@@ -469,7 +469,7 @@ export function NewSlotMachine({
         <button
           onClick={toggleFullscreen}
           className="absolute top-4 right-4 z-10 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg transition-all duration-200 shadow-lg"
-          title="เต็มจอ"
+          title="à¹€à¸•à¹‡à¸¡à¸ˆà¸­"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z" clipRule="evenodd" />
@@ -482,7 +482,7 @@ export function NewSlotMachine({
         <button
           onClick={toggleFullscreen}
           className="fixed top-8 right-8 z-50 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-4 rounded-lg transition-all duration-200"
-          title="ออกจากเต็มจอ"
+          title="à¸­à¸­à¸à¸ˆà¸²à¸à¹€à¸•à¹‡à¸¡à¸ˆà¸­"
         >
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -504,7 +504,7 @@ export function NewSlotMachine({
               isFullscreen ? 'max-w-lg p-12' : ''
             }`}>
               <div className="text-center mb-6">
-                <div className={`${isFullscreen ? 'text-6xl' : 'text-4xl'} mb-4`}>🎰</div>
+                <div className={`${isFullscreen ? 'text-6xl' : 'text-4xl'} mb-4`}>ðŸŽ°</div>
                 <h2 className={`font-bold text-gray-900 mb-2 ${
                   isFullscreen ? 'text-3xl' : 'text-2xl'
                 }`} style={{ fontFamily: 'Concert One, cursive' }}>
@@ -513,7 +513,7 @@ export function NewSlotMachine({
                 <p className={`text-gray-600 ${
                   isFullscreen ? 'text-xl' : 'text-base'
                 }`} style={{ fontFamily: 'Concert One, cursive' }}>
-                  เลือกประเภทการสุ่มและข้อมูลที่ต้องการ
+                  à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡à¹à¸¥à¸°à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£
                 </p>
               </div>
 
@@ -523,13 +523,13 @@ export function NewSlotMachine({
                   <label className={`block text-gray-700 font-medium mb-2 ${
                     isFullscreen ? 'text-lg' : 'text-base'
                   }`} style={{ fontFamily: 'Concert One, cursive' }}>
-                    ประเภทการสุ่ม:
+                    à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡:
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2 mode-grid">
                     {[
-                      { value: 'session', label: '👥 Session', desc: 'สุ่มจากผู้เข้าร่วม' },
-                      { value: 'workshop', label: '🎯 Workshop', desc: 'สุ่มจากผู้ลงทะเบียน' },
-                      { value: 'task', label: '📝 Task', desc: 'สุ่มจากงานเฉพาะ' }
+                      { value: 'session', label: 'ðŸ‘¥ Session', desc: 'à¸ªà¸¸à¹ˆà¸¡à¸ˆà¸²à¸à¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡' },
+                      { value: 'workshop', label: 'ðŸŽ¯ Workshop', desc: 'à¸ªà¸¸à¹ˆà¸¡à¸ˆà¸²à¸à¸œà¸¹à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™' },
+                      { value: 'task', label: 'ðŸ“ Task', desc: 'à¸ªà¸¸à¹ˆà¸¡à¸ˆà¸²à¸à¸‡à¸²à¸™à¹€à¸‰à¸žà¸²à¸°' }
                     ].map(({ value, label, desc }) => (
                       <button
                         key={value}
@@ -565,7 +565,7 @@ export function NewSlotMachine({
                       }`}
                       style={{ fontFamily: 'Concert One, cursive' }}
                     >
-                      <option value="">เลือก Session</option>
+                      <option value="">à¹€à¸¥à¸·à¸­à¸ Session</option>
                       {sessions.map(session => (
                         <option key={session.id} value={session.id}>
                           {session.title}
@@ -589,7 +589,7 @@ export function NewSlotMachine({
                       }`}
                       style={{ fontFamily: 'Concert One, cursive' }}
                     >
-                      <option value="">เลือก Workshop</option>
+                      <option value="">à¹€à¸¥à¸·à¸­à¸ Workshop</option>
                       {workshops.map(workshop => (
                         <option key={workshop.id} value={workshop.id}>
                           {workshop.title}
@@ -610,12 +610,12 @@ export function NewSlotMachine({
                             onWorkshopChange(value)
                           }
                         }}
-                        className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
+                        className={`hidden w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                           isFullscreen ? 'text-lg' : 'text-base'
                         }`}
                         style={{ fontFamily: 'Concert One, cursive' }}
                       >
-                        <option value="">เลือก Workshop ก่อน</option>
+                        <option value="">à¹€à¸¥à¸·à¸­à¸ Workshop à¸à¹ˆà¸­à¸™</option>
                         {workshops.map(workshop => (
                           <option key={workshop.id} value={workshop.id}>
                             {workshop.title}
@@ -623,7 +623,7 @@ export function NewSlotMachine({
                         ))}
                       </select>
 
-                      {tempSelectedWorkshop && (
+                      {
                         <select
                           value={tempSelectedTask}
                           onChange={(e) => {
@@ -638,14 +638,14 @@ export function NewSlotMachine({
                           }`}
                           style={{ fontFamily: 'Concert One, cursive' }}
                         >
-                          <option value="">เลือก Task</option>
+                          <option value="">à¹€à¸¥à¸·à¸­à¸ Task</option>
                           {tasks.map(task => (
                             <option key={task.id} value={task.id}>
                               {task.title}
                             </option>
                           ))}
                         </select>
-                      )}
+                      }
                     </div>
                   )}
                 </div>
@@ -657,14 +657,14 @@ export function NewSlotMachine({
                     {loadingParticipants ? (
                       <div className="flex items-center gap-2 text-cyan-700">
                         <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                        <span style={{ fontFamily: 'Concert One, cursive' }}>กำลังโหลด...</span>
+                        <span style={{ fontFamily: 'Concert One, cursive' }}>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-between text-cyan-700">
                         <span style={{ fontFamily: 'Concert One, cursive' }}>
-                          {mode === 'session' ? '👥 จำนวนผู้เข้าร่วม' : '📝 จำนวนผู้ส่งงาน'}
+                          {mode === 'session' ? 'ðŸ‘¥ à¸ˆà¸³à¸™à¸§à¸™à¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡' : 'ðŸ“ à¸ˆà¸³à¸™à¸§à¸™à¸œà¸¹à¹‰à¸ªà¹ˆà¸‡à¸‡à¸²à¸™'}
                         </span>
-                        <span className="font-bold" style={{ fontFamily: 'Concert One, cursive' }}>{participants.length} คน</span>
+                        <span className="font-bold" style={{ fontFamily: 'Concert One, cursive' }}>{participants.length} à¸„à¸™</span>
                       </div>
                     )}
                   </div>
@@ -682,7 +682,7 @@ export function NewSlotMachine({
                   }`}
                   style={{ fontFamily: 'Concert One, cursive' }}
                 >
-                  {loadingParticipants ? 'กำลังโหลด...' : '🎲 ตกลง เริ่ม Lucky Draw!'}
+                  {loadingParticipants ? 'à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...' : 'ðŸŽ² à¸•à¸à¸¥à¸‡ à¹€à¸£à¸´à¹ˆà¸¡ Lucky Draw!'}
                 </button>
               </div>
             </div>
@@ -697,11 +697,11 @@ export function NewSlotMachine({
               isFullscreen ? 'text-lg' : 'text-base'
             }`}
             style={{ fontFamily: 'Concert One, cursive' }}
-            title="กลับไปเลือก Session ใหม่"
+            title="à¸à¸¥à¸±à¸šà¹„à¸›à¹€à¸¥à¸·à¸­à¸ Session à¹ƒà¸«à¸¡à¹ˆ"
           >
             <div className="flex items-center gap-2 text-gray-700">
-              <span className="text-xl">←</span>
-              <span className="font-medium">กลับ</span>
+              <span className="text-xl">â†</span>
+              <span className="font-medium">à¸à¸¥à¸±à¸š</span>
             </div>
           </button>
         )}
@@ -711,7 +711,7 @@ export function NewSlotMachine({
             <h2 className={`font-bold text-center text-white mb-8 ${
               isFullscreen ? 'text-7xl' : 'text-6xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
-              🎰 Lucky Draw
+              ðŸŽ° Lucky Draw
             </h2>
             <p className={`text-center text-cyan-100 mb-12 font-medium ${
               isFullscreen ? 'text-3xl' : 'text-2xl'
@@ -735,13 +735,13 @@ export function NewSlotMachine({
             }`}
             style={{ fontFamily: 'Concert One, cursive' }}
           >
-            {soundEnabled ? '🔊' : '🔇'}
-            {soundEnabled ? 'เสียง' : 'ปิดเสียง'}
+            {soundEnabled ? 'ðŸ”Š' : 'ðŸ”‡'}
+            {soundEnabled ? 'à¹€à¸ªà¸µà¸¢à¸‡' : 'à¸›à¸´à¸”à¹€à¸ªà¸µà¸¢à¸‡'}
           </button>
           
           {soundEnabled && (
             <div className="flex items-center gap-3">
-              <span className="text-base text-cyan-100">🔉</span>
+              <span className="text-base text-cyan-100">ðŸ”‰</span>
               <input
                 type="range"
                 min="0"
@@ -751,7 +751,7 @@ export function NewSlotMachine({
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
                 className="w-24 h-3 bg-pink-300 bg-opacity-30 rounded-lg appearance-none cursor-pointer"
               />
-              <span className="text-base text-cyan-100">🔊</span>
+              <span className="text-base text-cyan-100">ðŸ”Š</span>
             </div>
           )}
         </div>
@@ -785,11 +785,11 @@ export function NewSlotMachine({
         {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && winner && (
           <div className="text-center mb-6 p-4 bg-white bg-opacity-20 rounded-xl">
             <p className="text-white text-lg" style={{ fontFamily: 'Concert One, cursive' }}>
-              📧 {winner.email}
+              ðŸ“§ {winner.email}
             </p>
             {winner.faculty && (
               <p className="text-cyan-100 text-base mt-1" style={{ fontFamily: 'Concert One, cursive' }}>
-                🏫 {winner.faculty} {winner.department && `• ${winner.department}`}
+                ðŸ« {winner.faculty} {winner.department && `â€¢ ${winner.department}`}
               </p>
             )}
           </div>
@@ -813,12 +813,12 @@ export function NewSlotMachine({
             {isSpinning ? (
               <span className="flex items-center gap-3">
                 <div className={`${isFullscreen ? 'w-8 h-8' : 'w-6 h-6'} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
-                กำลังสุ่ม...
+                à¸à¸³à¸¥à¸±à¸‡à¸ªà¸¸à¹ˆà¸¡...
               </span>
             ) : availableParticipants.length === 0 ? (
-              'สุ่มหมดแล้ว'
+              'à¸ªà¸¸à¹ˆà¸¡à¸«à¸¡à¸”à¹à¸¥à¹‰à¸§'
             ) : (
-              `🎲 สุ่มเลย! (เหลือ ${availableParticipants.length} คน)`
+              `ðŸŽ² à¸ªà¸¸à¹ˆà¸¡à¹€à¸¥à¸¢! (à¹€à¸«à¸¥à¸·à¸­ ${availableParticipants.length} à¸„à¸™)`
             )}
           </button>
 
@@ -828,7 +828,7 @@ export function NewSlotMachine({
               className={`${isFullscreen ? 'px-12 py-4 text-xl' : 'px-10 py-4 text-lg'} bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors`}
               style={{ fontFamily: 'Concert One, cursive' }}
             >
-              🔄 เริ่มใหม่
+              ðŸ”„ à¹€à¸£à¸´à¹ˆà¸¡à¹ƒà¸«à¸¡à¹ˆ
             </button>
           )}
         </div>
@@ -837,20 +837,20 @@ export function NewSlotMachine({
         {/* Empty State Messages - only show when not showing selection modal */}
         {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && participants.length === 0 && !loadingParticipants && (
           <div className="text-center py-16">
-            <div className={`${isFullscreen ? 'text-8xl' : 'text-6xl'} mb-4`}>😔</div>
+            <div className={`${isFullscreen ? 'text-8xl' : 'text-6xl'} mb-4`}>ðŸ˜”</div>
             <h3 className={`font-bold text-white mb-2 ${
               isFullscreen ? 'text-4xl' : 'text-2xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
-              {mode === 'session' ? 'ไม่มีผู้เข้าร่วม' : 'ไม่มีผู้ส่งงาน'}
+              {mode === 'session' ? 'à¹„à¸¡à¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡' : 'à¹„à¸¡à¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¸ªà¹ˆà¸‡à¸‡à¸²à¸™'}
             </h3>
             <p className={`text-cyan-100 ${
               isFullscreen ? 'text-2xl' : 'text-lg'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
               {mode === 'session' 
-                ? 'กรุณาเลือก Session อื่นที่มีผู้ลงทะเบียนแล้ว'
+                ? 'à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸ Session à¸­à¸·à¹ˆà¸™à¸—à¸µà¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹à¸¥à¹‰à¸§'
                 : mode === 'workshop'
-                ? 'กรุณาเลือก Workshop อื่นที่มีผู้ส่งงานแล้ว'
-                : 'กรุณาเลือก Task อื่นที่มีผู้ส่งงานแล้ว'
+                ? 'à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸ Workshop à¸­à¸·à¹ˆà¸™à¸—à¸µà¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¸ªà¹ˆà¸‡à¸‡à¸²à¸™à¹à¸¥à¹‰à¸§'
+                : 'à¸à¸£à¸¸à¸“à¸²à¹€à¸¥à¸·à¸­à¸ Task à¸­à¸·à¹ˆà¸™à¸—à¸µà¹ˆà¸¡à¸µà¸œà¸¹à¹‰à¸ªà¹ˆà¸‡à¸‡à¸²à¸™à¹à¸¥à¹‰à¸§'
               }
             </p>
           </div>
@@ -861,6 +861,7 @@ export function NewSlotMachine({
       {/* Styles */}
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Concert+One&display=swap');
+        .mode-grid > :nth-child(2) { display: none; }
         .reel-item {
           height: ${isFullscreen ? '160px' : '128px'};
           display: flex;

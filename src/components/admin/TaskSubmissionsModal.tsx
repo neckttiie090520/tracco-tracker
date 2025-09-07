@@ -5,6 +5,7 @@ import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
 import { adminService } from '../../services/admin'
 import { Avatar } from '../common/Avatar'
+import { randomPick } from '../../utils/randomizer'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -129,7 +130,8 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
       alert('No submitted entries to pick from')
       return
     }
-    const random = adminService.getRandomParticipant(eligibleSubmissions)
+    // Use the same randomization logic as Lucky Draw Randomizer
+    const random = randomPick(eligibleSubmissions)
     setRandomSubmission(random)
     setShowRandomModal(true)
   }
