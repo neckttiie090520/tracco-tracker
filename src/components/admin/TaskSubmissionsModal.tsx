@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
+import { LuckyDrawSlot } from './LuckyDrawSlot'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -19,11 +20,22 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const [showLuckyDraw, setShowLuckyDraw] = useState(false)
 
   const [reviewData, setReviewData] = useState({
     feedback: '',
     grade: ''
   })
+
+  const eligibleNames = useMemo(() => {
+    if (!submissions) return [] as string[]
+    // pick from users who have actually submitted (status submitted or reviewed)
+    const list = submissions
+      .filter((s: any) => s?.status && s.status !== 'draft')
+      .map((s: any) => s?.user?.name || s?.user?.email || 'Unknown')
+    // de-duplicate
+    return Array.from(new Set(list))
+  }, [submissions])
 
   // Handle escape key and focus management
   useEffect(() => {
@@ -155,7 +167,18 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
                 {task.workshop?.title} • {submissions?.length || 0} submission{submissions?.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3">
+              {eligibleNames.length > 0 && (
+                <button
+                  onClick={() => setShowLuckyDraw((v) => !v)}
+                  className="text-sm bg-pink-600 hover:bg-pink-700 text-white px-3 py-2 rounded-md font-medium flex items-center"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Lucky Draw
+                </button>
+              )}
               {submissions && submissions.length > 0 && (
                 <button
                   onClick={exportSubmissions}
@@ -182,6 +205,19 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               <span className="ml-3 text-gray-600">Loading submissions...</span>
+            </div>
+          )}
+
+          {!loading && !error && showLuckyDraw && (
+            <div className="mb-6">
+              <LuckyDrawSlot
+                names={eligibleNames}
+                reelId={`reel-${task?.id || 'task'}`}
+                onWinner={(name) => {
+                  // optional: toast or console
+                  console.log('Lucky winner:', name)
+                }}
+              />
             </div>
           )}
 

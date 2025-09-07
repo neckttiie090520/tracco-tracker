@@ -113,3 +113,10 @@ SQL_CODE/
 
 # Embedded repositories
 workshop-tracker/
+# Local scratch files
+*.tmp.txt
+*.temp.txt
+temp*.txt
+
+# External sandbox
+tracco-workshop-tracker/
