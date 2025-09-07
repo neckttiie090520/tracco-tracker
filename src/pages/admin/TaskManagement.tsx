@@ -568,18 +568,7 @@ export function TaskManagement() {
                                 <span>View</span>
                                 <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200">{submissionCount}</span>
                               </button>
-                              {submissionCount > 0 && (
-                                <button
-                                  onClick={() => { setViewingSubmissions(task); (window as any).__openLuckyDrawForTask = task?.id; }}
-                                  className="inline-flex items-center gap-1.5 text-xs font-medium text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1.5 rounded-md border border-pink-200"
-                                  title="Open Lucky Draw"
-                                >
-                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                  </svg>
-                                  Lucky
-                                </button>
-                              )}
+                              {/* Lucky Draw quick action removed per request */}
                             </div>
                           </td>
 
