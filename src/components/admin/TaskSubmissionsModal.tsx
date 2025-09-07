@@ -27,6 +27,12 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
     feedback: '',
     grade: ''
   })
+  // Submissions view controls
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'submitted' | 'reviewed' | 'draft'>('all')
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name'>('newest')
+  const [compact, setCompact] = useState(false)
+  const [contentOnly, setContentOnly] = useState(false)
 
   const eligibleNames = useMemo(() => {
     if (!submissions) return [] as string[]
@@ -37,6 +43,40 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
     // de-duplicate
     return Array.from(new Set(list))
   }, [submissions])
+
+  // Quick stats
+  const quickStats = useMemo(() => {
+    const counts = { total: submissions?.length || 0, submitted: 0, reviewed: 0, draft: 0 }
+    ;(submissions || []).forEach((s: any) => {
+      if (s.status === 'submitted') counts.submitted += 1
+      else if (s.status === 'reviewed') counts.reviewed += 1
+      else counts.draft += 1
+    })
+    return counts
+  }, [submissions])
+
+  // Filter, search, sort
+  const filtered = useMemo(() => {
+    let list = submissions || []
+    if (contentOnly) list = list.filter((s: any) => s.notes || s.submission_url || s.file_url)
+    if (statusFilter !== 'all') list = list.filter((s: any) => s.status === statusFilter)
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter((s: any) =>
+        (s.user?.name || '').toLowerCase().includes(q) ||
+        (s.user?.email || '').toLowerCase().includes(q) ||
+        (s.notes || '').toLowerCase().includes(q)
+      )
+    }
+    if (sortBy === 'name') {
+      list = [...list].sort((a: any, b: any) => (a.user?.name || '').localeCompare(b.user?.name || ''))
+    } else if (sortBy === 'oldest') {
+      list = [...list].sort((a: any, b: any) => new Date(a.submitted_at || 0).getTime() - new Date(b.submitted_at || 0).getTime())
+    } else {
+      list = [...list].sort((a: any, b: any) => new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime())
+    }
+    return list
+  }, [submissions, search, statusFilter, sortBy, contentOnly])
 
   const openWinnerDetail = (winnerNameOrEmail: string) => {
     if (!submissions || !winnerNameOrEmail) return
@@ -237,6 +277,62 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
             </div>
           )}
 
+          {/* Controls Bar */}
+          {!loading && !error && (
+            <div className="mb-4 bg-white border rounded-md p-3">
+              <div className="flex flex-wrap gap-3 items-center">
+                <div className="flex-1 min-w-[220px]">
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search name, email, or notes"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    title="Filter by status"
+                  >
+                    <option value="all">All</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+                <div>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    title="Sort order"
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="name">Name</option>
+                  </select>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="checkbox" className="rounded" checked={contentOnly} onChange={(e) => setContentOnly(e.target.checked)} />
+                  Only with content
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input type="checkbox" className="rounded" checked={compact} onChange={(e) => setCompact(e.target.checked)} />
+                  Compact rows
+                </label>
+                <div className="ml-auto flex gap-2 text-xs">
+                  <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">All: {quickStats.total}</span>
+                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700">Submitted: {quickStats.submitted}</span>
+                  <span className="px-2 py-0.5 rounded bg-green-100 text-green-700">Reviewed: {quickStats.reviewed}</span>
+                  <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">Draft: {quickStats.draft}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="text-center py-12">
               <div className="text-red-600 mb-4">
@@ -257,18 +353,18 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
 
           {!loading && !error && (
             <>
-              {submissions && submissions.length === 0 ? (
+              {filtered && filtered.length === 0 ? (
                 <div className="text-center py-12">
                   <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No Submissions Yet</h3>
-                  <p className="text-gray-600">Participants haven't submitted anything for this task yet.</p>
+                  <p className="text-gray-600">No items match your search or filters.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Student
@@ -291,8 +387,8 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {submissions?.map((submission) => (
-                        <tr key={submission.id} className="hover:bg-gray-50">
+                      {filtered?.map((submission) => (
+                        <tr key={submission.id} className={`hover:bg-gray-50 ${compact ? 'text-sm' : ''}`} onDoubleClick={() => setSelectedSubmissionDetail(submission)}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
