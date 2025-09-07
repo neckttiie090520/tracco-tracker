@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
+import { adminService } from '../../services/admin'
+import { Avatar } from '../common/Avatar'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -19,6 +21,10 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+
+  // Randomizer states
+  const [randomSubmission, setRandomSubmission] = useState<any>(null)
+  const [showRandomModal, setShowRandomModal] = useState(false)
 
   const [reviewData, setReviewData] = useState({
     feedback: '',
@@ -115,6 +121,19 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
     URL.revokeObjectURL(url)
   }
 
+  // Eligible submissions for randomizer (submitted or reviewed only)
+  const eligibleSubmissions = (submissions || []).filter((s: any) => s.status === 'submitted' || s.status === 'reviewed')
+
+  const handleRandomPick = () => {
+    if (!eligibleSubmissions || eligibleSubmissions.length === 0) {
+      alert('No submitted entries to pick from')
+      return
+    }
+    const random = adminService.getRandomParticipant(eligibleSubmissions)
+    setRandomSubmission(random)
+    setShowRandomModal(true)
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'submitted':
@@ -156,6 +175,19 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
               </p>
             </div>
             <div className="flex items-center space-x-3">
+              {/* Random Pick from submitted users */}
+              {submissions && submissions.length > 0 && (
+                <button
+                  onClick={handleRandomPick}
+                  disabled={eligibleSubmissions.length === 0}
+                  className="text-sm bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded-md font-medium flex items-center"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Random Pick
+                </button>
+              )}
               {submissions && submissions.length > 0 && (
                 <button
                   onClick={exportSubmissions}
@@ -606,5 +638,53 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
     </div>
   )
 
-  return createPortal(modalContent, document.body)
+  const randomModal = (
+    showRandomModal && randomSubmission ? (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[10000]">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mb-4">
+              <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">🎉 Random Selection Result</h3>
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <div className="flex items-center space-x-4 mb-3">
+                <Avatar
+                  username={randomSubmission.user?.email}
+                  name={randomSubmission.user?.name}
+                  avatarSeed={randomSubmission.user?.avatar_seed}
+                  size={60}
+                  saturation={randomSubmission.user?.avatar_saturation}
+                  lightness={randomSubmission.user?.avatar_lightness}
+                />
+                <div className="text-left">
+                  <p className="text-xl font-semibold text-gray-900">{randomSubmission.user?.name}</p>
+                  <p className="text-sm text-gray-600">{randomSubmission.user?.email}</p>
+                </div>
+              </div>
+              {randomSubmission.submission_url && (
+                <div className="mt-2 text-left">
+                  <p className="text-sm font-medium text-gray-700">URL:</p>
+                  <a href={randomSubmission.submission_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 break-all">
+                    {randomSubmission.submission_url}
+                  </a>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-center space-x-3">
+              <button onClick={handleRandomPick} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium">Pick Again</button>
+              <button onClick={() => setShowRandomModal(false)} className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null
+  )
+
+  return createPortal(<>
+    {modalContent}
+    {randomModal}
+  </>, document.body)
 }
