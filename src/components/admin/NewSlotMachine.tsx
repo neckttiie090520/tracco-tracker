@@ -698,8 +698,8 @@ export function NewSlotMachine({
             <h2 className={`font-bold text-center text-white mb-8 ${
               isFullscreen ? 'text-7xl' : 'text-6xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
-              ðŸŽ° Lucky Draw
               Lucky Draw
+            </h2>
             <p className={`text-center text-cyan-100 mb-12 font-medium ${
               isFullscreen ? 'text-3xl' : 'text-2xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
@@ -707,7 +707,6 @@ export function NewSlotMachine({
             </p>
           </>
         )}
-
         {/* Sound Controls - only show if something is selected and not showing selection */}
         {(selectedSession || selectedWorkshop || selectedTask) && !showSelectionModal && (
         <div className={`flex items-center justify-center gap-6 ${
@@ -943,6 +942,7 @@ export function NewSlotMachine({
     </div>
   )
 }
+
 
 
 
