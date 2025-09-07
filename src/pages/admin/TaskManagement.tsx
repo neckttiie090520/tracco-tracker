@@ -556,26 +556,26 @@ export function TaskManagement() {
                           </td>
                           {/* Submissions cell (after Task/Workshop) */}
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className=\"flex items-center gap-2\">
+                            <div className="flex items-center gap-2">
                               <button
                                 onClick={() => setViewingSubmissions(task)}
-                                className=\"inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors\"
-                                title=\"View all submissions\"
+                                className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
+                                title="View all submissions"
                               >
-                                <svg className=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" aria-hidden=\"true\">
-                                  <path d=\"M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z\" />
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                  <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z" />
                                 </svg>
                                 <span>View</span>
-                                <span className=\"ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200\">{submissionCount}</span>
+                                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200">{submissionCount}</span>
                               </button>
                               {submissionCount > 0 && (
                                 <button
                                   onClick={() => { setViewingSubmissions(task); (window as any).__openLuckyDrawForTask = task?.id; }}
-                                  className=\"inline-flex items-center gap-1.5 text-xs font-medium text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1.5 rounded-md border border-pink-200\"
-                                  title=\"Open Lucky Draw\"
+                                  className="inline-flex items-center gap-1.5 text-xs font-medium text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1.5 rounded-md border border-pink-200"
+                                  title="Open Lucky Draw"
                                 >
-                                  <svg className=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
-                                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 10V3L4 14h7v7l9-11h-7z\" />
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                   </svg>
                                   Lucky
                                 </button>
