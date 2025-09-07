@@ -511,91 +511,32 @@ export function TaskManagement() {
                       
                       return (
                         <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <input
-                              type="checkbox"
-                              checked={selectedItems.includes(task.id)}
-                              onChange={() => handleItemSelect(task.id)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                          </td>
-                          <td className="px-6 py-4 align-top">
-                            <div className="flex flex-col">
-                              <div className="text-sm font-semibold text-gray-900">
-                                {task.title}
-                              </div>
-                              {task.description && (
-                                <div className="text-xs text-gray-600 truncate max-w-md">
-                                  {task.description.length > 80 
-                                    ? `${task.description.substring(0, 80)}...` 
-                                    : task.description
-                                  }
-                                </div>
+                                                    <td className=\"px-6 py-4 whitespace-nowrap\">
+                            <div className=\"flex items-center gap-2\">
+                              <button
+                                onClick={() => setViewingSubmissions(task)}
+                                className=\"inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors\"
+                                title=\"View all submissions\"
+                              >
+                                <svg className=\"w-4 h-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" aria-hidden=\"true\">
+                                  <path d=\"M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z\" />
+                                </svg>
+                                <span>View</span>
+                                <span className=\"ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200\">{submissionCount}</span>
+                              </button>
+                              {submissionCount > 0 && (
+                                <button
+                                  onClick={() => { setViewingSubmissions(task); (window as any).__openLuckyDrawForTask = task?.id; }}
+                                  className=\"inline-flex items-center gap-1.5 text-xs font-medium text-pink-700 bg-pink-50 hover:bg-pink-100 px-2.5 py-1.5 rounded-md border border-pink-200\"
+                                  title=\"Open Lucky Draw\"
+                                >
+                                  <svg className=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">
+                                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth={2} d=\"M13 10V3L4 14h7v7l9-11h-7z\" />
+                                  </svg>
+                                  Lucky
+                                </button>
                               )}
-                              <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-                                <div className="flex items-center flex-wrap gap-2">
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-                                    Order {task.order_index}
-                                  </span>
-                                  {task.workshop?.title && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">
-                                      {task.workshop.title}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="ml-3">
-                                  <button
-                                    onClick={() => handleUpdateTask(task.id, { is_active: !task.is_active })}
-                                    aria-pressed={task.is_active}
-                                    title={task.is_active ? 'Click to hide this task' : 'Click to show this task'}
-                                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full transition-colors shadow-sm border ${
-                                      task.is_active 
-                                        ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' 
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'
-                                    }`}
-                                  >
-                                    {task.is_active ? (
-                                      <>
-                                        <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
-                                        </svg>
-                                        Show
-                                      </>
-                                    ) : (
-                                      <>
-                                        <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                          <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd"/>
-                                          <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
-                                        </svg>
-                                        Hide
-                                      </>
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className={`text-sm ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
-                              {formatDate(task.due_date)}
-                            </div>
-                            {isOverdue && (
-                              <div className="text-xs text-red-500">Overdue</div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => setViewingSubmissions(task)}
-                              className="group inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium hover:bg-blue-50 px-2 py-1 rounded-md transition-all duration-200 cursor-pointer"
-                              title="Click to view all submissions for this task"
-                            >
-                              <span className="mr-1.5">📂</span>
-                              <span>View ({submissionCount} submission{submissionCount !== 1 ? 's' : ''})</span>
-                              <svg className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
                           </td>
                           
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -640,10 +581,7 @@ export function TaskManagement() {
       />
 
       {/* Task Submissions Modal */}
-      <TaskSubmissionsModal
-        task={viewingSubmissions}
-        onClose={() => setViewingSubmissions(null)}
-      />
+      <TaskSubmissionsModal task={viewingSubmissions} onClose={() => setViewingSubmissions(null)} initialShowLuckyDraw={(window as any).__openLuckyDrawForTask === viewingSubmissions?.id} />
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
@@ -657,3 +595,4 @@ export function TaskManagement() {
     </div>
   )
 }
+

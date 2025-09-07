@@ -8,9 +8,10 @@ import { LuckyDrawSlot } from './LuckyDrawSlot'
 interface TaskSubmissionsModalProps {
   task: any
   onClose: () => void
+  initialShowLuckyDraw?: boolean
 }
 
-export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProps) {
+export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = false }: TaskSubmissionsModalProps) {
   const { user } = useAuth()
   console.log('TaskSubmissionsModal - task object:', task)
   console.log('TaskSubmissionsModal - task.id:', task?.id)
@@ -21,7 +22,7 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
-  const [showLuckyDraw, setShowLuckyDraw] = useState(false)
+  const [showLuckyDraw, setShowLuckyDraw] = useState<boolean>(initialShowLuckyDraw)
 
   const [reviewData, setReviewData] = useState({
     feedback: '',
@@ -122,6 +123,11 @@ export function TaskSubmissionsModal({ task, onClose }: TaskSubmissionsModalProp
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [task, selectedSubmission, selectedSubmissionDetail, onClose])
+
+  // Sync default Lucky Draw visibility when opened from quick action
+  useEffect(() => {
+    setShowLuckyDraw(initialShowLuckyDraw)
+  }, [initialShowLuckyDraw, task?.id])
 
   const handleReviewSubmission = async (submission: any) => {
     setSelectedSubmission(submission)
