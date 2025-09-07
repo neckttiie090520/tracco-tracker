@@ -508,6 +508,15 @@ export function TaskManagement() {
                       
                       return (
                         <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`}>
+                          {/* Row checkbox (aligns with first header column) */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.includes(task.id)}
+                              onChange={() => handleItemSelect(task.id)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                          </td>
                           {/* Task / Workshop first, submissions column follows below */}
 
                           {/* Task / Workshop with due date + status toggle */}
