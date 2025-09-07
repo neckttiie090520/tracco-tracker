@@ -495,12 +495,12 @@ export function NewSlotMachine({
                 <div className={`${isFullscreen ? 'text-6xl' : 'text-4xl'} mb-4`}>ðŸŽ°</div>
                 <h2 className={`font-bold text-gray-900 mb-2 ${
                   isFullscreen ? 'text-3xl' : 'text-2xl'
-                }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
+                }`} style={{ fontFamily: "'Concert One', 'Prompt', sans-serif" }}>
                   Lucky Draw Randomizer
                 </h2>
                 <p className={`text-gray-600 ${
                   isFullscreen ? 'text-xl' : 'text-base'
-                }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
+                }`} style={{ fontFamily: "'Concert One', 'Prompt', sans-serif" }}>
                   à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡à¹à¸¥à¸°à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£
                 </p>
               </div>
@@ -510,7 +510,7 @@ export function NewSlotMachine({
                 <div>
                   <label className={`block text-gray-700 font-medium mb-2 ${
                     isFullscreen ? 'text-lg' : 'text-base'
-                  }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
+                  }`}>
                     Pick Type:
                   </label>
                   <div className="grid grid-cols-2 gap-2 mode-grid">
@@ -526,7 +526,7 @@ export function NewSlotMachine({
                             ? 'border-pink-500 bg-pink-50 text-pink-700'
                             : 'border-gray-300 bg-white text-gray-600 hover:border-pink-300'
                         } ${isFullscreen ? 'text-base' : 'text-sm'}`}
-                        style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
+                        
                       >
                         <div className="font-bold">{label}</div>
                         <div className="text-xs mt-1">{desc}</div>
@@ -550,7 +550,7 @@ export function NewSlotMachine({
                       className={`w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                         isFullscreen ? 'text-lg' : 'text-base'
                       }`}
-                      style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
+                      
                     >
                       <option value="">Choose Session</option>
                       {sessions.map(session => (
@@ -600,7 +600,7 @@ export function NewSlotMachine({
                         className={`hidden w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 text-gray-900 font-medium ${
                           isFullscreen ? 'text-lg' : 'text-base'
                         }`}
-                        style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
+                        
                       >
                         <option value="">à¹€à¸¥à¸·à¸­à¸ Workshop à¸à¹ˆà¸­à¸™</option>
                         {workshops.map(workshop => (
@@ -697,7 +697,7 @@ export function NewSlotMachine({
           <>
             <h2 className={`font-bold text-center text-white mb-8 ${
               isFullscreen ? 'text-7xl' : 'text-6xl'
-            }`} style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}>
+                  }`} style={{ fontFamily: "'Concert One', 'Prompt', sans-serif" }}>
               Lucky Draw
             </h2>
             <p className={`text-center text-cyan-100 mb-12 font-medium ${
@@ -719,7 +719,7 @@ export function NewSlotMachine({
                 ? 'bg-pink-300 bg-opacity-30 text-white hover:bg-opacity-40'
                 : 'bg-purple-300 bg-opacity-30 text-purple-100 hover:bg-opacity-40'
             }`}
-            style={{ fontFamily: '\''Concert One'\', \''Prompt'\', sans-serif' }}
+                        
           >
             {soundEnabled ? 'ðŸ”Š' : 'ðŸ”‡'}
             {soundEnabled ? 'à¹€à¸ªà¸µà¸¢à¸‡' : 'à¸›à¸´à¸”à¹€à¸ªà¸µà¸¢à¸‡'}
@@ -942,6 +942,8 @@ export function NewSlotMachine({
     </div>
   )
 }
+
+
 
 
 
