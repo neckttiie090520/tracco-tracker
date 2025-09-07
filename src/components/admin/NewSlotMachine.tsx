@@ -669,7 +669,7 @@ export function NewSlotMachine({
                   }`}
                   style={{ fontFamily: 'Concert One, cursive' }}
                 >
-                  {loadingParticipants ? 'à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...' : 'ðŸŽ² à¸•à¸à¸¥à¸‡ à¹€à¸£à¸´à¹ˆà¸¡ Lucky Draw!'}
+                  {loadingParticipants ? 'Loading...' : 'Start Lucky Draw!'}
                 </button>
               </div>
             </div>
@@ -699,7 +699,7 @@ export function NewSlotMachine({
               isFullscreen ? 'text-7xl' : 'text-6xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
               ðŸŽ° Lucky Draw
-            </h2>
+              Lucky Draw
             <p className={`text-center text-cyan-100 mb-12 font-medium ${
               isFullscreen ? 'text-3xl' : 'text-2xl'
             }`} style={{ fontFamily: 'Concert One, cursive' }}>
@@ -943,4 +943,6 @@ export function NewSlotMachine({
     </div>
   )
 }
+
+
 
