@@ -528,7 +528,7 @@ export function NewSlotMachine({
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { value: 'session', label: '👥 Session', desc: 'สุ่มจากผู้เข้าร่วม' },
-                      { value: 'workshop', label: '🎯 Workshop', desc: 'สุ่มจากผู้ส่งงาน' },
+                      { value: 'workshop', label: '🎯 Workshop', desc: 'สุ่มจากผู้ลงทะเบียน' },
                       { value: 'task', label: '📝 Task', desc: 'สุ่มจากงานเฉพาะ' }
                     ].map(({ value, label, desc }) => (
                       <button

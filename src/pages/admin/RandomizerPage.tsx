@@ -76,7 +76,7 @@ export function RandomizerPage() {
     if (mode === 'session' && selectedSession) {
       fetchParticipants(selectedSession)
     } else if (mode === 'workshop' && selectedWorkshop) {
-      fetchWorkshopSubmitters(selectedWorkshop)
+      fetchWorkshopRegistrants(selectedWorkshop)
     } else if (mode === 'task' && selectedTask) {
       fetchTaskSubmitters(selectedTask)
     } else {
@@ -184,59 +184,39 @@ export function RandomizerPage() {
     }
   }
 
-  const fetchWorkshopSubmitters = async (workshopId: string) => {
+  
+
+  const fetchWorkshopRegistrants = async (workshopId: string) => {
     try {
       setLoadingParticipants(true)
       const { data, error } = await supabase
-        .from('submissions')
+        .from('workshop_registrations')
         .select(`
-          user_id,
-          status,
-          submitted_at,
-          task:tasks!submissions_task_id_fkey(
-            id,
-            title,
-            workshop_id
-          ),
-          user:users!submissions_user_id_fkey(
-            id,
-            name,
-            email,
-            faculty,
-            department
-          )
-        `)
-        .eq('task.workshop_id', workshopId)
-        .eq('status', 'submitted')
+            *,
+            users (
+              id,
+              name,
+              email,
+              faculty,
+              department
+            )
+          `)
+        .eq('workshop_id', workshopId)
 
       if (error) throw error
 
-      // Group by user and count submissions
-      const userSubmissions = data?.reduce((acc, submission) => {
-        const userId = submission.user_id
-        if (!acc[userId]) {
-          acc[userId] = {
-            id: submission.user.id,
-            name: submission.user.name || submission.user.email.split('@')[0],
-            email: submission.user.email,
-            faculty: submission.user.faculty,
-            department: submission.user.department,
-            submissionCount: 0,
-            latestSubmission: submission.submitted_at
-          }
-        }
-        acc[userId].submissionCount += 1
-        if (new Date(submission.submitted_at) > new Date(acc[userId].latestSubmission || '')) {
-          acc[userId].latestSubmission = submission.submitted_at
-        }
-        return acc
-      }, {} as Record<string, SubmissionParticipant>) || {}
+      const participantData = data?.map(reg => ({
+        id: reg.users.id,
+        name: reg.users.name || reg.users.email.split('@')[0],
+        email: reg.users.email,
+        faculty: reg.users.faculty,
+        department: reg.users.department
+      })) || []
 
-      const submitters = Object.values(userSubmissions)
-      setSubmissionParticipants(submitters)
+      setParticipants(participantData)
     } catch (error) {
-      console.error('Error fetching workshop submitters:', error)
-      setSubmissionParticipants([])
+      console.error('Error fetching workshop registrants:', error)
+      setParticipants([])
     } finally {
       setLoadingParticipants(false)
     }
@@ -313,7 +293,11 @@ export function RandomizerPage() {
   }
 
   const getCurrentParticipants = () => {
-    return mode === 'session' ? participants : submissionParticipants
+    if (mode === 'session' || mode === 'workshop') {
+      return participants
+    } else { // mode === 'task'
+      return submissionParticipants
+    }
   }
 
   const handleModeChange = (newMode: RandomizerMode) => {
