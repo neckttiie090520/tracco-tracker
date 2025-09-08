@@ -388,9 +388,15 @@ export function WorkshopFeedPage() {
         <div className="mb-4">
           <BackButton />
         </div>
-        {/* Main Material Display - YouTube Style */}
+        {/* Main Material Display - make it clear this is workshop materials */}
         {mainMaterial ? (
           <div className="mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-rose-100 text-rose-700">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"/></svg>
+              </span>
+              <h3 className="text-sm font-semibold text-gray-700">เอกสารประกอบของ Workshop นี้</h3>
+            </div>
             {/* Material Display: embed hero only if embed mode */}
             {mainMaterial.display_mode === 'embed' && (mainMaterial as any).embed_url ? (
               <div className="aspect-video w-full mb-6 rounded-2xl overflow-hidden">
