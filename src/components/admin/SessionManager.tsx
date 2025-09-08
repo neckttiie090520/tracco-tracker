@@ -1198,23 +1198,61 @@ export function SessionManager() {
       <AdminNavigation />
       
       <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Traco Session Management</h1>
-              <p className="text-gray-600 mt-1">Manage Sessions and Registrations</p>
-            </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create Session
-            </button>
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Traco Session Management</h1>
+            <p className="text-gray-600 mt-1">Manage Sessions and Registrations</p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create Session
+          </button>
+        </div>
+
+        {/* Quick Status Tabs */}
+        {sessions.length > 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 p-2 mb-4">
+            {(() => {
+              const counts = sessions.reduce(
+                (acc, s) => {
+                  if (s.session.is_archived) acc.archived++
+                  else if (s.session.is_active) acc.active++
+                  else acc.inactive++
+                  acc.all++
+                  return acc
+                },
+                { active: 0, inactive: 0, archived: 0, all: 0 }
+              )
+              const Tab = ({ value, label, count }: { value: string; label: string; count: number }) => (
+                <button
+                  onClick={() => setStatusFilter(value)}
+                  className={`px-3 py-1.5 text-sm rounded-md mr-2 border ${
+                    statusFilter === value
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  {label} <span className="ml-1 text-xs text-gray-500">({count})</span>
+                </button>
+              )
+              return (
+                <div className="flex flex-wrap items-center">
+                  <Tab value="all" label="All" count={counts.all} />
+                  <Tab value="active" label="Active" count={counts.active} />
+                  <Tab value="inactive" label="Inactive" count={counts.inactive} />
+                  <Tab value="archived" label="Archived" count={counts.archived} />
+                </div>
+              )
+            })()}
+          </div>
+        )}
 
           {/* Search and Filter */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">

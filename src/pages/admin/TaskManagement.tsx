@@ -356,14 +356,52 @@ export function TaskManagement() {
                 Create Task
               </button>
             </div>
-          </div>
+        </div>
 
-          {/* Search and Filter */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-            <SearchAndFilter
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              searchPlaceholder="Search tasks by title or description..."
+        {/* Quick Status Tabs */}
+        {tasks.length > 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 p-2 mb-4">
+            {(() => {
+              const counts = tasks.reduce(
+                (acc, t: any) => {
+                  if (t.is_archived) acc.archived++
+                  else if (t.is_active) acc.active++
+                  else acc.inactive++
+                  acc.all++
+                  return acc
+                },
+                { active: 0, inactive: 0, archived: 0, all: 0 }
+              )
+              const Tab = ({ value, label, count }: { value: string; label: string; count: number }) => (
+                <button
+                  onClick={() => setStatusFilter(value)}
+                  className={`px-3 py-1.5 text-sm rounded-md mr-2 border ${
+                    statusFilter === value
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  {label} <span className="ml-1 text-xs text-gray-500">({count})</span>
+                </button>
+              )
+              return (
+                <div className="flex flex-wrap items-center">
+                  <Tab value="all" label="All" count={counts.all} />
+                  <Tab value="active" label="Active" count={counts.active} />
+                  <Tab value="inactive" label="Inactive" count={counts.inactive} />
+                  <Tab value="archived" label="Archived" count={counts.archived} />
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
+        {/* Search and Filter */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+          <SearchAndFilter
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Search tasks by title or description..."
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
               statusOptions={[
