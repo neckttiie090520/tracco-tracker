@@ -282,7 +282,7 @@ export function SessionFeedPage() {
         {/* Main Session Material Display - Respect display mode */}
         {mainSessionMaterial ? (
           <div className="mb-8">
-            {mainSessionMaterial.display_mode === 'embed' ? (
+            {mainSessionMaterial.display_mode === 'embed' && mainSessionMaterial.embed_url ? (
               <div className="aspect-video w-full mb-6 rounded-2xl overflow-hidden">
                 <WorkshopMaterialDisplay material={mainSessionMaterial} className="w-full h-full" />
               </div>
