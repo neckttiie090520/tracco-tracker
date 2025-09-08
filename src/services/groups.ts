@@ -37,6 +37,40 @@ export const groupService = {
     return data
   },
 
+  async searchUsers(query: string, limit = 8) {
+    const q = query.trim()
+    if (!q) return []
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, email')
+      .or(`name.ilike.%${q}%,email.ilike.%${q}%`)
+      .limit(limit)
+    if (error) throw error
+    return data || []
+  },
+
+  async addMembers(groupId: string, userIds: string[]) {
+    if (!userIds || userIds.length === 0) return
+    const rows = userIds.map(id => ({ task_group_id: groupId, user_id: id }))
+    const { error } = await supabase
+      .from('task_group_members')
+      .insert(rows)
+    if (error && (error as any).code !== '23505') throw error
+  },
+
+  async removeMember(groupId: string, userId: string) {
+    const { error } = await supabase
+      .from('task_group_members')
+      .delete()
+      .eq('task_group_id', groupId)
+      .eq('user_id', userId)
+    if (error) throw error
+  },
+
+  isOwner(group: { owner_id: string }, userId?: string | null) {
+    return !!userId && group?.owner_id === userId
+  },
+
   async joinByCode(code: string, userId: string) {
     const { data: group, error } = await supabase
       .from('task_groups')
@@ -76,4 +110,3 @@ export const groupService = {
     return data
   },
 }
-

@@ -889,7 +889,37 @@ export function WorkshopFeedPage() {
                                         <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
                                       </div>
                                       {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || '']?.length > 0 && (
-                                        <div className="text-xs text-gray-600 mt-2">สมาชิก: {groupMembers[taskGroups[task.id]?.id || ''].map(m => m.user?.name || m.user_id.slice(0,6)).join(', ')}</div>
+                                        <div className="mt-2">
+                                          <div className="text-xs text-gray-600 mb-1">Members</div>
+                                          <div className="flex flex-wrap gap-2">
+                                            {groupMembers[taskGroups[task.id]?.id || ''].map((m: any) => (
+                                              <span key={m.user_id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
+                                                {m.user?.name || m.user_id.slice(0,6)}
+                                                {(taskGroups[task.id]?.owner_id === user?.id || m.user_id === user?.id) && (
+                                                  <button
+                                                    onClick={async () => {
+                                                      try {
+                                                        await groupService.removeMember(taskGroups[task.id]!.id, m.user_id)
+                                                        const mem = await groupService.listMembers(taskGroups[task.id]!.id)
+                                                        setGroupMembers(prev => ({ ...prev, [taskGroups[task.id]!.id]: mem || [] }))
+                                                        // if user removed self, clear local group
+                                                        if (m.user_id === user?.id) {
+                                                          setTaskGroups(prev => ({ ...prev, [task.id]: null }))
+                                                        }
+                                                      } catch (e) {
+                                                        console.error('remove member failed', e)
+                                                      }
+                                                    }}
+                                                    className="text-gray-500 hover:text-gray-700"
+                                                    title={m.user_id === user?.id ? 'Leave group' : 'Remove member'}
+                                                  >
+                                                    ×
+                                                  </button>
+                                                )}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
                                       )}
                                     </div>
                                   )}
@@ -954,6 +984,38 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Member search state
+  const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([])
+
+  useEffect(() => {
+    let active = true
+    const run = async () => {
+      if (!query.trim()) { setSuggestions([]); return }
+      try {
+        const res = await groupService.searchUsers(query, 8)
+        if (active) setSuggestions(res || [])
+      } catch (e) {
+        console.warn('search users failed', e)
+      }
+    }
+    const t = setTimeout(run, 200)
+    return () => { active = false; clearTimeout(t) }
+  }, [query])
+
+  const addSelected = (u: any) => {
+    if (!u) return
+    if (selectedUsers.find(x => x.id === u.id)) return
+    setSelectedUsers(prev => [...prev, u])
+    setQuery('')
+    setSuggestions([])
+  }
+
+  const removeSelected = (id: string) => {
+    setSelectedUsers(prev => prev.filter(u => u.id !== id))
+  }
+
   return (
     <div>
       <input
@@ -963,6 +1025,38 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
         className="w-full border px-3 py-2 rounded mb-2"
         placeholder="ชื่อกลุ่ม"
       />
+
+      <div className="mb-2">
+        <div className="text-xs text-gray-600 mb-1">เพิ่มสมาชิก (พิมพ์ชื่อหรืออีเมล)</div>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full border px-3 py-2 rounded"
+          placeholder="เช่น student@domain.com"
+        />
+        {suggestions.length > 0 && (
+          <div className="border rounded mt-1 bg-white max-h-40 overflow-auto text-sm">
+            {suggestions.map(s => (
+              <button key={s.id} onClick={() => addSelected(s)} className="w-full text-left px-3 py-2 hover:bg-gray-50">
+                <div className="font-medium">{s.name || s.email}</div>
+                <div className="text-xs text-gray-500">{s.email}</div>
+              </button>
+            ))}
+          </div>
+        )}
+        {selectedUsers.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {selectedUsers.map(u => (
+              <span key={u.id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
+                {u.name || u.email}
+                <button onClick={() => removeSelected(u.id)} className="text-gray-500 hover:text-gray-700">×</button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
       {error && <div className="text-red-600 text-xs mb-2">{error}</div>}
       <button
         onClick={async () => {
@@ -970,7 +1064,11 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
           try {
             setLoading(true)
             setError(null)
-            await groupService.createGroup(taskId, name.trim() || 'My Group', user.id)
+            const group = await groupService.createGroup(taskId, name.trim() || 'My Group', user.id)
+            const memberIds = selectedUsers.map(u => u.id).filter((id: string) => id && id !== user.id)
+            if (memberIds.length > 0) {
+              await groupService.addMembers(group.id, memberIds)
+            }
             await onDone()
           } catch (e: any) {
             setError(e?.message || 'สร้างกลุ่มไม่สำเร็จ')
