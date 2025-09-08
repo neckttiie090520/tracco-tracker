@@ -8,6 +8,7 @@ import { ConfirmDeleteModal } from '../../components/admin/ConfirmDeleteModal'
 import { SearchAndFilter } from '../../components/admin/SearchAndFilter'
 import { BulkActionBar } from '../../components/admin/BulkActionBar'
 import { supabase } from '../../services/supabase'
+import { TaskGroupsModal } from '../../components/admin/TaskGroupsModal'
 
 export function TaskManagement() {
   const { tasks, workshops, loading, error, createTask, updateTask, deleteTask, refetch } = useAdminTasks()
@@ -20,6 +21,7 @@ export function TaskManagement() {
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [selectedWorkshop, setSelectedWorkshop] = useState<string>('all')
+  const [viewingGroups, setViewingGroups] = useState<any>(null)
   
   // Search and Filter State
   const [searchTerm, setSearchTerm] = useState('')
@@ -344,7 +346,17 @@ export function TaskManagement() {
                   Add Sample Tasks
                 </button>
               )}
-              
+              <button
+                onClick={refetch}
+                className="border px-4 py-2 rounded-md text-gray-700 hover:bg-gray-50 flex items-center mr-2"
+                title="Refresh"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
+                </svg>
+                Refresh
+              </button>
+
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
@@ -645,6 +657,14 @@ export function TaskManagement() {
                             >
                               Edit
                             </button>
+                            {task.submission_mode === 'group' && (
+                              <button
+                                onClick={() => setViewingGroups(task)}
+                                className="text-blue-700 hover:text-blue-900"
+                              >
+                                Groups
+                              </button>
+                            )}
                             {task.is_archived ? (
                               <button
                                 onClick={() => handleRestoreTask(task)}
@@ -696,6 +716,11 @@ export function TaskManagement() {
 
       {/* Task Submissions Modal */}
       <TaskSubmissionsModal task={viewingSubmissions} onClose={() => setViewingSubmissions(null)} initialShowLuckyDraw={(window as any).__openLuckyDrawForTask === viewingSubmissions?.id} />
+
+      {/* Task Groups Modal */}
+      {viewingGroups && (
+        <TaskGroupsModal task={viewingGroups} onClose={() => setViewingGroups(null)} />
+      )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal

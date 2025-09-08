@@ -37,6 +37,16 @@ export const groupService = {
     return data
   },
 
+  async listTaskGroups(taskId: string) {
+    const { data, error } = await supabase
+      .from('task_groups')
+      .select('id, name, owner_id, party_code, created_at')
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data || []
+  },
+
   async searchUsers(query: string, limit = 8) {
     const q = query.trim()
     if (!q) return []
