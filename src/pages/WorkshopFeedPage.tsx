@@ -660,18 +660,6 @@ export function WorkshopFeedPage() {
               </div>
             )}
             
-            {/* Main Material (if exists, show as additional section) */}
-            {mainMaterial && (
-              <div className="bg-gray-50 rounded-2xl p-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <span className="mr-3">🎯</span>
-                  เอกสารหลัก
-                </h2>
-                <div className="bg-white rounded-xl p-4">
-                  <WorkshopMaterialDisplay material={mainMaterial} />
-                </div>
-              </div>
-            )}
 
             {/* Tasks Section */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
