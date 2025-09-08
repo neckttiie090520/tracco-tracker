@@ -69,6 +69,7 @@ export function useTaskSubmission(taskId: string) {
   const submitTask = async (submissionData: {
     notes?: string
     submission_url?: string
+    links?: string[]
     file?: File
   }) => {
     if (!user || !taskId) throw new Error('User or task not available')
@@ -92,6 +93,7 @@ export function useTaskSubmission(taskId: string) {
         user_id: user.id,
         notes: submissionData.notes || null,
         submission_url: submissionData.submission_url || null,
+        links: submissionService.normalizeLinks(submissionData.submission_url || null, submissionData.links || []),
         file_url: fileUrl,
         status: 'submitted' as const,
         submitted_at: new Date().toISOString(),
@@ -112,6 +114,7 @@ export function useTaskSubmission(taskId: string) {
   const updateSubmission = async (updates: {
     notes?: string
     submission_url?: string
+    links?: string[]
     file?: File
   }) => {
     if (!user || !taskId) throw new Error('User or task not available')
@@ -147,6 +150,10 @@ export function useTaskSubmission(taskId: string) {
         user_id: user.id,
         notes: updates.notes !== undefined ? updates.notes : submission?.notes,
         submission_url: updates.submission_url !== undefined ? updates.submission_url : submission?.submission_url,
+        links: submissionService.normalizeLinks(
+          (updates.submission_url !== undefined ? updates.submission_url : submission?.submission_url) || null,
+          updates.links || (submission?.links as any) || []
+        ),
         file_url: fileUrl,
         status: 'submitted' as const,
         updated_at: new Date().toISOString()

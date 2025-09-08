@@ -279,16 +279,18 @@ export function SessionFeedPage() {
         <div className="mb-4">
           <BackButton to="/dashboard" />
         </div>
-        {/* Main Session Material Display - YouTube Style */}
+        {/* Main Session Material Display - Respect display mode */}
         {mainSessionMaterial ? (
           <div className="mb-8">
-            {/* Material Embed */}
-            <div className="aspect-video w-full mb-6 rounded-2xl overflow-hidden">
-              <WorkshopMaterialDisplay 
-                material={mainSessionMaterial} 
-                className="w-full h-full"
-              />
-            </div>
+            {mainSessionMaterial.display_mode === 'embed' ? (
+              <div className="aspect-video w-full mb-6 rounded-2xl overflow-hidden">
+                <WorkshopMaterialDisplay material={mainSessionMaterial} className="w-full h-full" />
+              </div>
+            ) : (
+              <div className="mb-6">
+                <WorkshopMaterialDisplay material={mainSessionMaterial} />
+              </div>
+            )}
             
             {/* Session Title and Info - Clean minimal style */}
             <div className="space-y-3">

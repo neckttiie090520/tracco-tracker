@@ -805,7 +805,14 @@ export function WorkshopFeedPage() {
                               </div>
                             </div>
                           )}
-                          
+
+                          {/* Task Materials (if any) */}
+                          {Array.isArray((task as any).materials) && (task as any).materials.length > 0 && (
+                            <div className="mt-3">
+                              <TaskMaterialDisplay materials={(task as any).materials} />
+                            </div>
+                          )}
+
                           {/* Edit Form for Submitted Tasks */}
                           {isSubmitted && editingTaskId === task.id && (
                             <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">

@@ -56,7 +56,7 @@ export const submissionService = {
   },
 
   // Create or update submission
-  async upsertSubmission(submissionData: SubmissionInsert) {
+  async upsertSubmission(submissionData: SubmissionInsert & { links?: string[] }) {
     const { data, error } = await supabase
       .from('submissions')
       .upsert(submissionData, {
@@ -197,6 +197,17 @@ export const submissionService = {
     }
 
     return data
+  },
+
+  // Helper to normalize links list (ensure submission_url is first entry)
+  normalizeLinks(primaryUrl?: string | null, links?: string[] | null): string[] | undefined {
+    const arr = [primaryUrl, ...(links || [])].filter((u): u is string => !!u && u.trim().length > 0)
+    if (arr.length === 0) return undefined
+    // de-duplicate while preserving order
+    const seen = new Set<string>()
+    const out: string[] = []
+    for (const u of arr) { if (!seen.has(u)) { seen.add(u); out.push(u) } }
+    return out
   },
 
   // Upload file to Supabase Storage
