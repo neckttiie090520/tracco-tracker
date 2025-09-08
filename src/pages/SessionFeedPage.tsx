@@ -264,8 +264,8 @@ export function SessionFeedPage() {
   }
 
   // Find main session material (embed display mode first, then any)
-  const mainSessionMaterial = sessionMaterials.find(m => m.display_mode === 'embed') || sessionMaterials[0]
-  const secondarySessionMaterials = sessionMaterials.filter(m => m.id !== mainSessionMaterial?.id)
+  const mainSessionMaterial = sessionMaterials[0]
+  const secondarySessionMaterials = sessionMaterials.slice(1)
   
   // Description handling
   const descriptionPreview = session?.description?.slice(0, 150) || ''

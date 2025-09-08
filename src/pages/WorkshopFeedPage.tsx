@@ -930,7 +930,7 @@ export function WorkshopFeedPage() {
                                                         console.error('remove member failed', e)
                                                       }
                                                     }}
-                                                    className="text-gray-500 hover:text-gray-700"
+                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs"
                                                     title={m.user_id === user?.id ? 'Leave group' : 'Remove member'}
                                                   >
                                                     ×
@@ -1072,7 +1072,7 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
             {selectedUsers.map(u => (
               <span key={u.id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
                 {u.name || u.email}
-                <button onClick={() => removeSelected(u.id)} className="text-gray-500 hover:text-gray-700">×</button>
+                <button onClick={() => removeSelected(u.id)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs">×</button>
               </span>
             ))}
           </div>

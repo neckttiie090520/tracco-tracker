@@ -103,7 +103,7 @@ export const submissionService = {
   },
 
   // Upsert a submission for a group (one per group per task)
-  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string }) {
+  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string, links?: string[] }) {
     // Try to find existing submission by (task_id, group_id)
     const { data: existing, error: findError } = await supabase
       .from('submissions')
@@ -124,6 +124,7 @@ export const submissionService = {
         .update({
           notes: submissionData.notes ?? null,
           submission_url: submissionData.submission_url ?? null,
+          links: submissionData.links ?? null,
           file_url: submissionData.file_url ?? null,
           status: submissionData.status ?? 'submitted',
           updated_at: new Date().toISOString()
@@ -149,6 +150,7 @@ export const submissionService = {
           group_id: submissionData.group_id,
           notes: submissionData.notes ?? null,
           submission_url: submissionData.submission_url ?? null,
+          links: submissionData.links ?? null,
           file_url: submissionData.file_url ?? null,
           status: submissionData.status ?? 'submitted',
           submitted_at: submissionData.submitted_at ?? new Date().toISOString(),
