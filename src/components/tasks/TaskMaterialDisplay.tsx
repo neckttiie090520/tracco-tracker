@@ -42,3 +42,5 @@ export function TaskMaterialDisplay({ materials, className = '' }: TaskMaterialD
     </div>
   );
 }
+
+export default TaskMaterialDisplay

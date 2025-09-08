@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTaskSubmission } from '../../hooks/useSubmissions'
 import { UrlSubmissionDisplay } from './UrlSubmissionDisplay'
-import { TaskMaterialDisplay } from './TaskMaterialDisplay'
+import TaskMaterialDisplay from './TaskMaterialDisplay'
 import { ImprovedTaskSubmissionModal } from './ImprovedTaskSubmissionModal'
 import type { TaskMaterial } from '../../types/materials'
 import { groupService } from '../../services/groups'
