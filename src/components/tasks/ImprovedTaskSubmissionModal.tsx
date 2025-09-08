@@ -111,6 +111,39 @@ export function ImprovedTaskSubmissionModal({
               <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                 <span className="text-2xl">{submission ? '✏️' : '📤'}</span>
               </div>
+
+              {/* Additional links (optional) */}
+              <div className="mt-2 space-y-2">
+                {(formData.links || []).slice(1).map((u: string, i: number) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="url"
+                      value={u}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setFormData((p: any) => {
+                          const links = [...(p.links || [])]
+                          links[i + 1] = val
+                          return { ...p, links }
+                        })
+                      }}
+                      className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder={`ลิงก์ที่ ${i + 2}`}
+                      disabled={uploading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData((p: any) => ({ ...p, links: (p.links || []).filter((_: any, idx: number) => idx !== i + 1) }))}
+                      className="px-2 py-1 text-xs border rounded text-gray-700 hover:bg-gray-50"
+                    >ลบ</button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setFormData((p: any) => ({ ...p, links: [...(p.links || [p.submission_url || '']), ''] }))}
+                  className="text-xs text-blue-700 hover:underline"
+                >+ เพิ่มลิงก์</button>
+              </div>
               <div>
                 <h2 className="text-2xl font-bold mb-1">
                   {submission ? 'แก้ไขงานที่ส่ง' : 'ส่งงาน'}
