@@ -391,13 +391,16 @@ export function WorkshopFeedPage() {
         {/* Main Material Display - YouTube Style */}
         {mainMaterial ? (
           <div className="mb-8">
-            {/* Material Embed */}
-            <div className="aspect-video w-full mb-6 rounded-2xl overflow-hidden">
-              <WorkshopMaterialDisplay 
-                material={mainMaterial} 
-                className="w-full h-full"
-              />
-            </div>
+            {/* Material Display: embed hero only if embed mode */}
+            {mainMaterial.display_mode === 'embed' && (mainMaterial as any).embed_url ? (
+              <div className="aspect-video w-full mb-6 rounded-2xl overflow-hidden">
+                <WorkshopMaterialDisplay material={mainMaterial} className="w-full h-full" />
+              </div>
+            ) : (
+              <div className="mb-6">
+                <WorkshopMaterialDisplay material={mainMaterial} />
+              </div>
+            )}
             
             {/* Workshop Title and Info - Like YouTube video title */}
             <div className="space-y-4">
