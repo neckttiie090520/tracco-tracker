@@ -144,7 +144,9 @@ export function WorkshopFeedPage() {
       try {
         tasksData = await adminOperations.getWorkshopTasks(id)
         console.log('Tasks fetched successfully:', tasksData?.length || 0)
-        setTasks(tasksData || [])
+        // Exclude archived tasks from end-user feed
+        const visibleTasks = (tasksData || []).filter((t: any) => !t.is_archived)
+        setTasks(visibleTasks)
       } catch (tasksError) {
         console.error('Tasks query error:', tasksError)
         setTasks([])

@@ -16,6 +16,8 @@ interface Session {
   max_participants: number
   is_active: boolean
   is_published: boolean
+  is_archived?: boolean
+  archived_at?: string | null
   location?: string
   venue?: string
   created_at: string
@@ -869,6 +871,7 @@ export function SessionManager() {
             max_participants: session.max_participants,
             is_active: session.is_active,
             is_published: session.is_published,
+            is_archived: (session as any).is_archived,
             created_at: session.created_at
           },
           participant_count: participantCount || 0,
@@ -957,6 +960,32 @@ export function SessionManager() {
     }
   }
 
+  const archiveSession = async (sessionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ is_archived: true, archived_at: new Date().toISOString(), is_active: false })
+        .eq('id', sessionId)
+      if (error) throw error
+      await fetchSessions()
+    } catch (error) {
+      console.error('Error archiving session:', error)
+    }
+  }
+
+  const restoreSession = async (sessionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ is_archived: false, archived_at: null })
+        .eq('id', sessionId)
+      if (error) throw error
+      await fetchSessions()
+    } catch (error) {
+      console.error('Error restoring session:', error)
+    }
+  }
+
   const handleEditSession = async (sessionId: string, sessionData: any, materials?: WorkshopMaterial[]) => {
     try {
       const { error } = await supabase
@@ -1033,8 +1062,9 @@ export function SessionManager() {
 
       // Status filter
       const matchesStatus = statusFilter === 'all' || 
-        (statusFilter === 'active' && session.is_active) ||
-        (statusFilter === 'inactive' && !session.is_active)
+        (statusFilter === 'active' && session.is_active && !session.is_archived) ||
+        (statusFilter === 'inactive' && !session.is_active && !session.is_archived) ||
+        (statusFilter === 'archived' && session.is_archived)
 
       // Published filter
       const matchesPublished = publishedFilter === 'all' ||
@@ -1194,6 +1224,12 @@ export function SessionManager() {
               searchPlaceholder="Search sessions by title or description..."
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
+              statusOptions={[
+                { value: 'all', label: 'All Status' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' },
+                { value: 'archived', label: 'Archived' },
+              ]}
               publishedFilter={publishedFilter}
               onPublishedFilterChange={setPublishedFilter}
               dateRange={dateRange}
@@ -1403,6 +1439,21 @@ export function SessionManager() {
                             >
                               Edit
                             </button>
+                            {session.is_archived ? (
+                              <button
+                                onClick={() => restoreSession(session.id)}
+                                className="text-yellow-700 hover:text-yellow-900 text-xs px-2 py-1 bg-yellow-50 rounded"
+                              >
+                                Restore
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => archiveSession(session.id)}
+                                className="text-yellow-700 hover:text-yellow-900 text-xs px-2 py-1 bg-yellow-50 rounded"
+                              >
+                                Archive
+                              </button>
+                            )}
                             <button 
                               onClick={() => handleDeleteSession(session.id, session.title)}
                               className="text-red-600 hover:text-red-900 text-xs px-2 py-1 bg-red-50 rounded"

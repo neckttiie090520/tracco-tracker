@@ -147,10 +147,12 @@ export function SessionFeedPage() {
             end_time,
             max_participants,
             is_active,
+            is_archived,
             created_at
           )
         `)
         .eq('session_id', sessionReg.sessions.id)
+        .eq('workshops.is_archived', false)
 
       if (workshopError) {
         console.error('Workshop query error:', workshopError)
@@ -160,7 +162,7 @@ export function SessionFeedPage() {
         const workshopData = sessionWorkshops
           .map(sw => sw.workshops)
           .filter(Boolean)
-          .filter(workshop => workshop.is_active)
+          .filter(workshop => workshop.is_active && !workshop.is_archived)
           .sort((a, b) => {
             // Sort by start_time if available, otherwise by created_at
             const aTime = a.start_time ? new Date(a.start_time) : new Date(a.created_at)

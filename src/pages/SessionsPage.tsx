@@ -47,6 +47,7 @@ export function SessionsPage() {
       const { data: sessionsData, error: sessionsError } = await supabase
         .from('sessions')
         .select('*')
+        .eq('is_archived', false)
         .eq('is_active', true)
         .order('start_date', { ascending: true })
 

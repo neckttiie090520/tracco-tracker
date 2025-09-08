@@ -60,18 +60,9 @@ export interface Database {
           max_participants: number
           is_active: boolean
           is_published: boolean
+          is_archived: boolean
+          archived_at?: string
           created_at: string
-        }
-        Insert: {
-          id?: string
-          title: string
-          description?: string
-          instructor: string
-          google_doc_url?: string
-          start_time?: string
-          end_time?: string
-          max_participants?: number
-          created_at?: string
         }
         Insert: {
           id?: string
@@ -84,6 +75,8 @@ export interface Database {
           max_participants?: number
           is_active?: boolean
           is_published?: boolean
+          is_archived?: boolean
+          archived_at?: string
           created_at?: string
         }
         Update: {
@@ -97,6 +90,8 @@ export interface Database {
           max_participants?: number
           is_active?: boolean
           is_published?: boolean
+          is_archived?: boolean
+          archived_at?: string
           created_at?: string
         }
       }
@@ -115,6 +110,8 @@ export interface Database {
           registration_open: boolean
           is_active: boolean
           is_published: boolean
+          is_archived: boolean
+          archived_at?: string
           metadata: Record<string, any>
           created_at: string
           updated_at: string
@@ -133,6 +130,8 @@ export interface Database {
           registration_open?: boolean
           is_active?: boolean
           is_published?: boolean
+          is_archived?: boolean
+          archived_at?: string
           metadata?: Record<string, any>
           created_at?: string
           updated_at?: string
@@ -151,6 +150,8 @@ export interface Database {
           registration_open?: boolean
           is_active?: boolean
           is_published?: boolean
+          is_archived?: boolean
+          archived_at?: string
           metadata?: Record<string, any>
           created_at?: string
           updated_at?: string
@@ -240,6 +241,8 @@ export interface Database {
           due_date?: string
           order_index: number
           is_active: boolean
+          is_archived: boolean
+          archived_at?: string
           created_at: string
           updated_at: string
         }
@@ -251,6 +254,8 @@ export interface Database {
           due_date?: string
           order_index?: number
           is_active?: boolean
+          is_archived?: boolean
+          archived_at?: string
           created_at?: string
           updated_at?: string
         }
@@ -262,6 +267,8 @@ export interface Database {
           due_date?: string
           order_index?: number
           is_active?: boolean
+          is_archived?: boolean
+          archived_at?: string
           created_at?: string
           updated_at?: string
         }

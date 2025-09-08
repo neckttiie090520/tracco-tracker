@@ -19,6 +19,7 @@ export const taskService = {
       `)
       .eq('workshop_id', workshopId)
       .eq('is_active', true)
+      .eq('is_archived', false)
       .order('order_index', { ascending: true })
 
     if (error) {
@@ -41,6 +42,7 @@ export const taskService = {
         )
       `)
       .eq('is_active', true)
+      .eq('is_archived', false)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -65,6 +67,7 @@ export const taskService = {
       `)
       .eq('id', taskId)
       .eq('is_active', true)
+      .eq('is_archived', false)
       .single()
 
     if (error) {
@@ -85,6 +88,7 @@ export const taskService = {
         submissions:submissions!left(id, status, submitted_at, updated_at)
       `)
       .eq('is_active', true)
+      .eq('is_archived', false)
 
     // Filter by workshop if specified, otherwise get all tasks
     if (workshopId) {

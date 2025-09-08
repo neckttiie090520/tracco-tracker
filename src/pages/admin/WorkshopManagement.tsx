@@ -42,6 +42,22 @@ export function WorkshopManagement() {
     setEditingWorkshop(null)
   }
 
+  const handleArchiveWorkshop = async (workshop: any) => {
+    try {
+      await updateWorkshop(workshop.id, { is_archived: true, is_active: false, archived_at: new Date().toISOString() })
+    } catch (error) {
+      console.error('Failed to archive workshop:', error)
+    }
+  }
+
+  const handleRestoreWorkshop = async (workshop: any) => {
+    try {
+      await updateWorkshop(workshop.id, { is_archived: false, archived_at: null })
+    } catch (error) {
+      console.error('Failed to restore workshop:', error)
+    }
+  }
+
   const handleDeleteWorkshop = (workshop: any) => {
     setDeleteConfirm({ workshop, show: true })
   }
@@ -107,8 +123,9 @@ export function WorkshopManagement() {
 
       // Status filter
       const matchesStatus = statusFilter === 'all' || 
-        (statusFilter === 'active' && workshop.is_active) ||
-        (statusFilter === 'inactive' && !workshop.is_active)
+        (statusFilter === 'active' && workshop.is_active && !workshop.is_archived) ||
+        (statusFilter === 'inactive' && !workshop.is_active && !workshop.is_archived) ||
+        (statusFilter === 'archived' && workshop.is_archived)
 
       // Instructor filter
       const matchesInstructor = instructorFilter === 'all' ||
@@ -273,6 +290,12 @@ export function WorkshopManagement() {
               searchPlaceholder="Search workshops by title, description, or instructor..."
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
+              statusOptions={[
+                { value: 'all', label: 'All Status' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' },
+                { value: 'archived', label: 'Archived' },
+              ]}
               sessionFilter={sessionFilter}
               onSessionFilterChange={setSessionFilter}
               sessionOptions={sessionOptions}
@@ -434,6 +457,21 @@ export function WorkshopManagement() {
                               >
                                 Edit
                               </button>
+                              {workshop.is_archived ? (
+                                <button
+                                  onClick={() => handleRestoreWorkshop(workshop)}
+                                  className="text-yellow-700 hover:text-yellow-900 text-xs px-2 py-1 bg-yellow-50 rounded"
+                                >
+                                  Restore
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleArchiveWorkshop(workshop)}
+                                  className="text-yellow-700 hover:text-yellow-900 text-xs px-2 py-1 bg-yellow-50 rounded"
+                                >
+                                  Archive
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleDeleteWorkshop(workshop)}
                                 className="text-red-600 hover:text-red-900 text-xs px-2 py-1 bg-red-50 rounded"

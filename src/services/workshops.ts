@@ -26,6 +26,7 @@ export const workshopService = {
       .from('workshops')
       .select('*')
       .eq('is_active', true)
+      .eq('is_archived', false)
       .order('start_time', { ascending: true, nullsFirst: true })
 
     if (error) {
@@ -79,6 +80,7 @@ export const workshopService = {
       .select('*')
       .eq('id', id)
       .eq('is_active', true)
+      .eq('is_archived', false)
       .single()
 
     if (error) {

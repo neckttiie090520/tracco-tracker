@@ -49,6 +49,22 @@ export function TaskManagement() {
     setEditingTask(null)
   }
 
+  const handleArchiveTask = async (task: any) => {
+    try {
+      await updateTask(task.id, { is_archived: true, archived_at: new Date().toISOString(), is_active: false })
+    } catch (error) {
+      console.error('Failed to archive task:', error)
+    }
+  }
+
+  const handleRestoreTask = async (task: any) => {
+    try {
+      await updateTask(task.id, { is_archived: false, archived_at: null })
+    } catch (error) {
+      console.error('Failed to restore task:', error)
+    }
+  }
+
   const handleDeleteTask = (task: any) => {
     setDeleteConfirm({ task, show: true })
   }
@@ -98,8 +114,9 @@ export function TaskManagement() {
 
       // Status filter
       const matchesStatus = statusFilter === 'all' || 
-        (statusFilter === 'active' && task.is_active) ||
-        (statusFilter === 'inactive' && !task.is_active)
+        (statusFilter === 'active' && task.is_active && !task.is_archived) ||
+        (statusFilter === 'inactive' && !task.is_active && !task.is_archived) ||
+        (statusFilter === 'archived' && task.is_archived)
 
       // Workshop filter for search component
       const matchesWorkshop = workshopFilter === 'all' ||
@@ -349,6 +366,12 @@ export function TaskManagement() {
               searchPlaceholder="Search tasks by title or description..."
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
+              statusOptions={[
+                { value: 'all', label: 'All Status' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' },
+                { value: 'archived', label: 'Archived' },
+              ]}
               workshopFilter={workshopFilter}
               onWorkshopFilterChange={setWorkshopFilter}
               workshopOptions={workshopOptions}
@@ -588,6 +611,21 @@ export function TaskManagement() {
                             >
                               Edit
                             </button>
+                            {task.is_archived ? (
+                              <button
+                                onClick={() => handleRestoreTask(task)}
+                                className="text-yellow-700 hover:text-yellow-900"
+                              >
+                                Restore
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleArchiveTask(task)}
+                                className="text-yellow-700 hover:text-yellow-900"
+                              >
+                                Archive
+                              </button>
+                            )}
                             <button
                               onClick={() => handleDeleteTask(task)}
                               className="text-red-600 hover:text-red-900"
