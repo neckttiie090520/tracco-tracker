@@ -11,6 +11,8 @@ import { WorkshopMaterialsList, WorkshopMaterialDisplay } from '../components/ma
 import { MaterialService } from '../services/materials'
 import { Avatar } from '../components/common/Avatar'
 import type { WorkshopMaterial } from '../types/materials'
+import { groupService } from '../services/groups'
+import { submissionService } from '../services/submissions'
 
 interface Workshop {
   id: string
@@ -58,6 +60,10 @@ export function WorkshopFeedPage() {
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [instructorProfile, setInstructorProfile] = useState<any>(null)
+  // Group task state
+  const [taskGroups, setTaskGroups] = useState<Record<string, any | null>>({})
+  const [groupMembers, setGroupMembers] = useState<Record<string, any[]>>({})
+  const [groupSubmissions, setGroupSubmissions] = useState<Record<string, any | null>>({})
 
   useEffect(() => {
     if (id && user) {
@@ -173,6 +179,32 @@ export function WorkshopFeedPage() {
 
       setSubmissions(submissionsData || [])
 
+      // Load group info for group-mode tasks
+      if (user && tasksData && tasksData.length > 0) {
+        const newTaskGroups: Record<string, any | null> = {}
+        const newGroupMembers: Record<string, any[]> = {}
+        const newGroupSubs: Record<string, any | null> = {}
+        for (const t of tasksData) {
+          if ((t as any).submission_mode === 'group') {
+            try {
+              const g = await groupService.getUserGroupForTask(t.id, user.id)
+              newTaskGroups[t.id] = g
+              if (g) {
+                const mem = await groupService.listMembers(g.id)
+                newGroupMembers[g.id] = mem || []
+                const gs = await submissionService.getGroupTaskSubmission(t.id, g.id)
+                newGroupSubs[g.id] = gs || null
+              }
+            } catch (e) {
+              console.warn('Group load failed for task', t.id, e)
+            }
+          }
+        }
+        setTaskGroups(prev => ({ ...prev, ...newTaskGroups }))
+        setGroupMembers(prev => ({ ...prev, ...newGroupMembers }))
+        setGroupSubmissions(prev => ({ ...prev, ...newGroupSubs }))
+      }
+
     } catch (error) {
       console.error('Error fetching workshop data:', error)
       alert('Error: ' + JSON.stringify(error))
@@ -188,6 +220,7 @@ export function WorkshopFeedPage() {
       console.log('Submitting task:', taskId, 'for user:', user.id)
       
       const existingSubmission = submissions.find(s => s.task_id === taskId)
+      const currentTask = tasks.find(t => t.id === taskId)
       
       const submissionData = {
         task_id: taskId,
@@ -198,7 +231,19 @@ export function WorkshopFeedPage() {
         submitted_at: new Date().toISOString()
       }
       
-      if (existingSubmission) {
+      if ((currentTask as any)?.submission_mode === 'group') {
+        const g = taskGroups[taskId]
+        if (!g) {
+          alert('กรุณาสร้างหรือเข้าร่วมกลุ่มก่อนส่งงาน')
+          return
+        }
+        const saved = await submissionService.upsertGroupSubmission({
+          ...submissionData,
+          group_id: g.id,
+          updated_at: new Date().toISOString()
+        } as any)
+        setGroupSubmissions(prev => ({ ...prev, [g.id]: saved }))
+      } else if (existingSubmission) {
         console.log('Updating existing submission:', existingSubmission.id)
         // Update existing submission
         const { error } = await supabase
@@ -658,7 +703,9 @@ export function WorkshopFeedPage() {
                 <div className="space-y-3">
                   {tasks.map((task) => {
                     const submission = submissions.find(s => s.task_id === task.id)
-                    const isSubmitted = submission?.status === 'submitted'
+                    const g = taskGroups[task.id]
+                    const gSub = g ? groupSubmissions[g.id] : null
+                    const isSubmitted = (task as any).submission_mode === 'group' ? (gSub?.status === 'submitted') : (submission?.status === 'submitted')
                     const dueDate = new Date(task.due_date)
                     const isOverdue = dueDate < new Date() && !isSubmitted
                     
@@ -803,6 +850,51 @@ export function WorkshopFeedPage() {
                           {/* Submission Form for Unsubmitted Tasks */}
                           {!isSubmitted && editingTaskId === task.id && (
                             <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              {(task as any).submission_mode === 'group' && (
+                                <div className="mb-3">
+                                  {!taskGroups[task.id] ? (
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                      <div className="border rounded p-3">
+                                        <div className="font-medium mb-2">สร้างกลุ่ม</div>
+                                        <GroupCreateInline taskId={task.id} onDone={async () => {
+                                          if (!user) return;
+                                          const g = await groupService.getUserGroupForTask(task.id, user.id);
+                                          setTaskGroups(prev => ({ ...prev, [task.id]: g }));
+                                          if (g) {
+                                            const mem = await groupService.listMembers(g.id);
+                                            setGroupMembers(prev => ({ ...prev, [g.id]: mem || [] }));
+                                          }
+                                        }} />
+                                      </div>
+                                      <div className="border rounded p-3">
+                                        <div className="font-medium mb-2">เข้าร่วมด้วยรหัส</div>
+                                        <GroupJoinInline onDone={async () => {
+                                          if (!user) return;
+                                          const g = await groupService.getUserGroupForTask(task.id, user.id);
+                                          setTaskGroups(prev => ({ ...prev, [task.id]: g }));
+                                          if (g) {
+                                            const mem = await groupService.listMembers(g.id);
+                                            setGroupMembers(prev => ({ ...prev, [g.id]: mem || [] }));
+                                          }
+                                        }} />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="p-3 bg-white rounded border">
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <div className="text-sm">กลุ่ม: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
+                                          <div className="text-xs text-gray-600">รหัส: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
+                                        </div>
+                                        <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
+                                      </div>
+                                      {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || '']?.length > 0 && (
+                                        <div className="text-xs text-gray-600 mt-2">สมาชิก: {groupMembers[taskGroups[task.id]?.id || ''].map(m => m.user?.name || m.user_id.slice(0,6)).join(', ')}</div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                               <div className="space-y-3">
                                 <input
                                   type="url"
@@ -853,6 +945,82 @@ export function WorkshopFeedPage() {
         )}
 
       </div>
+    </div>
+  )
+}
+
+function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => void }) {
+  const { user } = useAuth()
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full border px-3 py-2 rounded mb-2"
+        placeholder="ชื่อกลุ่ม"
+      />
+      {error && <div className="text-red-600 text-xs mb-2">{error}</div>}
+      <button
+        onClick={async () => {
+          if (!user) return
+          try {
+            setLoading(true)
+            setError(null)
+            await groupService.createGroup(taskId, name.trim() || 'My Group', user.id)
+            await onDone()
+          } catch (e: any) {
+            setError(e?.message || 'สร้างกลุ่มไม่สำเร็จ')
+          } finally {
+            setLoading(false)
+          }
+        }}
+        disabled={loading}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+      >
+        {loading ? 'กำลังสร้าง...' : 'สร้างกลุ่ม'}
+      </button>
+    </div>
+  )
+}
+
+function GroupJoinInline({ onDone }: { onDone: () => void }) {
+  const { user } = useAuth()
+  const [code, setCode] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div>
+      <input
+        type="text"
+        value={code}
+        onChange={(e) => setCode(e.target.value.toUpperCase())}
+        className="w-full border px-3 py-2 rounded mb-2 tracking-widest"
+        placeholder="ABC123"
+      />
+      {error && <div className="text-red-600 text-xs mb-2">{error}</div>}
+      <button
+        onClick={async () => {
+          if (!user) return
+          try {
+            setLoading(true)
+            setError(null)
+            await groupService.joinByCode(code.trim(), user.id)
+            await onDone()
+          } catch (e: any) {
+            setError(e?.message || 'รหัสไม่ถูกต้อง')
+          } finally {
+            setLoading(false)
+          }
+        }}
+        disabled={loading}
+        className="bg-gray-800 hover:bg-black text-white px-3 py-2 rounded text-sm"
+      >
+        {loading ? 'กำลังเข้าร่วม...' : 'เข้าร่วม'}
+      </button>
     </div>
   )
 }
