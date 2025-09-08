@@ -390,9 +390,26 @@ export const adminOperations = {
     const tasksWithCounts = data?.map(task => ({
       ...task,
       submissions: [{
+        // default: individual submission count
         count: task.submissions?.length || 0
       }]
     })) || []
+
+    // Adjust counts for group-mode tasks: count groups instead of individual submissions
+    for (const task of tasksWithCounts) {
+      if ((task as any).submission_mode === 'group') {
+        try {
+          const { count } = await adminClient
+            .from('task_groups')
+            .select('id', { count: 'exact', head: true })
+            .eq('task_id', task.id)
+          task.submissions = [{ count: count || 0 }]
+        } catch (e) {
+          console.warn('Failed to count task groups for task', task.id, e)
+          task.submissions = [{ count: 0 }]
+        }
+      }
+    }
 
     // Fetch materials separately for each task
     for (const task of tasksWithCounts) {

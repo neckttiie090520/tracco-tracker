@@ -79,6 +79,94 @@ export const submissionService = {
     return data
   },
 
+  // Get a group's submission for a specific task
+  async getGroupTaskSubmission(taskId: string, groupId: string) {
+    const { data, error } = await supabase
+      .from('submissions')
+      .select(`
+        *,
+        task:tasks!submissions_task_id_fkey(
+          id, title, description, due_date, order_index,
+          workshop:workshops!tasks_workshop_id_fkey(id, title)
+        )
+      `)
+      .eq('task_id', taskId)
+      .eq('group_id', groupId)
+      .maybeSingle()
+
+    if (error && (error as any).code !== 'PGRST116') {
+      console.error('Error fetching group task submission:', error)
+      throw error
+    }
+
+    return data
+  },
+
+  // Upsert a submission for a group (one per group per task)
+  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string }) {
+    // Try to find existing submission by (task_id, group_id)
+    const { data: existing, error: findError } = await supabase
+      .from('submissions')
+      .select('id')
+      .eq('task_id', submissionData.task_id)
+      .eq('group_id', submissionData.group_id)
+      .maybeSingle()
+
+    if (findError && (findError as any).code !== 'PGRST116') {
+      console.error('Error checking existing group submission:', findError)
+      throw findError
+    }
+
+    if (existing?.id) {
+      // Update existing
+      const { data, error } = await supabase
+        .from('submissions')
+        .update({
+          notes: submissionData.notes ?? null,
+          submission_url: submissionData.submission_url ?? null,
+          file_url: submissionData.file_url ?? null,
+          status: submissionData.status ?? 'submitted',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+        .select(`
+          *,
+          task:tasks!submissions_task_id_fkey(
+            id, title, description, due_date, order_index,
+            workshop:workshops!tasks_workshop_id_fkey(id, title)
+          )
+        `)
+        .single()
+      if (error) throw error
+      return data
+    } else {
+      // Insert new
+      const { data, error } = await supabase
+        .from('submissions')
+        .insert({
+          task_id: submissionData.task_id,
+          user_id: submissionData.user_id,
+          group_id: submissionData.group_id,
+          notes: submissionData.notes ?? null,
+          submission_url: submissionData.submission_url ?? null,
+          file_url: submissionData.file_url ?? null,
+          status: submissionData.status ?? 'submitted',
+          submitted_at: submissionData.submitted_at ?? new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select(`
+          *,
+          task:tasks!submissions_task_id_fkey(
+            id, title, description, due_date, order_index,
+            workshop:workshops!tasks_workshop_id_fkey(id, title)
+          )
+        `)
+        .single()
+      if (error) throw error
+      return data
+    }
+  },
+
   // Update submission with review (admin only)
   async reviewSubmission(submissionId: string, review: {
     feedback?: string

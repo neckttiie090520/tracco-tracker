@@ -21,7 +21,8 @@ export function EditTaskModal({ task, onClose, onTaskUpdated, workshops }: EditT
     workshop_id: '',
     due_date: '',
     order_index: 1,
-    is_active: true
+    is_active: true,
+    submission_mode: 'individual' as 'individual' | 'group'
   })
   
   const [materials, setMaterials] = useState<TaskMaterial[]>([])
@@ -35,7 +36,8 @@ export function EditTaskModal({ task, onClose, onTaskUpdated, workshops }: EditT
         workshop_id: task.workshop_id || '',
         due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : '',
         order_index: task.order_index || 1,
-        is_active: task.is_active ?? true
+        is_active: task.is_active ?? true,
+        submission_mode: (task.submission_mode as any) || 'individual'
       })
       
       // Initialize materials if task has them
@@ -237,6 +239,35 @@ export function EditTaskModal({ task, onClose, onTaskUpdated, workshops }: EditT
                 materials={materials}
                 onMaterialsChange={setMaterials}
               />
+            </div>
+
+            {/* Submission Mode */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Submission Mode
+              </label>
+              <div className="flex items-center gap-4">
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="submission_mode"
+                    value="individual"
+                    checked={formData.submission_mode === 'individual'}
+                    onChange={handleChange}
+                  />
+                  Individual
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="submission_mode"
+                    value="group"
+                    checked={formData.submission_mode === 'group'}
+                    onChange={handleChange}
+                  />
+                  Group (one per team)
+                </label>
+              </div>
             </div>
 
             {/* Task Status */}

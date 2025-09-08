@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTaskSubmission } from '../../hooks/useSubmissions'
 import { UrlSubmissionDisplay } from './UrlSubmissionDisplay'
 import { TaskMaterialDisplay } from './TaskMaterialDisplay'
 import { ImprovedTaskSubmissionModal } from './ImprovedTaskSubmissionModal'
 import type { TaskMaterial } from '../../types/materials'
+import { groupService } from '../../services/groups'
+import { submissionService } from '../../services/submissions'
+import { useAuth } from '../../hooks/useAuth'
 
 interface TaskSubmissionFormProps {
   taskId: string
@@ -14,6 +17,7 @@ interface TaskSubmissionFormProps {
 }
 
 export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionFormProps) {
+  const { user } = useAuth()
   const { submission, loading, uploading, submitTask, updateSubmission, refetch } = useTaskSubmission(taskId)
   const [formData, setFormData] = useState({
     notes: submission?.notes || '',
@@ -22,6 +26,32 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
   })
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [group, setGroup] = useState<any | null>(null)
+  const [groupMembers, setGroupMembers] = useState<any[]>([])
+  const [groupSubmission, setGroupSubmission] = useState<any | null>(null)
+  const isGroupTask = useMemo(() => task?.submission_mode === 'group', [task?.submission_mode])
+
+  useEffect(() => {
+    const initGroup = async () => {
+      if (!isGroupTask || !user) return
+      try {
+        const g = await groupService.getUserGroupForTask(taskId, user.id)
+        setGroup(g)
+        if (g) {
+          const members = await groupService.listMembers(g.id)
+          setGroupMembers(members || [])
+          const gs = await submissionService.getGroupTaskSubmission(taskId, g.id)
+          setGroupSubmission(gs)
+        } else {
+          setGroupMembers([])
+          setGroupSubmission(null)
+        }
+      } catch (e) {
+        console.error('Init group failed:', e)
+      }
+    }
+    initGroup()
+  }, [isGroupTask, taskId, user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,10 +59,35 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
     try {
       setError(null)
       
-      if (submission) {
-        await updateSubmission(formData)
+      if (isGroupTask) {
+        if (!user) throw new Error('User not found')
+        if (!group) throw new Error('Please create or join a group before submitting')
+
+        // Upload file if any
+        let fileUrl: string | null = null
+        if (formData.file) {
+          const fileResult = await submissionService.uploadFile(formData.file, user.id, taskId)
+          fileUrl = fileResult.publicUrl
+        }
+
+        const saved = await submissionService.upsertGroupSubmission({
+          task_id: taskId,
+          user_id: user.id,
+          group_id: group.id,
+          notes: formData.notes || null,
+          submission_url: formData.submission_url || null,
+          file_url: fileUrl || undefined,
+          status: 'submitted',
+          submitted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as any)
+        setGroupSubmission(saved)
       } else {
-        await submitTask(formData)
+        if (submission) {
+          await updateSubmission(formData)
+        } else {
+          await submitTask(formData)
+        }
       }
       
       // Reset file input and URL
@@ -107,6 +162,68 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
       {task.materials && task.materials.length > 0 && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <TaskMaterialDisplay materials={task.materials} />
+        </div>
+      )}
+
+      {/* Group: Create/Join and status (for group tasks) */}
+      {isGroupTask && (
+        <div className="bg-white rounded-xl shadow-md border-2 border-blue-200 overflow-hidden">
+          <div className="bg-blue-50 px-6 py-3 border-b border-blue-200 font-medium text-blue-900">Group for this task</div>
+          <div className="p-6">
+            {!group ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <CreateGroupInline taskId={taskId} onCreated={async () => {
+                  if (!user) return
+                  const g = await groupService.getUserGroupForTask(taskId, user.id)
+                  setGroup(g)
+                  if (g) {
+                    const members = await groupService.listMembers(g.id)
+                    setGroupMembers(members || [])
+                  }
+                }} />
+                <JoinGroupInline onJoined={async () => {
+                  if (!user) return
+                  const g = await groupService.getUserGroupForTask(taskId, user.id)
+                  setGroup(g)
+                  if (g) {
+                    const members = await groupService.listMembers(g.id)
+                    setGroupMembers(members || [])
+                  }
+                }} />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-gray-800"><span className="font-medium">Group:</span> {group.name}</div>
+                    <div className="text-sm text-gray-600">Code: <span className="font-mono tracking-widest">{group.party_code}</span></div>
+                  </div>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(group.party_code)}
+                    className="text-xs text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded hover:bg-blue-50"
+                  >Copy Code</button>
+                </div>
+                {groupMembers.length > 0 && (
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Members</div>
+                    <div className="flex flex-wrap gap-2">
+                      {groupMembers.map((m) => (
+                        <div key={m.user_id} className="px-2 py-1 bg-gray-100 rounded text-sm">
+                          {m.user?.name || m.user_id.slice(0, 6)} {m.role === 'owner' ? '(owner)' : ''}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {groupSubmission?.status === 'submitted' && (
+                  <div className="text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2 inline-flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-7.364 7.364a1 1 0 01-1.414 0L3.293 9.536a1 1 0 111.414-1.414l3.222 3.222 6.657-6.657a1 1 0 011.414 0z"/></svg>
+                    Submitted by your group
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -220,7 +337,7 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
       <ImprovedTaskSubmissionModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        submission={submission}
+        submission={groupSubmission || submission}
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSubmit}
@@ -228,6 +345,84 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
         onFileChange={handleFileChange}
         taskTitle={task.title}
       />
+    </div>
+  )
+}
+
+function CreateGroupInline({ taskId, onCreated }: { taskId: string; onCreated: () => void }) {
+  const { user } = useAuth()
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div className="border rounded-lg p-4">
+      <h4 className="font-medium mb-2">Create a Group</h4>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full border px-3 py-2 rounded mb-2"
+        placeholder="Group name"
+      />
+      {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
+      <button
+        onClick={async () => {
+          if (!user) return
+          try {
+            setLoading(true)
+            setError(null)
+            await groupService.createGroup(taskId, name.trim() || 'My Group', user.id)
+            await onCreated()
+          } catch (e: any) {
+            setError(e?.message || 'Failed to create group')
+          } finally {
+            setLoading(false)
+          }
+        }}
+        disabled={loading}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded"
+      >
+        {loading ? 'Creating...' : 'Create'}
+      </button>
+    </div>
+  )
+}
+
+function JoinGroupInline({ onJoined }: { onJoined: () => void }) {
+  const { user } = useAuth()
+  const [code, setCode] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div className="border rounded-lg p-4">
+      <h4 className="font-medium mb-2">Join with Party Code</h4>
+      <input
+        type="text"
+        value={code}
+        onChange={(e) => setCode(e.target.value.toUpperCase())}
+        className="w-full border px-3 py-2 rounded mb-2 tracking-widest"
+        placeholder="ABC123"
+      />
+      {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
+      <button
+        onClick={async () => {
+          if (!user) return
+          try {
+            setLoading(true)
+            setError(null)
+            await groupService.joinByCode(code.trim(), user.id)
+            await onJoined()
+          } catch (e: any) {
+            setError(e?.message || 'Invalid code')
+          } finally {
+            setLoading(false)
+          }
+        }}
+        disabled={loading}
+        className="bg-gray-800 hover:bg-black text-white px-3 py-2 rounded"
+      >
+        {loading ? 'Joining...' : 'Join Group'}
+      </button>
     </div>
   )
 }

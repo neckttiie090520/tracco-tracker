@@ -20,7 +20,8 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, workshops }: C
     description: '',
     workshop_id: '',
     due_date: '',
-    order_index: 1
+    order_index: 1,
+    submission_mode: 'individual' as 'individual' | 'group'
   })
   
   const [materials, setMaterials] = useState<TaskMaterial[]>([])
@@ -47,7 +48,8 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, workshops }: C
         description: '',
         workshop_id: '',
         due_date: '',
-        order_index: 1
+        order_index: 1,
+        submission_mode: 'individual'
       })
       setMaterials([])
       onClose()
@@ -215,6 +217,38 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, workshops }: C
                   Task order within the workshop (1 is first)
                 </p>
               </div>
+            </div>
+
+            {/* Submission Mode */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Submission Mode
+              </label>
+              <div className="flex items-center gap-4">
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="submission_mode"
+                    value="individual"
+                    checked={formData.submission_mode === 'individual'}
+                    onChange={handleChange}
+                  />
+                  Individual
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="submission_mode"
+                    value="group"
+                    checked={formData.submission_mode === 'group'}
+                    onChange={handleChange}
+                  />
+                  Group (one per team)
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Group mode lets participants form a team and submit once per team.
+              </p>
             </div>
 
             {/* Task Materials Section */}

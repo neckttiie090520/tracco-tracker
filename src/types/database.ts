@@ -241,6 +241,7 @@ export interface Database {
           due_date?: string
           order_index: number
           is_active: boolean
+          submission_mode: 'individual' | 'group'
           is_archived: boolean
           archived_at?: string
           created_at: string
@@ -254,6 +255,7 @@ export interface Database {
           due_date?: string
           order_index?: number
           is_active?: boolean
+          submission_mode?: 'individual' | 'group'
           is_archived?: boolean
           archived_at?: string
           created_at?: string
@@ -267,6 +269,7 @@ export interface Database {
           due_date?: string
           order_index?: number
           is_active?: boolean
+          submission_mode?: 'individual' | 'group'
           is_archived?: boolean
           archived_at?: string
           created_at?: string
@@ -278,6 +281,7 @@ export interface Database {
           id: string
           task_id: string
           user_id: string
+          group_id?: string | null
           file_url?: string
           submission_url?: string
           notes?: string
@@ -293,6 +297,7 @@ export interface Database {
           id?: string
           task_id: string
           user_id: string
+          group_id?: string | null
           file_url?: string
           submission_url?: string
           notes?: string
@@ -308,6 +313,7 @@ export interface Database {
           id?: string
           task_id?: string
           user_id?: string
+          group_id?: string | null
           file_url?: string
           submission_url?: string
           notes?: string
@@ -318,6 +324,52 @@ export interface Database {
           reviewed_by?: string
           submitted_at?: string
           updated_at?: string
+        }
+      }
+      task_groups: {
+        Row: {
+          id: string
+          task_id: string
+          name: string
+          owner_id: string
+          party_code: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          task_id: string
+          name: string
+          owner_id: string
+          party_code: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          task_id?: string
+          name?: string
+          owner_id?: string
+          party_code?: string
+          created_at?: string
+        }
+      }
+      task_group_members: {
+        Row: {
+          task_group_id: string
+          user_id: string
+          role: 'owner' | 'member'
+          joined_at: string
+        }
+        Insert: {
+          task_group_id: string
+          user_id: string
+          role?: 'owner' | 'member'
+          joined_at?: string
+        }
+        Update: {
+          task_group_id?: string
+          user_id?: string
+          role?: 'owner' | 'member'
+          joined_at?: string
         }
       }
     }
