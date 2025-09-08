@@ -30,6 +30,31 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
   const [groupMembers, setGroupMembers] = useState<any[]>([])
   const [groupSubmission, setGroupSubmission] = useState<any | null>(null)
   const isGroupTask = useMemo(() => task?.submission_mode === 'group', [task?.submission_mode])
+  const [refreshingCard, setRefreshingCard] = useState(false)
+
+  const refreshSubmissionCard = async () => {
+    if (!user) return
+    setRefreshingCard(true)
+    try {
+      if (isGroupTask) {
+        let g = group
+        if (!g) {
+          g = await groupService.getUserGroupForTask(taskId, user.id)
+          setGroup(g)
+        }
+        if (g) {
+          const members = await groupService.listMembers(g.id)
+          setGroupMembers(members || [])
+          const gs = await submissionService.getGroupTaskSubmission(taskId, g.id)
+          setGroupSubmission(gs)
+        }
+      } else {
+        await refetch()
+      }
+    } finally {
+      setRefreshingCard(false)
+    }
+  }
 
   useEffect(() => {
     const initGroup = async () => {
@@ -257,6 +282,15 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
           
           {/* Card Content */}
           <div className="p-6 space-y-4">
+            <div className="flex justify-end">
+              <button onClick={refreshSubmissionCard} className="inline-flex items-center gap-2 text-xs px-3 py-1.5 border rounded-md text-gray-700 hover:bg-gray-50">
+                {refreshingCard ? (<span className="w-3 h-3 border-2 border-gray-500 border-t-transparent rounded-full inline-block animate-spin"/>) : (
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
+                  </svg>)}
+                Refresh
+              </button>
+            </div>
             {submission.notes && (
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center mb-2">
