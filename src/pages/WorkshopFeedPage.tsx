@@ -720,7 +720,7 @@ export function WorkshopFeedPage() {
                     const isOverdue = dueDate < new Date() && !isSubmitted
                     
                     return (
-                      <div key={task.id} className="bg-white border border-gray-200 rounded-lg shadow-sm relative">
+                          <div key={task.id} className="bg-gray-100 border border-gray-200 rounded-lg shadow-sm relative">
                         {/* Task Header */}
                         <div className="p-3 bg-gray-800 text-white">
                           <div className="flex items-center justify-between">
@@ -738,6 +738,46 @@ export function WorkshopFeedPage() {
                                   size="sm"
                                   showIcon={true}
                                 />
+                              </div>
+                              {/* Prominent actions */}
+                              <div className="mt-2 flex justify-end gap-2">
+                                <button
+                                  onClick={() => {
+                                    setSubmissionUrl(submission?.submission_url || '')
+                                    setSubmissionNotes(submission?.notes || '')
+                                    setEditingTaskId(task.id)
+                                  }}
+                                  className="px-3 py-1 rounded border border-blue-200 text-blue-700 bg-white hover:bg-blue-50 text-xs"
+                                >
+                                  แก้ไข
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (!user) return
+                                    const ok = confirm('ยืนยันการยกเลิก/ลบงานที่ส่ง?')
+                                    if (!ok) return
+                                    try {
+                                      if ((task as any).submission_mode === 'group') {
+                                        const g = taskGroups[task.id]
+                                        if (g) {
+                                          await submissionService.deleteGroupTaskSubmission(task.id, g.id)
+                                          setGroupSubmissions(prev => ({ ...prev, [g.id]: null }))
+                                        }
+                                      } else {
+                                        await submissionService.deleteUserTaskSubmission(user.id, task.id)
+                                        setSubmissions(prev => prev.filter(s => s.task_id !== task.id))
+                                      }
+                                      setEditingTaskId(null)
+                                      setSubmissionUrl('')
+                                      setSubmissionNotes('')
+                                    } catch (e) {
+                                      console.error('Delete submission failed', e)
+                                    }
+                                  }}
+                                  className="px-3 py-1 rounded border border-red-200 text-red-700 bg-white hover:bg-red-50 text-xs"
+                                >
+                                  ลบงานที่ส่ง
+                                </button>
                               </div>
                             </div>
                             {/* per-card refresh removed */}
@@ -757,7 +797,7 @@ export function WorkshopFeedPage() {
                                   href={submission.submission_url} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center space-x-2 p-3 border rounded-lg transition-all duration-200 group bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                                  className="inline-flex items-center space-x-2 p-3 border rounded-lg transition-all duration-200 group bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
                                 >
                                   <div className="flex items-center space-x-2 flex-1">
                                     <span className="text-green-600 text-sm">✅</span>
@@ -805,7 +845,7 @@ export function WorkshopFeedPage() {
                           )}
 
                           {/* Task Materials (if any) */}
-                          {Array.isArray((task as any).materials) && (task as any).materials.length > 0 && (
+                          {editingTaskId !== task.id && Array.isArray((task as any).materials) && (task as any).materials.length > 0 && (
                             <div className="mt-3">
                               <TaskMaterialDisplay materials={(task as any).materials} />
                             </div>
@@ -814,6 +854,12 @@ export function WorkshopFeedPage() {
                           {/* Edit Form for Submitted Tasks */}
                           {isSubmitted && editingTaskId === task.id && (
                             <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="mb-2 inline-flex items-center gap-2 text-xs text-blue-800 bg-blue-50 border border-blue-200 px-2 py-1 rounded">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>กำลังแก้ไขงานที่ส่ง</span>
+                              </div>
                               <div className="space-y-3">
                                 <input
                                   type="url"
@@ -852,6 +898,13 @@ export function WorkshopFeedPage() {
                                   </button>
                                 </div>
                               </div>
+                            </div>
+                          )}
+
+                          {/* Materials below when editing */}
+                          {editingTaskId === task.id && Array.isArray((task as any).materials) && (task as any).materials.length > 0 && (
+                            <div className="mt-3">
+                              <TaskMaterialDisplay materials={(task as any).materials} />
                             </div>
                           )}
                         

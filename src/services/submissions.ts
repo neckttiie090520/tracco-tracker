@@ -32,6 +32,34 @@ export const submissionService = {
     return data
   },
 
+  // Delete a user's submission for a specific task
+  async deleteUserTaskSubmission(userId: string, taskId: string) {
+    const { error } = await supabase
+      .from('submissions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('task_id', taskId)
+
+    if (error) {
+      console.error('Error deleting user task submission:', error)
+      throw error
+    }
+  },
+
+  // Delete a group submission for a specific task
+  async deleteGroupTaskSubmission(taskId: string, groupId: string) {
+    const { error } = await supabase
+      .from('submissions')
+      .delete()
+      .eq('task_id', taskId)
+      .eq('group_id', groupId)
+
+    if (error) {
+      console.error('Error deleting group task submission:', error)
+      throw error
+    }
+  },
+
   // Get user's submission for a specific task
   async getUserTaskSubmission(userId: string, taskId: string) {
     const { data, error } = await supabase
