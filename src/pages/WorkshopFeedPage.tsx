@@ -64,6 +64,7 @@ export function WorkshopFeedPage() {
   const [taskGroups, setTaskGroups] = useState<Record<string, any | null>>({})
   const [groupMembers, setGroupMembers] = useState<Record<string, any[]>>({})
   const [groupSubmissions, setGroupSubmissions] = useState<Record<string, any | null>>({})
+  const [refreshingTasks, setRefreshingTasks] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (id && user) {
@@ -679,6 +680,18 @@ export function WorkshopFeedPage() {
                 <span className="mr-2">📝</span>
                 งานที่ต้องส่ง ({tasks.length} งาน)
               </h2>
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={fetchWorkshopData}
+                  className="inline-flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md text-gray-700 hover:bg-gray-50"
+                  title="รีเฟรชหน้า"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
+                  </svg>
+                  รีเฟรชหน้า
+                </button>
+              </div>
               
               {tasks.length === 0 ? (
                 <div className="text-center py-6">
@@ -729,6 +742,21 @@ export function WorkshopFeedPage() {
                                   showIcon={true}
                                 />
                               </div>
+                            </div>
+                            <div className="mr-2">
+                              <button
+                                onClick={() => refreshTaskCard(task.id)}
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/30 hover:bg-white/10"
+                                title="รีเฟรชการ์ด"
+                              >
+                                {refreshingTasks[task.id] ? (
+                                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block animate-spin" />
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
+                                  </svg>
+                                )}
+                              </button>
                             </div>
                             <div className="text-lg ml-2">
                               {isSubmitted ? '✅' : isOverdue ? '⚠️' : '📝'}
@@ -1010,6 +1038,36 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
     setSelectedUsers(prev => [...prev, u])
     setQuery('')
     setSuggestions([])
+  }
+
+  // Refresh only one task card (submissions + group info)
+  const refreshTaskCard = async (taskId: string) => {
+    if (!user) return
+    setRefreshingTasks(prev => ({ ...prev, [taskId]: true }))
+    try {
+      const task = tasks.find(t => t.id === taskId)
+      if ((task as any)?.submission_mode === 'group') {
+        const g = await groupService.getUserGroupForTask(taskId, user.id)
+        setTaskGroups(prev => ({ ...prev, [taskId]: g }))
+        if (g) {
+          const mem = await groupService.listMembers(g.id)
+          setGroupMembers(prev => ({ ...prev, [g.id]: mem || [] }))
+          const gs = await submissionService.getGroupTaskSubmission(taskId, g.id)
+          setGroupSubmissions(prev => ({ ...prev, [g.id]: gs || null }))
+        }
+      } else {
+        // Individual submission refresh
+        const s = await submissionService.getUserTaskSubmission(user.id, taskId)
+        setSubmissions(prev => {
+          const others = prev.filter(x => x.task_id !== taskId)
+          return s ? [...others, s] : others
+        })
+      }
+    } catch (e) {
+      console.warn('refreshTaskCard failed', e)
+    } finally {
+      setRefreshingTasks(prev => ({ ...prev, [taskId]: false }))
+    }
   }
 
   const removeSelected = (id: string) => {
