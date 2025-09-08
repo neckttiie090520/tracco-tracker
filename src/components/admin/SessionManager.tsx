@@ -1062,8 +1062,7 @@ export function SessionManager() {
 
       // Status filter
       const matchesStatus = statusFilter === 'all' || 
-        (statusFilter === 'active' && session.is_active && !session.is_archived) ||
-        (statusFilter === 'inactive' && !session.is_active && !session.is_archived) ||
+        (statusFilter === 'current' && !session.is_archived) ||
         (statusFilter === 'archived' && session.is_archived)
 
       // Published filter
@@ -1223,12 +1222,11 @@ export function SessionManager() {
               const counts = sessions.reduce(
                 (acc, s) => {
                   if (s.session.is_archived) acc.archived++
-                  else if (s.session.is_active) acc.active++
-                  else acc.inactive++
+                  else acc.current++
                   acc.all++
                   return acc
                 },
-                { active: 0, inactive: 0, archived: 0, all: 0 }
+                { current: 0, archived: 0, all: 0 }
               )
               const Tab = ({ value, label, count }: { value: string; label: string; count: number }) => (
                 <button
@@ -1245,8 +1243,7 @@ export function SessionManager() {
               return (
                 <div className="flex flex-wrap items-center">
                   <Tab value="all" label="All" count={counts.all} />
-                  <Tab value="active" label="Active" count={counts.active} />
-                  <Tab value="inactive" label="Inactive" count={counts.inactive} />
+                  <Tab value="current" label="In Use" count={counts.current} />
                   <Tab value="archived" label="Archived" count={counts.archived} />
                 </div>
               )
@@ -1263,9 +1260,8 @@ export function SessionManager() {
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
               statusOptions={[
-                { value: 'all', label: 'All Status' },
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
+                { value: 'all', label: 'All' },
+                { value: 'current', label: 'In Use' },
                 { value: 'archived', label: 'Archived' },
               ]}
               publishedFilter={publishedFilter}

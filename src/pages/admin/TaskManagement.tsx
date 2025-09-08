@@ -114,8 +114,7 @@ export function TaskManagement() {
 
       // Status filter
       const matchesStatus = statusFilter === 'all' || 
-        (statusFilter === 'active' && task.is_active && !task.is_archived) ||
-        (statusFilter === 'inactive' && !task.is_active && !task.is_archived) ||
+        (statusFilter === 'current' && !task.is_archived) ||
         (statusFilter === 'archived' && task.is_archived)
 
       // Workshop filter for search component
@@ -365,12 +364,11 @@ export function TaskManagement() {
               const counts = tasks.reduce(
                 (acc, t: any) => {
                   if (t.is_archived) acc.archived++
-                  else if (t.is_active) acc.active++
-                  else acc.inactive++
+                  else acc.current++
                   acc.all++
                   return acc
                 },
-                { active: 0, inactive: 0, archived: 0, all: 0 }
+                { current: 0, archived: 0, all: 0 }
               )
               const Tab = ({ value, label, count }: { value: string; label: string; count: number }) => (
                 <button
@@ -387,8 +385,7 @@ export function TaskManagement() {
               return (
                 <div className="flex flex-wrap items-center">
                   <Tab value="all" label="All" count={counts.all} />
-                  <Tab value="active" label="Active" count={counts.active} />
-                  <Tab value="inactive" label="Inactive" count={counts.inactive} />
+                  <Tab value="current" label="In Use" count={counts.current} />
                   <Tab value="archived" label="Archived" count={counts.archived} />
                 </div>
               )
@@ -402,20 +399,19 @@ export function TaskManagement() {
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             searchPlaceholder="Search tasks by title or description..."
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              statusOptions={[
-                { value: 'all', label: 'All Status' },
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
-                { value: 'archived', label: 'Archived' },
-              ]}
-              workshopFilter={workshopFilter}
-              onWorkshopFilterChange={setWorkshopFilter}
-              workshopOptions={workshopOptions}
-              onClearFilters={handleClearFilters}
-              hasActiveFilters={hasActiveFilters}
-            />
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            statusOptions={[
+              { value: 'all', label: 'All' },
+              { value: 'current', label: 'In Use' },
+              { value: 'archived', label: 'Archived' },
+            ]}
+            workshopFilter={workshopFilter}
+            onWorkshopFilterChange={setWorkshopFilter}
+            workshopOptions={workshopOptions}
+            onClearFilters={handleClearFilters}
+            hasActiveFilters={hasActiveFilters}
+          />
           </div>
 
           {/* Tasks Overview Stats */}
