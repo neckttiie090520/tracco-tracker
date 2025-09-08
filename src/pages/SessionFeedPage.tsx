@@ -381,29 +381,6 @@ export function SessionFeedPage() {
         )}
 
         {/* Additional Session Materials - Minimal style */}
-        {secondarySessionMaterials.length > 0 && (
-          <div className="mb-8">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <span className="mr-2">📚</span>
-                เอกสารประกอบเพิ่มเติม
-              </h2>
-              
-              <div className="space-y-4">
-                {secondarySessionMaterials.map((material) => (
-                  <div key={material.id} className="group">
-                    <div className="mb-2">
-                      <h4 className="text-sm font-medium text-gray-700">
-                        {material.title}
-                      </h4>
-                    </div>
-                    <WorkshopMaterialDisplay material={material} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Workshops Section - Minimal header */}
         <div className="mb-8">
