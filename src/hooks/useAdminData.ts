@@ -304,8 +304,8 @@ export function useParticipantData() {
       console.log('🎯 User workshop IDs:', Array.from(userWorkshopIds))
 
       // Filter tasks สำหรับ workshops ที่ user ลงทะเบียน
-      const userTasks = allTasks?.filter(task => 
-        userWorkshopIds.has(task.workshop_id)
+      const userTasks = (allTasks || []).filter(task => 
+        (task as any)?.is_active && !(task as any)?.is_archived && userWorkshopIds.has(task.workshop_id)
       ) || []
 
       console.log('📝 User tasks:', userTasks.length)
@@ -329,7 +329,11 @@ export function useParticipantData() {
       // คำนวณสถิติ
       const completedTasks = submissions.filter(s => s.status === 'submitted').length
       const totalTasks = userTasks.length
-      const totalWorkshops = userWorkshopIds.size
+      const totalWorkshops = new Set(
+        Array.from(userWorkshopIds).filter((id: any) =>
+          (allWorkshops || []).some((w: any) => w?.id === id && w?.is_active && !w?.is_archived)
+        )
+      ).size
 
       // คำนวณงานที่ใกล้ครบกำหนด (7 วัน)
       const now = new Date()
@@ -375,7 +379,7 @@ export function useParticipantData() {
         return isUpcoming
       }).map(task => {
         // เพิ่ม workshop title
-        const workshop = allWorkshops?.find(w => w.id === task.workshop_id)
+        const workshop = (allWorkshops || []).find((w: any) => w?.id === task.workshop_id && w?.is_active && !w?.is_archived)
         return {
           ...task,
           workshop_title: workshop?.title || 'Unknown Workshop'
@@ -385,8 +389,9 @@ export function useParticipantData() {
       console.log('⏰ Upcoming tasks:', upcomingTasks.length)
 
       // เพิ่มข้อมูล workshops และ tasks ทั้งหมดที่ user เข้าถึงได้
-      const userWorkshopsWithTasks = allWorkshops
-        ?.filter(workshop => userWorkshopIds.has(workshop.id))
+      const userWorkshopsWithTasks = (allWorkshops || [])
+        .filter((workshop: any) => workshop?.is_active && !workshop?.is_archived)
+        .filter((workshop: any) => userWorkshopIds.has(workshop.id))
         .map(workshop => {
           const workshopTasks = userTasks.filter(task => task.workshop_id === workshop.id)
           const workshopSubmissions = submissions.filter(s => 
