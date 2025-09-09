@@ -244,8 +244,8 @@ export function useParticipantData() {
   const [lastFetch, setLastFetch] = useState(0)
   const lastFetchRef = useRef(0)
   
-  // Cache duration: 5 minutes
-  const CACHE_DURATION = 5 * 60 * 1000
+  // Cache duration: 15 minutes (increased to reduce frequent refreshes on tab switch)
+  const CACHE_DURATION = 15 * 60 * 1000
 
   const fetchParticipantData = useCallback(async (forceRefresh = false) => {
     if (!user) {
@@ -452,10 +452,22 @@ export function useParticipantData() {
 
       console.log('⏰ Upcoming tasks details:', upcomingTasks)
       
-      // Set cache timestamp
+      // Set cache timestamp and save to sessionStorage
       const timestamp = Date.now()
+      const newStats = {
+        totalWorkshops,
+        completedTasks,
+        totalTasks,
+        upcomingDeadlines: upcomingTasks.length,
+        activeSession,
+        upcomingTasks: upcomingTasks.slice(0, 5),
+        allUserWorkshops: userWorkshopsWithTasks
+      }
+      
       setLastFetch(timestamp)
       lastFetchRef.current = timestamp
+      saveToCache(newStats, timestamp)
+      console.log('✅ Participant data fetch completed')
 
     } catch (err) {
       console.error('❌ Error fetching participant data:', err)
@@ -465,14 +477,20 @@ export function useParticipantData() {
     }
   }, [user])
 
+  // Initial fetch when user changes - try cache first
   useEffect(() => {
     if (user?.id) {
-      fetchParticipantData()
+      const hasCachedData = loadCachedData()
+      if (!hasCachedData) {
+        fetchParticipantData()
+      }
     }
-  }, [user?.id, fetchParticipantData])
+  }, [user?.id, fetchParticipantData, loadCachedData])
 
-  // Handle visibility change - only refresh if data is stale
+  // Handle visibility change with throttling to prevent excessive refreshes
   useEffect(() => {
+    let visibilityThrottle: NodeJS.Timeout | null = null
+    
     const handleVisibilityChange = () => {
       console.log('👀 Visibility changed:', {
         hidden: document.hidden,
@@ -480,30 +498,43 @@ export function useParticipantData() {
         lastFetch: lastFetchRef.current > 0 ? new Date(lastFetchRef.current).toISOString() : 'never'
       })
       
+      // Clear any pending throttle
+      if (visibilityThrottle) {
+        clearTimeout(visibilityThrottle)
+      }
+      
+      // Only process when tab becomes visible (not hidden)
       if (!document.hidden && user?.id) {
-        const currentTime = Date.now()
-        const cacheAge = currentTime - lastFetchRef.current
-        const shouldRefresh = lastFetchRef.current === 0 || cacheAge >= CACHE_DURATION
-        
-        console.log('🔄 Visibility check:', {
-          cacheAge: `${Math.round(cacheAge / 1000)}s`,
-          shouldRefresh,
-          CACHE_DURATION: `${CACHE_DURATION / 1000}s`
-        })
-        
-        if (shouldRefresh) {
-          console.log('🚀 Triggering refresh from visibility change')
-          fetchParticipantData()
-        } else {
-          console.log('📦 Cache still valid, skipping refresh')
-        }
+        // Throttle visibility refreshes to prevent rapid tab switching issues
+        visibilityThrottle = setTimeout(() => {
+          const currentTime = Date.now()
+          const cacheAge = currentTime - lastFetchRef.current
+          // More conservative refresh: only if cache is very stale (>= CACHE_DURATION)
+          const shouldRefresh = lastFetchRef.current === 0 || cacheAge >= CACHE_DURATION
+          
+          console.log('🔄 Visibility check (throttled):', {
+            cacheAge: `${Math.round(cacheAge / 1000)}s`,
+            shouldRefresh,
+            CACHE_DURATION: `${CACHE_DURATION / 1000}s`
+          })
+          
+          if (shouldRefresh) {
+            console.log('🚀 Triggering refresh from visibility change')
+            fetchParticipantData()
+          } else {
+            console.log('📦 Cache still valid, skipping refresh')
+          }
+        }, 1000) // 1 second throttle
       }
     }
 
-    console.log('📡 Setting up visibility listener', { userId: user?.id })
+    console.log('📡 Setting up visibility listener with throttling', { userId: user?.id })
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
       console.log('🧹 Cleaning up visibility listener')
+      if (visibilityThrottle) {
+        clearTimeout(visibilityThrottle)
+      }
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [user?.id, fetchParticipantData])
