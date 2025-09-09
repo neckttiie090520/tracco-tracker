@@ -1019,7 +1019,8 @@ export function WorkshopFeedPage() {
       )
     })()}
   </div>
-)}/* Materials below when editing */}
+)}
+{/* Materials below when editing */}
                           {editingTaskId === task.id && Array.isArray((task as any).materials) && (task as any).materials.length > 0 && (
                             <div className="mt-3">
                               <TaskMaterialDisplay materials={(task as any).materials} />
