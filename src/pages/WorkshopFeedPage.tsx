@@ -15,6 +15,8 @@ import type { WorkshopMaterial } from '../types/materials'
 import { groupService } from '../services/groups'
 import { submissionService } from '../services/submissions'
 import { formatDateShort, formatDateTimeShort } from '../utils/date'
+import { GroupManagementCard } from '../components/groups/GroupManagementCard'
+import { JoinGroupCard } from '../components/groups/JoinGroupCard'
 
 interface Workshop {
   id: string
@@ -1184,88 +1186,48 @@ export function WorkshopFeedPage() {
                               {(task as any).submission_mode === 'group' && (
                                 <div className="mb-3">
                                   {!taskGroups[task.id] ? (
-                                    <div className="grid gap-3 md:grid-cols-2">
-                                      <div className="border rounded p-3">
-                                        <div className="font-medium mb-2">สร้างกลุ่ม</div>
-                                        <GroupCreateInline taskId={task.id} onDone={async () => {
-                                          if (!user) return;
-                                          const g = await groupService.getUserGroupForTask(task.id, user.id);
-                                          setTaskGroups(prev => ({ ...prev, [task.id]: g }));
-                                          if (g) {
-                                            const mem = await groupService.listMembers(g.id);
-                                            setGroupMembers(prev => ({ ...prev, [g.id]: mem || [] }));
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                      <GroupManagementCard
+                                        taskId={task.id}
+                                        onGroupUpdated={async (group) => {
+                                          if (!user) return
+                                          setTaskGroups(prev => ({ ...prev, [task.id]: group }))
+                                          if (group) {
+                                            const mem = await groupService.listMembers(group.id)
+                                            setGroupMembers(prev => ({ ...prev, [group.id]: mem || [] }))
                                           }
-                                        }} />
-                                      </div>
-                                      <div className="border rounded p-3">
-                                        <div className="font-medium mb-2">เข้าร่วมด้วยรหัส</div>
-                                        <GroupJoinInline onDone={async () => {
-                                          if (!user) return;
-                                          const g = await groupService.getUserGroupForTask(task.id, user.id);
-                                          setTaskGroups(prev => ({ ...prev, [task.id]: g }));
-                                          if (g) {
-                                            const mem = await groupService.listMembers(g.id);
-                                            setGroupMembers(prev => ({ ...prev, [g.id]: mem || [] }));
+                                        }}
+                                        onGroupDeleted={() => {
+                                          setTaskGroups(prev => ({ ...prev, [task.id]: null }))
+                                        }}
+                                      />
+                                      <JoinGroupCard
+                                        taskId={task.id}
+                                        onJoined={async (group) => {
+                                          if (!user) return
+                                          setTaskGroups(prev => ({ ...prev, [task.id]: group }))
+                                          if (group) {
+                                            const mem = await groupService.listMembers(group.id)
+                                            setGroupMembers(prev => ({ ...prev, [group.id]: mem || [] }))
                                           }
-                                        }} />
-                                      </div>
+                                        }}
+                                      />
                                     </div>
                                   ) : (
-                                    <div className="p-3 bg-white rounded border">
-                                      <div className="flex items-center justify-between">
-                                        <div>
-                                          <div className="text-sm">กลุ่ม: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
-                                          <div className="text-xs text-gray-600">รหัส: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
-                                          <button
-                                            onClick={() => navigate(`/group-settings/${taskGroups[task.id]?.id}`)}
-                                            className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 font-medium transition-colors"
-                                            title="การตั้งค่ากลุ่ม - จัดการสมาชิก"
-                                          >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            ตั้งค่า
-                                          </button>
-                                        </div>
-                                      </div>
-                                      {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || '']?.length > 0 && (
-                                        <div className="mt-2">
-                                          <div className="text-xs text-gray-600 mb-1">Members</div>
-                                          <div className="flex flex-wrap gap-2">
-                                            {groupMembers[taskGroups[task.id]?.id || ''].map((m: any) => (
-                                              <span key={m.user_id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
-                                                {m.user?.name || m.user_id.slice(0,6)}
-                                                {(taskGroups[task.id]?.owner_id === user?.id || m.user_id === user?.id) && (
-                                                  <button
-                                                    onClick={async () => {
-                                                      try {
-                                                        await groupService.removeMember(taskGroups[task.id]!.id, m.user_id)
-                                                        const mem = await groupService.listMembers(taskGroups[task.id]!.id)
-                                                        setGroupMembers(prev => ({ ...prev, [taskGroups[task.id]!.id]: mem || [] }))
-                                                        // if user removed self, clear local group
-                                                        if (m.user_id === user?.id) {
-                                                          setTaskGroups(prev => ({ ...prev, [task.id]: null }))
-                                                        }
-                                                      } catch (e) {
-                                                        console.error('remove member failed', e)
-                                                      }
-                                                    }}
-                                                    className="ml-1 w-6 h-6 inline-flex items-center justify-center rounded-full text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors"
-                                                    title={m.user_id === user?.id ? 'Leave group' : 'Remove member'}
-                                                  >
-                                                    <i className="bx bx-x text-lg"></i>
-                                                  </button>
-                                                )}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
+                                    <GroupManagementCard
+                                      group={taskGroups[task.id]}
+                                      taskId={task.id}
+                                      onGroupUpdated={async (group) => {
+                                        setTaskGroups(prev => ({ ...prev, [task.id]: group }))
+                                        if (group) {
+                                          const mem = await groupService.listMembers(group.id)
+                                          setGroupMembers(prev => ({ ...prev, [group.id]: mem || [] }))
+                                        }
+                                      }}
+                                      onGroupDeleted={() => {
+                                        setTaskGroups(prev => ({ ...prev, [task.id]: null }))
+                                      }}
+                                    />
                                   )}
                                 </div>
                               )}
@@ -1322,155 +1284,4 @@ export function WorkshopFeedPage() {
     </div>
   )
 }
-
-function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => void }) {
-  const { user } = useAuth()
-  const [name, setName] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  // Member search state
-  const [query, setQuery] = useState('')
-  const [suggestions, setSuggestions] = useState<any[]>([])
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([])
-
-  useEffect(() => {
-    let active = true
-    const run = async () => {
-      if (!query.trim()) { setSuggestions([]); return }
-      try {
-        const res = await groupService.searchUsers(query, 8)
-        if (active) setSuggestions(res || [])
-      } catch (e) {
-        console.warn('search users failed', e)
-      }
-    }
-    const t = setTimeout(run, 200)
-    return () => { active = false; clearTimeout(t) }
-  }, [query])
-
-  const addSelected = (u: any) => {
-    if (!u) return
-    if (selectedUsers.find(x => x.id === u.id)) return
-    setSelectedUsers(prev => [...prev, u])
-    setQuery('')
-    setSuggestions([])
-  }
-
-  // Per-card refresh removed per request
-
-  const removeSelected = (id: string) => {
-    setSelectedUsers(prev => prev.filter(u => u.id !== id))
-  }
-
-  return (
-    <div>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full border px-3 py-2 rounded mb-2"
-        placeholder="ชื่อกลุ่ม"
-      />
-
-      <div className="mb-2">
-        <div className="text-xs text-gray-600 mb-1">เพิ่มสมาชิก (พิมพ์ชื่อหรืออีเมล)</div>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-          placeholder="เช่น student@domain.com"
-        />
-        {suggestions.length > 0 && (
-          <div className="border rounded mt-1 bg-white max-h-40 overflow-auto text-sm">
-            {suggestions.map(s => (
-              <button key={s.id} onClick={() => addSelected(s)} className="w-full text-left px-3 py-2 hover:bg-gray-50">
-                <div className="font-medium">{s.name || s.email}</div>
-                <div className="text-xs text-gray-500">{s.email}</div>
-              </button>
-            ))}
-          </div>
-        )}
-        {selectedUsers.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {selectedUsers.map(u => (
-              <span key={u.id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
-                {u.name || u.email}
-                <button onClick={() => removeSelected(u.id)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs">×</button>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {error && <div className="text-red-600 text-xs mb-2">{error}</div>}
-      <button
-        onClick={async () => {
-          if (!user) return
-          try {
-            setLoading(true)
-            setError(null)
-            const group = await groupService.createGroup(taskId, name.trim() || 'My Group', user.id)
-            const memberIds = selectedUsers.map(u => u.id).filter((id: string) => id && id !== user.id)
-            if (memberIds.length > 0) {
-              await groupService.addMembers(group.id, memberIds)
-            }
-            await onDone()
-          } catch (e: any) {
-            setError(e?.message || 'สร้างกลุ่มไม่สำเร็จ')
-          } finally {
-            setLoading(false)
-          }
-        }}
-        disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
-      >
-        {loading ? 'กำลังสร้าง...' : 'สร้างกลุ่ม'}
-      </button>
-    </div>
-  )
-}
-
-function GroupJoinInline({ onDone }: { onDone: () => void }) {
-  const { user } = useAuth()
-  const [code, setCode] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  return (
-    <div>
-      <input
-        type="text"
-        value={code}
-        onChange={(e) => setCode(e.target.value.toUpperCase())}
-        className="w-full border px-3 py-2 rounded mb-2 tracking-widest"
-        placeholder="ABC123"
-      />
-      {error && <div className="text-red-600 text-xs mb-2">{error}</div>}
-      <button
-        onClick={async () => {
-          if (!user) return
-          try {
-            setLoading(true)
-            setError(null)
-            await groupService.joinByCode(code.trim(), user.id)
-            await onDone()
-          } catch (e: any) {
-            setError(e?.message || 'รหัสไม่ถูกต้อง')
-          } finally {
-            setLoading(false)
-          }
-        }}
-        disabled={loading}
-        className="bg-gray-800 hover:bg-black text-white px-3 py-2 rounded text-sm"
-      >
-        {loading ? 'กำลังเข้าร่วม...' : 'เข้าร่วม'}
-      </button>
-    </div>
-  )
-}
-
-
-
-
-
 
