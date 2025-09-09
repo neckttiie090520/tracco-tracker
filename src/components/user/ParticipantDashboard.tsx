@@ -519,7 +519,7 @@ export function ParticipantDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="text-left">
                           <p className="text-lg font-semibold mb-1">ลงทะเบียน</p>
-                          <p className="text-blue-100 text-sm">ลงทะเบียนงานสัมมนาใหม่</p>
+                          <p className="text-gray-500 text-sm">ลงทะเบียนงานสัมมนาใหม่</p>
                         </div>
                         <span className="text-3xl group-hover:scale-110 transition-transform">🎯</span>
                       </div>
@@ -532,7 +532,7 @@ export function ParticipantDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="text-left">
                           <p className="text-lg font-semibold mb-1">โปรไฟล์</p>
-                          <p className="text-amber-100 text-sm">จัดการข้อมูลส่วนตัว</p>
+                          <p className="text-gray-500 text-sm">จัดการข้อมูลส่วนตัว</p>
                         </div>
                         <span className="text-3xl group-hover:scale-110 transition-transform">🧖‍♂️</span>
                       </div>

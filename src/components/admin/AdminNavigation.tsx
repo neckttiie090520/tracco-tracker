@@ -3,6 +3,15 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { ProfileButton } from '../common/ProfileButton'
 import { RealtimeIndicators } from '../common/RealtimeDashboard'
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Presentation,
+  ListChecks,
+  Users,
+  Boxes,
+  Dice3
+} from 'lucide-react'
 
 export function AdminNavigation() {
   const location = useLocation()
@@ -12,17 +21,18 @@ export function AdminNavigation() {
 
   const isActive = (path: string) => location.pathname === path
 
-  const navGroups = [
-    { label: 'Overview', items: [{ path: '/admin', label: 'Dashboard', icon: 'dY"S' }] },
-    { label: 'Session Management', items: [{ path: '/admin/sessions', label: 'Sessions', icon: 'dYZ"' }] },
+  type NavItem = { path: string; label: string; icon: React.ReactNode }
+  const navGroups: { label: string; items: NavItem[] }[] = [
+    { label: 'Overview', items: [{ path: '/admin', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> }] },
+    { label: 'Session Management', items: [{ path: '/admin/sessions', label: 'Sessions', icon: <CalendarDays className="w-4 h-4" /> }] },
     { label: 'Content Management', items: [
-      { path: '/admin/workshops', label: 'Workshops', icon: 'dY?�' },
-      { path: '/admin/tasks', label: 'Tasks', icon: 'dY"<' },
+      { path: '/admin/workshops', label: 'Workshops', icon: <Presentation className="w-4 h-4" /> },
+      { path: '/admin/tasks', label: 'Tasks', icon: <ListChecks className="w-4 h-4" /> },
     ] },
-    { label: 'User Management', items: [{ path: '/admin/participants', label: 'Participants', icon: 'dY`�' }] },
+    { label: 'User Management', items: [{ path: '/admin/participants', label: 'Participants', icon: <Users className="w-4 h-4" /> }] },
     { label: 'Tools & Operations', items: [
-      { path: '/admin/batch-operations', label: 'Batch Operations', icon: '�s�' },
-      { path: '/admin/randomizer', label: 'Lucky Draw', icon: 'dYZ�' },
+      { path: '/admin/batch-operations', label: 'Batch Operations', icon: <Boxes className="w-4 h-4" /> },
+      { path: '/admin/randomizer', label: 'Lucky Draw', icon: <Dice3 className="w-4 h-4" /> },
     ] },
   ]
 
@@ -149,4 +159,3 @@ export function AdminNavigation() {
     </nav>
   )
 }
-
