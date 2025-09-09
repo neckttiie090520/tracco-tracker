@@ -87,6 +87,21 @@ export const groupService = {
     if (error) throw error
   },
 
+  async deleteGroup(groupId: string) {
+    // Delete all group members first
+    await supabase
+      .from('task_group_members')
+      .delete()
+      .eq('task_group_id', groupId)
+    
+    // Delete the group
+    const { error } = await supabase
+      .from('task_groups')
+      .delete()
+      .eq('id', groupId)
+    if (error) throw error
+  },
+
   isOwner(group: { owner_id: string }, userId?: string | null) {
     return !!userId && group?.owner_id === userId
   },
