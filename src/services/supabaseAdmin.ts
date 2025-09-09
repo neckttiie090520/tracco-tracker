@@ -395,17 +395,20 @@ export const adminOperations = {
       }]
     })) || []
 
-    // Adjust counts for group-mode tasks: count groups instead of individual submissions
+    // Adjust counts for group-mode tasks: count actual group submissions instead of total groups
     for (const task of tasksWithCounts) {
       if ((task as any).submission_mode === 'group') {
         try {
+          // Count distinct group submissions that have actually been submitted
           const { count } = await adminClient
-            .from('task_groups')
-            .select('id', { count: 'exact', head: true })
+            .from('submissions')
+            .select('group_id', { count: 'exact', head: true })
             .eq('task_id', task.id)
+            .eq('is_group_submission', true)
+            .neq('status', 'draft')
           task.submissions = [{ count: count || 0 }]
         } catch (e) {
-          console.warn('Failed to count task groups for task', task.id, e)
+          console.warn('Failed to count group submissions for task', task.id, e)
           task.submissions = [{ count: 0 }]
         }
       }
