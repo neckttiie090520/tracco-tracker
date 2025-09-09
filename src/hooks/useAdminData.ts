@@ -241,9 +241,19 @@ export function useParticipantData() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastFetch, setLastFetch] = useState(0)
+  
+  // Cache duration: 5 minutes
+  const CACHE_DURATION = 5 * 60 * 1000
 
-  const fetchParticipantData = async () => {
+  const fetchParticipantData = async (forceRefresh = false) => {
     if (!user) return
+
+    // Check cache first
+    if (!forceRefresh && lastFetch > 0 && (Date.now() - lastFetch) < CACHE_DURATION) {
+      console.log('📦 Using cached participant data')
+      return
+    }
 
     try {
       console.log('🔄 Fetching participant data for:', user.id)
@@ -425,6 +435,9 @@ export function useParticipantData() {
       })
 
       console.log('⏰ Upcoming tasks details:', upcomingTasks)
+      
+      // Set cache timestamp
+      setLastFetch(Date.now())
 
     } catch (err) {
       console.error('❌ Error fetching participant data:', err)
@@ -435,15 +448,31 @@ export function useParticipantData() {
   }
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchParticipantData()
     }
   }, [user?.id])
+
+  // Handle visibility change - only refresh if data is stale
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id) {
+        // Only fetch if cache is expired
+        if (lastFetch === 0 || (Date.now() - lastFetch) >= CACHE_DURATION) {
+          fetchParticipantData()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [user?.id, lastFetch])
 
   return {
     stats,
     loading,
     error,
-    refetch: fetchParticipantData
+    refetch: (forceRefresh = false) => fetchParticipantData(forceRefresh),
+    isCacheValid: lastFetch > 0 && (Date.now() - lastFetch) < CACHE_DURATION
   }
 }
