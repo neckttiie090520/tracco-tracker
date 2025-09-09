@@ -95,6 +95,62 @@ export function WorkshopFeedPage() {
     }
   }, [id, user])
 
+  const refreshTasksData = async () => {
+    try {
+      setLoading(true)
+      
+      // Refresh only submissions and group data (tasks don't change frequently)
+      const taskIds = tasks.map(t => t.id).filter(Boolean)
+      
+      let submissionsData = []
+      if (taskIds.length > 0) {
+        const { data: subData, error: subError } = await supabase
+          .from('submissions')
+          .select('*')
+          .eq('user_id', user?.id)
+          .in('task_id', taskIds)
+        
+        if (subError) {
+          console.error('Submissions refresh error:', subError)
+        }
+        submissionsData = subData || []
+      }
+
+      setSubmissions(submissionsData || [])
+
+      // Refresh group info for group-mode tasks
+      if (user && tasks && tasks.length > 0) {
+        const newTaskGroups: Record<string, any | null> = {}
+        const newGroupMembers: Record<string, any[]> = {}
+        const newGroupSubs: Record<string, any | null> = {}
+        for (const t of tasks) {
+          if ((t as any).submission_mode === 'group') {
+            try {
+              const g = await groupService.getUserGroupForTask(t.id, user.id)
+              newTaskGroups[t.id] = g
+              if (g) {
+                const mem = await groupService.listMembers(g.id)
+                newGroupMembers[g.id] = mem || []
+                const gs = await submissionService.getGroupTaskSubmission(t.id, g.id)
+                newGroupSubs[g.id] = gs || null
+              }
+            } catch (e) {
+              console.warn('Group refresh failed for task', t.id, e)
+            }
+          }
+        }
+        setTaskGroups(prev => ({ ...prev, ...newTaskGroups }))
+        setGroupMembers(prev => ({ ...prev, ...newGroupMembers }))
+        setGroupSubmissions(prev => ({ ...prev, ...newGroupSubs }))
+      }
+
+    } catch (error) {
+      console.error('Error refreshing tasks data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const fetchWorkshopData = async () => {
     try {
       setLoading(true)
@@ -705,14 +761,14 @@ export function WorkshopFeedPage() {
               </h2>
               <div className="flex justify-end mb-2">
                 <button
-                  onClick={fetchWorkshopData}
-                  className="inline-flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md text-gray-700 hover:bg-gray-50"
-                  title="รีเฟรชหน้า"
+                  onClick={refreshTasksData}
+                  className="inline-flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                  title="รีเฟรชข้อมูลงาน"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.49 9A9 9 0 1115.8 3.8L17 5M17 1v4h-4" />
                   </svg>
-                  รีเฟรชหน้า
+                  รีเฟรช
                 </button>
               </div>
               
