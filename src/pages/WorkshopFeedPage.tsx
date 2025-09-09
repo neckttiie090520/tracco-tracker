@@ -925,6 +925,21 @@ export function WorkshopFeedPage() {
                                             } catch (e) { console.error('add link inline failed', e) }
                                           }}
                                         >บันทึก</button>
+                                        <button
+                                          className="px-3 py-2 text-xs rounded bg-gray-500 text-white hover:bg-gray-600"
+                                          onClick={() => {
+                                            setAddLinkInput(prev => {
+                                              const newState = { ...prev }
+                                              delete newState[task.id]
+                                              return newState
+                                            })
+                                            setAddLinkNoteInput(prev => {
+                                              const newState = { ...prev }
+                                              delete newState[task.id]
+                                              return newState
+                                            })
+                                          }}
+                                        >ยกเลิก</button>
                                       </div>
                                     )}
                                     <div className="space-y-2">
@@ -978,7 +993,7 @@ export function WorkshopFeedPage() {
       <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
-      <span>??????????????</span>
+      <span>ลิงก์ที่ส่ง</span>
     </div>
     {(() => {
       const effective: any = (task as any).submission_mode === 'group' ? gSub : submission
@@ -989,15 +1004,15 @@ export function WorkshopFeedPage() {
         <div className="space-y-3">
           {list.map((it, idx) => (
             <div key={idx} className="flex gap-2 items-start">
-              <input type="url" value={it.url} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], url:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder={`???????? ${idx+1}`} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
-              <input type="text" value={it.note || ''} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], note:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder="????????" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
+              <input type="url" value={it.url} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], url:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder={`ลิงก์ ${idx+1}`} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
+              <input type="text" value={it.note || ''} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], note:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder="หมายเหตุ" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
               <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={()=> setEditLinksMap(prev=>({ ...prev, [task.id]: (prev[task.id]||[]).filter((_,i)=>i!==idx) }))}>??</button>
             </div>
           ))}
           <div className="flex gap-2 items-start">
-            <input type="url" value={submissionUrl} onChange={(e)=> setSubmissionUrl(e.target.value)} placeholder="??????????????" className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
-            <input type="text" value={submissionNotes} onChange={(e)=> setSubmissionNotes(e.target.value)} placeholder="????????????????????" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
-            <button className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200" onClick={()=>{ const url=submissionUrl.trim(); if(!url) return; setEditLinksMap(prev=>({ ...prev, [task.id]: [ ...(prev[task.id]||[]), submissionNotes.trim()? {url, note:submissionNotes.trim()} : {url} ] })); setSubmissionUrl(''); setSubmissionNotes('') }}>??????????</button>
+            <input type="url" value={submissionUrl} onChange={(e)=> setSubmissionUrl(e.target.value)} placeholder="วางลิงก์ที่นี่" className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
+            <input type="text" value={submissionNotes} onChange={(e)=> setSubmissionNotes(e.target.value)} placeholder="หมายเหตุ (ถ้ามี)" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
+            <button className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200" onClick={()=>{ const url=submissionUrl.trim(); if(!url) return; setEditLinksMap(prev=>({ ...prev, [task.id]: [ ...(prev[task.id]||[]), submissionNotes.trim()? {url, note:submissionNotes.trim()} : {url} ] })); setSubmissionUrl(''); setSubmissionNotes('') }}>เพิ่มลิงก์</button>
           </div>
           <div className="flex gap-2">
             <button className="btn btn-primary px-4 py-2 text-sm font-medium" onClick={async ()=>{
@@ -1012,8 +1027,8 @@ export function WorkshopFeedPage() {
                 }
                 await fetchWorkshopData(); setEditingTaskId(null)
               }catch(e){ console.error('save links failed', e)}
-            }}>??????</button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm" onClick={()=>{ setEditingTaskId(null); setSubmissionUrl(''); setSubmissionNotes(''); setEditLinksMap(prev=>({ ...prev, [task.id]: [] })) }}>??????</button>
+            }}>ส่งงาน</button>
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm" onClick={()=>{ setEditingTaskId(null); setSubmissionUrl(''); setSubmissionNotes(''); setEditLinksMap(prev=>({ ...prev, [task.id]: [] })) }}>ยกเลิก</button>
           </div>
         </div>
       )
