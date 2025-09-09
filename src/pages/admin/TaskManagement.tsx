@@ -25,7 +25,7 @@ export function TaskManagement() {
   
   // Search and Filter State
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('current') // Start with "In Use" instead of "All"
   const [workshopFilter, setWorkshopFilter] = useState('all')
   
   // Bulk Actions State
@@ -196,11 +196,11 @@ export function TaskManagement() {
 
   const handleClearFilters = () => {
     setSearchTerm('')
-    setStatusFilter('all')
+    setStatusFilter('current') // Reset to default "In Use"
     setWorkshopFilter('all')
   }
 
-  const hasActiveFilters = searchTerm || statusFilter !== 'all' || workshopFilter !== 'all'
+  const hasActiveFilters = searchTerm || statusFilter !== 'current' || workshopFilter !== 'all'
 
   const createSampleTasks = async (workshopId: string) => {
     const sampleTasks = [
@@ -346,16 +346,6 @@ export function TaskManagement() {
                   Add Sample Tasks
                 </button>
               )}
-              <button
-                onClick={refetch}
-                className="border px-4 py-2 rounded-md text-gray-700 hover:bg-gray-50 flex items-center mr-2"
-                title="Refresh"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12a7.5 7.5 0 0112.9-5.3L20 4v4.5M19.5 12a7.5 7.5 0 01-12.9 5.3L4 20v-4.5" />
-                </svg>
-                Refresh
-              </button>
 
               <button
                 onClick={() => setShowCreateModal(true)}
@@ -510,6 +500,31 @@ export function TaskManagement() {
 
           {/* Tasks Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {/* Table Header with Refresh Button */}
+            <div className="flex items-center justify-between px-6 py-3 bg-gray-50 border-b border-gray-200">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.length === filteredTasks.length && filteredTasks.length > 0}
+                  onChange={selectedItems.length === filteredTasks.length ? handleDeselectAll : handleSelectAll}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+                />
+                <span className="text-sm font-medium text-gray-500">
+                  Select All
+                </span>
+              </div>
+              <button
+                onClick={refetch}
+                className="border px-3 py-1.5 rounded-md text-gray-700 hover:bg-gray-50 flex items-center text-sm"
+                title="Refresh"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12a7.5 7.5 0 0112.9-5.3L20 4v4.5M19.5 12a7.5 7.5 0 01-12.9 5.3L4 20v-4.5" />
+                </svg>
+                Refresh
+              </button>
+            </div>
+            
             {/* Bulk Action Bar */}
             {filteredTasks.length > 0 && (
               <BulkActionBar
@@ -552,12 +567,7 @@ export function TaskManagement() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.length === filteredTasks.length && filteredTasks.length > 0}
-                          onChange={selectedItems.length === filteredTasks.length ? handleDeselectAll : handleSelectAll}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                        {/* Checkbox header now in top bar */}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Task / Workshop
@@ -591,8 +601,26 @@ export function TaskManagement() {
                           {/* Task / Workshop with due date + status toggle */}
                           <td className="px-6 py-4 align-top">
                             <div className="flex flex-col">
-                              <div className="text-sm font-semibold text-gray-900">
-                                {task.title}
+                              <div className="flex items-center gap-2">
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {task.title}
+                                </div>
+                                {/* Task Type Badge */}
+                                {task.submission_mode === 'group' ? (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                                    </svg>
+                                    กลุ่ม
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                                    </svg>
+                                    เดี่ยว
+                                  </span>
+                                )}
                               </div>
                               {task.description && (
                                 <div className="text-xs text-gray-600 truncate max-w-md">

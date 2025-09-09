@@ -1,0 +1,56 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - progressbar [ref=e5]
+      - main [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e17]:
+            - img [ref=e19]
+            - generic [ref=e24]: Sign in with Google
+          - generic [ref=e25]:
+            - heading "Sign in" [level=1] [ref=e26]:
+              - generic [ref=e27]: Sign in
+            - generic [ref=e29]:
+              - text: to continue to
+              - button "zamluhrkxjoazssxctmd.supabase.co" [ref=e30] [cursor=pointer]
+        - generic [ref=e33]:
+          - generic [ref=e39]:
+            - generic [ref=e44]:
+              - textbox "Email or phone" [active] [ref=e45]: tracotracker@gmail.com
+              - generic: Email or phone
+            - button "Forgot email?" [ref=e49] [cursor=pointer]
+          - generic [ref=e52]:
+            - text: Before using this app, you can review zamluhrkxjoazssxctmd.supabase.co’s
+            - link "privacy policy" [ref=e53] [cursor=pointer]:
+              - /url: https://traco-tracker.vercel.app/privacy.html
+            - text: and
+            - link "terms of service" [ref=e54] [cursor=pointer]:
+              - /url: https://traco-tracker.vercel.app/terms.html
+            - text: .
+        - generic [ref=e56]:
+          - button "Next" [ref=e60]:
+            - generic [ref=e63]: Next
+          - button "Create account" [ref=e68]:
+            - generic [ref=e71]: Create account
+    - contentinfo [ref=e74]:
+      - combobox "Change language English (United States)" [ref=e78] [cursor=pointer]:
+        - generic:
+          - generic: English (United States)
+        - generic:
+          - img
+      - list [ref=e80]:
+        - listitem [ref=e81]:
+          - link "Help" [ref=e82] [cursor=pointer]:
+            - /url: https://support.google.com/accounts?hl=en-US&p=account_iph
+        - listitem [ref=e83]:
+          - link "Privacy" [ref=e84] [cursor=pointer]:
+            - /url: https://accounts.google.com/TOS?loc=TH&hl=en-US&privacy=true
+        - listitem [ref=e85]:
+          - link "Terms" [ref=e86] [cursor=pointer]:
+            - /url: https://accounts.google.com/TOS?loc=TH&hl=en-US
+  - iframe [ref=e87]:
+    
+```
