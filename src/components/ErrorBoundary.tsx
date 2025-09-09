@@ -1,12 +1,16 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 interface ErrorBoundaryState {
   hasError: boolean
   error?: Error
+  errorInfo?: React.ErrorInfo
 }
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
+  fallback?: React.ReactNode
+  message?: string
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -21,40 +25,52 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
+    this.setState({ errorInfo })
   }
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback
+      }
+
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="max-w-md mx-auto text-center">
-            <div className="text-red-600 mb-4">
-              <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Application Error</h1>
-            <p className="text-gray-600 mb-4">
-              Something went wrong while loading the application.
+          <div className="max-w-md mx-auto text-center bg-white p-8 rounded-2xl shadow-lg">
+            <div className="text-red-500 text-4xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              เกิดข้อผิดพลาด
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {this.props.message || 'หน้านี้ประสบปัญหาทางเทคนิค กรุณาลองใหม่อีกครั้ง'}
             </p>
-            {this.state.error && (
-              <details className="text-left bg-gray-100 p-4 rounded-lg mb-4">
-                <summary className="cursor-pointer font-medium text-gray-900 mb-2">
-                  Error Details
+            
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <details className="text-left text-sm bg-red-50 p-3 rounded mb-4">
+                <summary className="cursor-pointer font-medium text-red-700">
+                  รายละเอียดข้อผิดพลาด
                 </summary>
-                <pre className="text-sm text-red-600 overflow-auto">
+                <pre className="mt-2 text-xs text-red-600 overflow-x-auto">
                   {this.state.error.message}
-                  {'\n\n'}
-                  {this.state.error.stack}
+                  {this.state.errorInfo?.componentStack}
                 </pre>
               </details>
             )}
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
-            >
-              Reload Page
-            </button>
+            
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                รีโหลดหน้า
+              </button>
+              <Link
+                to="/dashboard"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                กลับหน้าหลัก
+              </Link>
+            </div>
           </div>
         </div>
       )
@@ -62,4 +78,41 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
     return this.props.children
   }
+}
+
+// Lazy loading error fallback component
+export const LazyLoadErrorFallback: React.FC<{ error?: Error }> = ({ error }) => {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-sm mx-auto text-center bg-white p-6 rounded-xl shadow-md">
+        <div className="text-orange-500 text-3xl mb-3">🔄</div>
+        <h3 className="font-semibold text-gray-900 mb-2">กำลังโหลดข้อมูล...</h3>
+        <p className="text-gray-600 text-sm mb-4">
+          หากใช้เวลานาน กรุณาลองรีโหลดหน้าใหม่
+        </p>
+        
+        {error && process.env.NODE_ENV === 'development' && (
+          <details className="text-left text-xs bg-orange-50 p-2 rounded mb-3">
+            <summary className="cursor-pointer">รายละเอียดข้อผิดพลาด</summary>
+            <pre className="mt-1 text-orange-700">{error.message}</pre>
+          </details>
+        )}
+        
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={() => window.location.reload()}
+            className="px-3 py-1.5 text-sm bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors"
+          >
+            รีโหลด
+          </button>
+          <Link
+            to="/dashboard" 
+            className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+          >
+            หน้าหลัก
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
 }

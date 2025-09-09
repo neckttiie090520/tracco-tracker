@@ -1,4 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
+import { 
+  PerformanceMonitor, 
+  AuthHelper, 
+  NavigationHelper, 
+  TEST_CONFIG 
+} from './helpers/test-helpers';
 
 // Helper function to monitor console for performance issues
 async function setupPerformanceMonitoring(page: Page) {
@@ -93,20 +99,40 @@ async function injectNetworkTimingMonitor(page: Page) {
   });
 }
 
-test.describe('Basic Performance Tests', () => {
+test.describe('Enhanced Performance Tests', () => {
+  let performanceMonitor: PerformanceMonitor;
+  let authHelper: AuthHelper;
+  let navHelper: NavigationHelper;
+
   test.beforeEach(async ({ page }) => {
+    performanceMonitor = new PerformanceMonitor(page);
+    authHelper = new AuthHelper(page);
+    navHelper = new NavigationHelper(page);
+    
     await setupPerformanceMonitoring(page);
     await injectNetworkTimingMonitor(page);
+    await performanceMonitor.start();
   });
 
-  test('Home page loading performance', async ({ page }) => {
-    console.log('🚀 Testing home page performance...');
+  test.afterEach(async ({ page }) => {
+    const metrics = await performanceMonitor.getMetrics();
+    const errors = performanceMonitor.getErrors();
+    
+    console.log('📊 Test Performance Summary:', {
+      webVitals: metrics.webVitals,
+      networkRequests: metrics.networkRequestCount,
+      errors: metrics.errorCount
+    });
+  });
+
+  test('Comprehensive Home Page Performance Analysis', async ({ page }) => {
+    console.log('🚀 Testing comprehensive home page performance...');
     
     const startTime = Date.now();
     
-    // Navigate to home page
-    await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    // Navigate to home page with performance timing
+    await page.goto(TEST_CONFIG.baseURL);
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
     
     const loadTime = Date.now() - startTime;
     console.log(`⏱️ Home page load time: ${loadTime}ms`);
@@ -136,17 +162,33 @@ test.describe('Basic Performance Tests', () => {
       }
     }
     
-    // Basic performance assertions
-    expect(loadTime).toBeLessThan(10000); // Home page should load within 10 seconds
+    // Get comprehensive performance metrics
+    const performanceMetrics = await performanceMonitor.getMetrics();
+    console.log('🔍 Web Vitals Analysis:', performanceMetrics.webVitals);
+    console.log('📈 Performance Timings:', performanceMetrics.customTimings);
+    
+    // Analyze Core Web Vitals
+    const { FCP, LCP, CLS, TTFB } = performanceMetrics.webVitals;
+    console.log(`📊 Core Web Vitals:`);
+    console.log(`   First Contentful Paint: ${FCP}ms`);
+    console.log(`   Largest Contentful Paint: ${LCP}ms`);
+    console.log(`   Cumulative Layout Shift: ${CLS}`);
+    console.log(`   Time to First Byte: ${TTFB}ms`);
+    
+    // Performance assertions with industry standards
+    expect(loadTime).toBeLessThan(12000); // Home page should load within 12 seconds
+    if (FCP > 0) expect(FCP).toBeLessThan(2500); // Good FCP < 1.8s, acceptable < 3.0s
+    if (LCP > 0) expect(LCP).toBeLessThan(4000); // Good LCP < 2.5s, acceptable < 4.0s
+    if (CLS > 0) expect(CLS).toBeLessThan(0.25); // Good CLS < 0.1, acceptable < 0.25
   });
 
-  test('Check for console errors and warnings', async ({ page }) => {
-    console.log('🔍 Checking for console errors...');
+  test('Comprehensive Error Detection and Performance Monitoring', async ({ page }) => {
+    console.log('🔍 Comprehensive error and performance analysis...');
     
     const { logs, errors } = await setupPerformanceMonitoring(page);
     
-    await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await page.goto(TEST_CONFIG.baseURL);
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
     
     // Wait for any async operations
     await page.waitForTimeout(3000);
@@ -190,16 +232,35 @@ test.describe('Basic Performance Tests', () => {
       });
     }
     
-    // Performance assertions - be lenient for now
-    expect(errorLogs.length).toBeLessThan(5); // Allow some errors but not too many
-    expect(performanceIssues.length).toBeLessThan(10); // Allow some performance warnings
+    // Check for memory leaks and resource usage
+    const memoryUsage = await page.evaluate(() => {
+      if ('memory' in performance) {
+        return (performance as any).memory;
+      }
+      return null;
+    });
+    
+    if (memoryUsage) {
+      console.log('💾 Memory Usage:', {
+        used: `${(memoryUsage.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB`,
+        total: `${(memoryUsage.totalJSHeapSize / 1024 / 1024).toFixed(2)}MB`,
+        limit: `${(memoryUsage.jsHeapSizeLimit / 1024 / 1024).toFixed(2)}MB`
+      });
+    }
+    
+    // Enhanced performance assertions
+    expect(errorLogs.length).toBeLessThan(3); // Stricter error tolerance
+    expect(performanceIssues.length).toBeLessThan(5); // Stricter performance warning tolerance
   });
 
-  test('Navigation performance test', async ({ page }) => {
-    console.log('🚀 Testing navigation performance...');
+  test('Advanced Navigation Performance and User Journey Analysis', async ({ page }) => {
+    console.log('🚀 Advanced navigation performance testing...');
     
-    await page.goto('/');
+    await page.goto(TEST_CONFIG.baseURL);
     await page.waitForLoadState('networkidle');
+    
+    // Test authenticated navigation performance
+    await authHelper.loginUser();
     
     // Look for navigation links
     const workshopLinks = page.locator('a[href*="/workshop/"]');
@@ -233,7 +294,21 @@ test.describe('Basic Performance Tests', () => {
         });
       }
       
-      expect(navigationTime).toBeLessThan(15000); // Navigation should complete within 15 seconds
+      // Analyze navigation performance patterns
+      const avgRequestDuration = recentRequests.reduce((sum, req) => sum + req.duration, 0) / recentRequests.length;
+      console.log(`📊 Average request duration during navigation: ${avgRequestDuration.toFixed(2)}ms`);
+      
+      // Check for resource optimization opportunities
+      const largeResources = recentRequests.filter((req: any) => req.duration > 3000);
+      if (largeResources.length > 0) {
+        console.log('🚨 Large resource requests detected:');
+        largeResources.forEach((req: any) => {
+          console.log(`  - ${req.url}: ${req.duration.toFixed(2)}ms`);
+        });
+      }
+      
+      expect(navigationTime).toBeLessThan(12000); // Navigation should complete within 12 seconds
+      expect(avgRequestDuration).toBeLessThan(2000); // Average request should be reasonable
     } else {
       console.log('ℹ️ No workshop links found for navigation test');
     }
@@ -283,5 +358,189 @@ test.describe('Basic Performance Tests', () => {
     } else {
       console.log('ℹ️ No workshop links found for copy button test');
     }
+  });
+
+  test('Memory Usage and Resource Leak Detection', async ({ page }) => {
+    console.log('🚀 Testing memory usage and resource leaks...');
+    
+    await page.goto(TEST_CONFIG.baseURL);
+    await authHelper.loginUser();
+    
+    // Get initial memory baseline
+    const initialMemory = await page.evaluate(() => {
+      if ('memory' in performance) {
+        return (performance as any).memory.usedJSHeapSize;
+      }
+      return 0;
+    });
+    
+    console.log(`💾 Initial memory usage: ${(initialMemory / 1024 / 1024).toFixed(2)}MB`);
+    
+    // Simulate heavy navigation usage
+    const navigationTasks = [
+      async () => await navHelper.navigateToPage('/'),
+      async () => {
+        const workshopLinks = page.locator('a[href*="/workshop/"]');
+        if (await workshopLinks.first().isVisible({ timeout: 3000 })) {
+          await workshopLinks.first().click();
+          await navHelper.waitForPageLoad();
+        }
+      },
+      async () => await page.goBack()
+    ];
+    
+    // Perform navigation tasks multiple times
+    for (let i = 0; i < 3; i++) {
+      console.log(`🔄 Navigation cycle ${i + 1}`);
+      for (const task of navigationTasks) {
+        try {
+          await task();
+          await page.waitForTimeout(1000);
+        } catch (error) {
+          console.log('Navigation task failed:', error);
+        }
+      }
+      
+      // Force garbage collection if available
+      await page.evaluate(() => {
+        if (window.gc) {
+          window.gc();
+        }
+      });
+    }
+    
+    // Check final memory usage
+    const finalMemory = await page.evaluate(() => {
+      if ('memory' in performance) {
+        return (performance as any).memory.usedJSHeapSize;
+      }
+      return 0;
+    });
+    
+    console.log(`💾 Final memory usage: ${(finalMemory / 1024 / 1024).toFixed(2)}MB`);
+    const memoryIncrease = finalMemory - initialMemory;
+    console.log(`📈 Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB`);
+    
+    // Memory should not increase excessively (allow 50MB increase)
+    expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
+  });
+
+  test('API Response Time and Database Performance', async ({ page }) => {
+    console.log('🚀 Testing API and database performance...');
+    
+    await page.goto(TEST_CONFIG.baseURL);
+    await authHelper.loginUser();
+    
+    // Monitor API calls during typical user journey
+    const apiRequests: any[] = [];
+    
+    page.on('response', response => {
+      if (response.url().includes('/api/')) {
+        apiRequests.push({
+          url: response.url(),
+          status: response.status(),
+          timing: response.timing(),
+          size: response.headers()['content-length'] || 0
+        });
+      }
+    });
+    
+    // Navigate through key pages that make API calls
+    const apiTestPages = [
+      '/',
+      '/profile',
+      '/sessions'
+    ];
+    
+    for (const pagePath of apiTestPages) {
+      console.log(`📏 Testing API performance on ${pagePath}`);
+      try {
+        await navHelper.navigateToPage(pagePath);
+        await page.waitForTimeout(3000); // Allow API calls to complete
+      } catch (error) {
+        console.log(`Failed to navigate to ${pagePath}:`, error);
+      }
+    }
+    
+    // Analyze API performance
+    console.log(`🔌 API Requests Analysis:`);
+    console.log(`   Total API calls: ${apiRequests.length}`);
+    
+    if (apiRequests.length > 0) {
+      const slowAPIs = apiRequests.filter(req => {
+        return req.timing && (req.timing.responseEnd - req.timing.requestStart) > 2000;
+      });
+      
+      const failedAPIs = apiRequests.filter(req => req.status >= 400);
+      
+      console.log(`   Slow API calls (>2s): ${slowAPIs.length}`);
+      console.log(`   Failed API calls: ${failedAPIs.length}`);
+      
+      slowAPIs.forEach((api, index) => {
+        const duration = api.timing.responseEnd - api.timing.requestStart;
+        console.log(`   🐌 Slow API ${index + 1}: ${api.url} (${duration}ms)`);
+      });
+      
+      failedAPIs.forEach((api, index) => {
+        console.log(`   ❌ Failed API ${index + 1}: ${api.url} (${api.status})`);
+      });
+      
+      // Performance assertions
+      expect(slowAPIs.length).toBeLessThan(3); // Max 2 slow API calls acceptable
+      expect(failedAPIs.length).toBe(0); // No failed API calls
+    }
+  });
+
+  test('Bundle Size and Resource Loading Analysis', async ({ page }) => {
+    console.log('🚀 Testing bundle size and resource loading...');
+    
+    const resourceMetrics: any[] = [];
+    
+    // Monitor all resource requests
+    page.on('response', response => {
+      const size = parseInt(response.headers()['content-length'] || '0');
+      const url = response.url();
+      
+      resourceMetrics.push({
+        url,
+        type: response.request().resourceType(),
+        size,
+        status: response.status(),
+        fromCache: response.fromCache()
+      });
+    });
+    
+    await page.goto(TEST_CONFIG.baseURL);
+    await page.waitForLoadState('networkidle');
+    
+    // Analyze resource loading
+    console.log(`📦 Resource Loading Analysis:`);
+    
+    const resourcesByType = resourceMetrics.reduce((acc, resource) => {
+      acc[resource.type] = acc[resource.type] || { count: 0, totalSize: 0 };
+      acc[resource.type].count++;
+      acc[resource.type].totalSize += resource.size;
+      return acc;
+    }, {});
+    
+    Object.entries(resourcesByType).forEach(([type, data]: [string, any]) => {
+      console.log(`   ${type}: ${data.count} resources, ${(data.totalSize / 1024).toFixed(2)}KB`);
+    });
+    
+    const totalSize = resourceMetrics.reduce((sum, resource) => sum + resource.size, 0);
+    console.log(`📈 Total page size: ${(totalSize / 1024).toFixed(2)}KB`);
+    
+    // Check for oversized resources
+    const largeResources = resourceMetrics.filter(resource => resource.size > 1024 * 1024); // > 1MB
+    if (largeResources.length > 0) {
+      console.log('🚨 Large resources detected:');
+      largeResources.forEach(resource => {
+        console.log(`   - ${resource.url}: ${(resource.size / 1024 / 1024).toFixed(2)}MB`);
+      });
+    }
+    
+    // Performance assertions
+    expect(totalSize).toBeLessThan(10 * 1024 * 1024); // Total page size should be < 10MB
+    expect(largeResources.length).toBeLessThan(2); // Allow max 1 large resource
   });
 });

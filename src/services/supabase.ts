@@ -7,12 +7,21 @@ validateEnv()
 const supabaseUrl = env.SUPABASE_URL
 const supabaseAnonKey = env.SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-})
+// Create singleton instance to prevent multiple clients
+let supabaseInstance: ReturnType<typeof createClient> | null = null
+
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false, // Prevent multiple client issues
+      },
+    })
+  }
+  return supabaseInstance
+})()
 
 // Expose supabase client to window for debugging
 if (typeof window !== 'undefined') {
