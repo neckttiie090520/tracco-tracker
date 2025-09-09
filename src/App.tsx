@@ -1,25 +1,26 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { LoginPage } from './pages/LoginPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { WorkshopDetailPage } from './pages/WorkshopDetailPage'
-import { SessionsPage } from './pages/SessionsPage'
-import { SessionFeedPage } from './pages/SessionFeedPage'
-import { WorkshopFeedPage } from './pages/WorkshopFeedPage'
-import { AdminDashboard } from './pages/admin/AdminDashboard'
-import { WorkshopManagement } from './pages/admin/WorkshopManagement'
-import { ParticipantManagement } from './pages/admin/ParticipantManagement'
-import { TaskManagement } from './pages/admin/TaskManagement'
-import { RandomizerPage } from './pages/admin/RandomizerPage'
-import { DebugRandomizer } from './components/admin/DebugRandomizer'
-import BatchOperationsDashboard from './components/admin/BatchOperationsDashboard'
-import { MaterialsTest } from './pages/MaterialsTest'
-import { SessionManager } from './components/admin/SessionManager'
-import GroupSettingsPage from './pages/GroupSettingsPage'
+// Lazy load pages to reduce initial bundle size
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
+const WorkshopDetailPage = lazy(() => import('./pages/WorkshopDetailPage').then(m => ({ default: m.WorkshopDetailPage })))
+const SessionsPage = lazy(() => import('./pages/SessionsPage').then(m => ({ default: m.SessionsPage })))
+const SessionFeedPage = lazy(() => import('./pages/SessionFeedPage').then(m => ({ default: m.SessionFeedPage })))
+const WorkshopFeedPage = lazy(() => import('./pages/WorkshopFeedPage').then(m => ({ default: m.WorkshopFeedPage })))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })))
+const WorkshopManagement = lazy(() => import('./pages/admin/WorkshopManagement').then(m => ({ default: m.WorkshopManagement })))
+const ParticipantManagement = lazy(() => import('./pages/admin/ParticipantManagement').then(m => ({ default: m.ParticipantManagement })))
+const TaskManagement = lazy(() => import('./pages/admin/TaskManagement').then(m => ({ default: m.TaskManagement })))
+const RandomizerPage = lazy(() => import('./pages/admin/RandomizerPage').then(m => ({ default: m.RandomizerPage })))
+const DebugRandomizer = lazy(() => import('./components/admin/DebugRandomizer').then(m => ({ default: m.DebugRandomizer })))
+const BatchOperationsDashboard = lazy(() => import('./components/admin/BatchOperationsDashboard'))
+const MaterialsTest = lazy(() => import('./pages/MaterialsTest').then(m => ({ default: m.MaterialsTest })))
+const SessionManager = lazy(() => import('./components/admin/SessionManager').then(m => ({ default: m.SessionManager })))
+const GroupSettingsPage = lazy(() => import('./pages/GroupSettingsPage'))
 import { NotFoundPage } from './pages/NotFoundPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 
@@ -28,6 +29,7 @@ function App() {
     <AuthProvider>
       <RealtimeProvider>
         <BrowserRouter>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
@@ -163,6 +165,7 @@ function App() {
           {/* 404 - Must be last */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </Suspense>
         </BrowserRouter>
       </RealtimeProvider>
     </AuthProvider>

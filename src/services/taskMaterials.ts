@@ -119,6 +119,45 @@ export const TaskMaterialService = {
   },
 
   /**
+   * Get materials for multiple tasks in one query (batch loading)
+   */
+  async getMaterialsByTasks(taskIds: string[]): Promise<Record<string, TaskMaterial[]>> {
+    console.log('📖 TaskMaterialService.getMaterialsByTasks called with taskIds:', taskIds)
+
+    if (!taskIds || taskIds.length === 0) {
+      return {}
+    }
+
+    const { data, error } = await supabaseAdmin.client
+      .from('task_materials')
+      .select('*')
+      .in('task_id', taskIds)
+      .eq('is_active', true)
+      .order('order_index')
+
+    if (error) {
+      console.error('❌ Error fetching task materials:', error)
+      throw error
+    }
+
+    // Group materials by task_id
+    const materialsByTask: Record<string, TaskMaterial[]> = {}
+    taskIds.forEach(taskId => {
+      materialsByTask[taskId] = []
+    })
+
+    data?.forEach(material => {
+      if (!materialsByTask[material.task_id]) {
+        materialsByTask[material.task_id] = []
+      }
+      materialsByTask[material.task_id].push(material)
+    })
+
+    console.log(`📚 Found materials for ${Object.keys(materialsByTask).length} tasks`)
+    return materialsByTask
+  },
+
+  /**
    * Delete a specific material
    */
   async deleteMaterial(materialId: string): Promise<void> {

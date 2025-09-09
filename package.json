@@ -12,7 +12,14 @@
     "analyze:unused": "node scripts/find-unused.js",
     "analyze:deps": "npx depcheck",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:performance": "playwright test tests/e2e/performance.spec.ts",
+    "test:queries": "playwright test tests/e2e/database-queries.spec.ts",
+    "test:live": "playwright test tests/e2e/live-performance.spec.ts --headed",
+    "test:data": "playwright test tests/e2e/performance-with-data.spec.ts --headed --timeout=120000"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
@@ -30,6 +37,7 @@
     "vanta": "^0.5.24"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.14.0",

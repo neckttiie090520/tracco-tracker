@@ -994,7 +994,7 @@ export function WorkshopFeedPage() {
                           const owner = members.find(m => m.role === 'owner')
                           
                           return (
-                            <div className="px-3 py-2 bg-purple-50 border-t border-purple-100">
+                            <div className="px-3 py-2 bg-purple-50 border-t border-purple-100" data-testid="group-card">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-purple-700 font-medium">สมาชิกในกลุ่ม:</span>
@@ -1029,6 +1029,7 @@ export function WorkshopFeedPage() {
                                     <button
                                       onClick={() => setShowGroupManagementFor(task.id)}
                                       className="text-xs px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                                      data-testid="group-settings-button"
                                     >
                                       ตั้งค่ากลุ่ม
                                     </button>
