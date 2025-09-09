@@ -1,0 +1,20 @@
+export const t = {
+  loading: 'กำลังโหลด...',
+  notFoundTitle: 'ไม่พบ Workshop',
+  notFoundDesc: 'Workshop นี้ไม่พร้อมใช้งานหรือถูกลบไปแล้ว',
+  goSessions: 'ไปหน้า Sessions',
+  statsTitle: 'สถิติ Workshop',
+  statsMaterials: 'เอกสารประกอบ',
+  statsTasks: 'งานที่ต้องส่ง',
+  statsSubmitted: 'งานที่ส่งแล้ว',
+  tasksSectionTitle: (n: number) => `งานที่ต้องส่ง (${n} งาน)`,
+  refresh: 'รีเฟรชหน้า',
+  noTasksTitle: 'ยังไม่มีงานที่ต้องส่ง',
+  group: 'กลุ่ม',
+  code: 'รหัส',
+  copyCode: 'คัดลอกรหัส',
+  members: 'สมาชิก',
+  groupWork: 'งานกลุ่ม',
+  individualWork: 'งานเดี่ยว',
+}
+

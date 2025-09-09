@@ -16,6 +16,7 @@ import { groupService } from '../services/groups'
 import { submissionService } from '../services/submissions'
 import { formatDateShort, formatDateTimeShort } from '../utils/date'
 import { Copy, XCircle, Users as UsersIcon, BadgeCheck } from 'lucide-react'
+import { t } from '../i18n/th'
 
 interface Workshop {
   id: string
@@ -299,7 +300,7 @@ export function WorkshopFeedPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥...</p>
+            <p className="text-gray-600 text-lg">{t.loading}</p>
           </div>
         </div>
       </div>
@@ -312,15 +313,13 @@ export function WorkshopFeedPage() {
         <UserNavigation />
         <div className="max-w-4xl mx-auto px-8 py-12">
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="text-red-500 text-5xl mb-4">âš ï¸</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">à¹„à¸¡à¹ˆà¸žà¸š Workshop</h2>
-            <p className="text-gray-600 mb-6">Workshop à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸„à¹‰à¸™à¸«à¸²à¹„à¸¡à¹ˆà¸¡à¸µà¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸£à¸°à¸šà¸š</p>
+            <div className="text-red-500 text-5xl mb-4">!</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.notFoundTitle}</h2>
+            <p className="text-gray-600 mb-6">{t.notFoundDesc}</p>
             <Link
               to="/sessions"
               className="btn btn-primary px-6 py-3 font-semibold"
-            >
-              à¸à¸¥à¸±à¸šà¹„à¸›à¸«à¸™à¹‰à¸² Workshops
-            </Link>
+            >{t.goSessions}</Link>
           </div>
         </div>
       </div>
@@ -609,7 +608,7 @@ export function WorkshopFeedPage() {
           <div className="space-y-8">
             {/* Simple Workshop Stats */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">à¸ªà¸–à¸´à¸•à¸´ Workshop</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t.statsTitle}</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
@@ -617,7 +616,7 @@ export function WorkshopFeedPage() {
                     <div className="text-2xl">ðŸ“š</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
-                      <p className="text-gray-600 text-sm">à¹€à¸­à¸à¸ªà¸²à¸£à¸›à¸£à¸°à¸à¸­à¸š</p>
+                      <p className="text-gray-600 text-sm">{t.statsMaterials}</p>
                     </div>
                   </div>
                 </div>
@@ -627,7 +626,7 @@ export function WorkshopFeedPage() {
                     <div className="text-2xl">ðŸ“</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
-                      <p className="text-gray-600 text-sm">à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸ªà¹ˆà¸‡</p>
+                      <p className="text-gray-600 text-sm">{t.statsTasks}</p>
                     </div>
                   </div>
                 </div>
@@ -639,7 +638,7 @@ export function WorkshopFeedPage() {
                       <p className="text-2xl font-bold text-gray-900">
                         {submissions.filter(s => s.status === 'submitted').length}
                       </p>
-                      <p className="text-gray-600 text-sm">à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸ªà¹ˆà¸‡à¹à¸¥à¹‰à¸§</p>
+                      <p className="text-gray-600 text-sm">{t.statsSubmitted}</p>
                     </div>
                   </div>
                 </div>
@@ -666,19 +665,19 @@ export function WorkshopFeedPage() {
             {/* Tasks Section */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <span className="mr-2">ðŸ“</span>
-                à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸ªà¹ˆà¸‡ ({tasks.length} à¸‡à¸²à¸™)
+                <span className="mr-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 7h10M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z"/></svg></span>
+                {t.tasksSectionTitle(tasks.length)}
               </h2>
               <div className="flex justify-end mb-2">
                 <button
                   onClick={fetchWorkshopData}
                   className="inline-flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md text-gray-700 hover:bg-gray-50"
-                  title="à¸£à¸µà¹€à¸Ÿà¸£à¸Šà¸«à¸™à¹‰à¸²"
+                  title={t.refresh}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
                   </svg>
-                  à¸£à¸µà¹€à¸Ÿà¸£à¸Šà¸«à¸™à¹‰à¸²
+                  {t.refresh}
                 </button>
               </div>
               
@@ -936,14 +935,14 @@ export function WorkshopFeedPage() {
                                     <div className="p-3 bg-white rounded border">
                                       <div className="flex items-center justify-between">
                                         <div>
-                                          <div className="text-sm">à¸à¸¥à¸¸à¹ˆà¸¡: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
-                                          <div className="text-xs text-gray-600">à¸£à¸«à¸±à¸ª: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
+                                          <div className="text-sm">{t.group}: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
+                                          <div className="text-xs text-gray-600">{t.code}: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
                                         </div>
-                                        <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">à¸„à¸±à¸”à¸¥à¸­à¸à¸£à¸«à¸±à¸ª</button>
+                                        <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50" title={t.copyCode}>{t.copyCode}</button>
                                       </div>
-                                      {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || '']?.length > 0 && (
+                                      {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || ""]?.length > 0 && (
                                         <div className="mt-2">
-                                          <div className="text-xs text-gray-600 mb-1">Members</div>
+                                          <div className="text-xs text-gray-600 mb-1">{t.members}</div>
                                           <div className="flex flex-wrap gap-2">
                                             {groupMembers[taskGroups[task.id]?.id || ''].map((m: any) => (
                                               <span key={m.user_id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
@@ -1177,4 +1176,7 @@ function GroupJoinInline({ onDone }: { onDone: () => void }) {
     </div>
   )
 }
+
+
+
 
