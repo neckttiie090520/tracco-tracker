@@ -582,6 +582,103 @@ export function WorkshopDetailPage() {
                       )}
                       
                       {/* Submission Form */}
+                      {/* Submitted Links (multi-link list) on detail page */}
+                      {isSubmitted && submission && (
+                        <div className="mt-4">
+                          {(() => {
+                            const links: string[] = Array.isArray((submission as any)?.links)
+                              ? (submission as any).links
+                              : (submission?.submission_url ? [submission.submission_url] : [])
+                            if (!links || links.length === 0) return null
+                            const submittedTime = new Date(submission.submitted_at || submission.updated_at || '').toLocaleString('th-TH')
+                            return (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm font-medium text-gray-900">Submitted Links ({links.length})</div>
+                                  <button
+                                    className="btn btn-primary px-3 py-1 text-xs"
+                                    aria-label="Add Link"
+                                    onClick={async () => {
+                                      const url = prompt('Add link URL')?.trim()
+                                      if (!url) return
+                                      const newLinks = [...links, url]
+                                      try {
+                                        await supabase
+                                          .from('submissions')
+                                          .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
+                                          .eq('id', submission.id)
+                                        const { data: refreshed } = await supabase
+                                          .from('submissions')
+                                          .select('*')
+                                          .eq('id', submission.id)
+                                          .single()
+                                        setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                      } catch (e) { console.error('add link failed', e) }
+                                    }}
+                                  >Add Link</button>
+                                </div>
+                                <div className="text-xs text-gray-600">Submitted at: {submittedTime}</div>
+                                <div className="space-y-2">
+                                  {links.map((url, idx) => (
+                                    <div key={idx} className="border rounded-lg p-2 bg-white">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                          <a href={url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline">{url}</a>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">View</a>
+                                          <button
+                                            className="text-xs px-2 py-1 rounded bg-yellow-100 hover:bg-yellow-200"
+                                            aria-label={`Replace link ${idx+1}`}
+                                            onClick={async () => {
+                                              const newUrl = prompt('Replace with URL', url)?.trim()
+                                              if (!newUrl || newUrl === url) return
+                                              const newLinks = links.map((u, i) => i === idx ? newUrl : u)
+                                              try {
+                                                await supabase
+                                                  .from('submissions')
+                                                  .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
+                                                  .eq('id', submission.id)
+                                                const { data: refreshed } = await supabase
+                                                  .from('submissions')
+                                                  .select('*')
+                                                  .eq('id', submission.id)
+                                                  .single()
+                                                setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                              } catch (e) { console.error('replace link failed', e) }
+                                            }}
+                                          >Replace</button>
+                                          <button
+                                            className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700"
+                                            aria-label={`Remove link ${idx+1}`}
+                                            onClick={async () => {
+                                              if (!confirm('Remove this link?')) return
+                                              const newLinks = links.filter((_, i) => i !== idx)
+                                              try {
+                                                await supabase
+                                                  .from('submissions')
+                                                  .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
+                                                  .eq('id', submission.id)
+                                                const { data: refreshed } = await supabase
+                                                  .from('submissions')
+                                                  .select('*')
+                                                  .eq('id', submission.id)
+                                                  .single()
+                                                setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                              } catch (e) { console.error('remove link failed', e) }
+                                            }}
+                                          >Remove</button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )
+                          })()}
+                        </div>
+                      )}
+
                       {activeTaskId === task.id && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
                           <h4 className="font-medium text-gray-900 mb-3">ส่งงาน</h4>
