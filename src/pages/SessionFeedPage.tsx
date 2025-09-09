@@ -415,27 +415,6 @@ export function SessionFeedPage() {
           )}
         </div>
 
-        {/* Quick Actions - Minimal style */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">จัดการงานของคุณ</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            ตรวจสอบความคืบหน้า ส่งงาน และดาวน์โหลดเอกสารประกอบ
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Link
-              to="/dashboard"
-              className="btn btn-primary px-4 py-2 text-sm font-medium"
-            >
-              งานของฉัน
-            </Link>
-            <Link
-              to="/materials"
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
-            >
-              เอกสารทั้งหมด
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   )
