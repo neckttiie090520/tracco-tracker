@@ -759,8 +759,13 @@ export function WorkshopFeedPage() {
                               <div className="mt-2 flex justify-end gap-2">
                                 <button
                                   onClick={() => {
-                                    setSubmissionUrl(submission?.submission_url || '')
-                                    setSubmissionNotes(submission?.notes || '')
+                                    // Initialize multi-link editing with all existing links
+                                    const effective = (task as any).submission_mode === 'group' ? gSub : submission
+                                    const existingLinks = normalizeLinkObjects(effective?.links?.length ? effective.links : (effective?.submission_url ? [effective.submission_url] : []))
+                                    setEditLinksMap(prev => ({ ...prev, [task.id]: existingLinks }))
+                                    
+                                    setSubmissionUrl('')
+                                    setSubmissionNotes('')
                                     setEditingTaskId(task.id)
                                   }}
                                   className="px-3 py-1 rounded border border-blue-200 text-blue-700 bg-white hover:bg-blue-50 text-xs"
@@ -808,55 +813,22 @@ export function WorkshopFeedPage() {
                           {/* Submitted Task Display */}
                           {isSubmitted && editingTaskId !== task.id && (
                             <div className="mt-3">
-                              {submission?.submission_url && (
-                                <a 
-                                  href={submission.submission_url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center space-x-2 p-3 border rounded-lg transition-all duration-200 group bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                                >
-                                  <div className="flex items-center space-x-2 flex-1">
-                                    <span className="text-green-600 text-sm">✅</span>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="font-medium text-sm truncate">งานที่ส่ง</div>
-                                      <div className="text-xs opacity-75">{new Date(submission?.submitted_at || '').toLocaleDateString('th-TH')}</div>
-                                    </div>
+                              <div className="p-3 border rounded-lg bg-green-50 border-green-200">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-green-600 text-sm">✅</span>
+                                  <div>
+                                    <div className="font-medium text-sm text-green-800">ส่งงานเรียบร้อยแล้ว</div>
+                                    <div className="text-xs text-green-600">{new Date(submission?.submitted_at || '').toLocaleDateString('th-TH')}</div>
+                                    <div className="text-xs text-green-600 mt-1">ดูรายละเอียดได้ที่หน้างาน</div>
                                   </div>
-                                  <svg
-                                    className="w-4 h-4 flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                    />
-                                  </svg>
-                                </a>
-                              )}
+                                </div>
+                              </div>
                               
                               {submission?.notes && (
                                 <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
                                   {submission.notes}
                                 </div>
                               )}
-                              
-                              {/* Edit Submission Button */}
-                              <div className="mt-2 flex justify-end">
-                                <button
-                                  onClick={() => {
-                                    setSubmissionUrl(submission?.submission_url || '')
-                                    setSubmissionNotes(submission?.notes || '')
-                                    setEditingTaskId(task.id)
-                                  }}
-                                  className="text-gray-600 hover:text-gray-800 text-xs px-2 py-1 rounded hover:bg-gray-100 transition-colors"
-                                >
-                                  แก้ไข
-                                </button>
-                              </div>
                             </div>
                           )}
 
