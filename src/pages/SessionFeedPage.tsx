@@ -8,6 +8,7 @@ import { WorkshopMaterialDisplay } from '../components/materials/WorkshopMateria
 import { MaterialService } from '../services/materials'
 import { Link } from 'react-router-dom'
 import type { SessionMaterial } from '../types/materials'
+import { t } from '../i18n/th'
 
 interface Session {
   id: string
