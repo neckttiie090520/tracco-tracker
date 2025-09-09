@@ -342,17 +342,6 @@ export function WorkshopDetailPage() {
               </h3>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">✅</span>
-                    <div>
-                      <p className="font-semibold text-gray-900">งานที่ส่งแล้ว</p>
-                      <p className="text-sm text-gray-600">ทำได้ดีมาก!</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl font-bold text-green-600">{completedTasks}</span>
-                </div>
-                
                 <div className="flex items-center justify-between p-4 bg-amber-50 rounded-xl">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl">⏳</span>
