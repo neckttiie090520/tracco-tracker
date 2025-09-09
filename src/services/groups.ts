@@ -119,4 +119,27 @@ export const groupService = {
     if (error) throw error
     return data
   },
+
+  async renameGroup(groupId: string, newName: string) {
+    const { error } = await supabase
+      .from('task_groups')
+      .update({ name: newName })
+      .eq('id', groupId)
+    if (error) throw error
+  },
+
+  async deleteGroup(groupId: string) {
+    // Try to delete members first, then the group
+    const { error: memErr } = await supabase
+      .from('task_group_members')
+      .delete()
+      .eq('task_group_id', groupId)
+    if (memErr && (memErr as any).code !== 'PGRST116') throw memErr
+
+    const { error } = await supabase
+      .from('task_groups')
+      .delete()
+      .eq('id', groupId)
+    if (error) throw error
+  },
 }

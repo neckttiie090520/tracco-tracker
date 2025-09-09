@@ -66,6 +66,8 @@ export function WorkshopFeedPage() {
   const [taskGroups, setTaskGroups] = useState<Record<string, any | null>>({})
   const [groupMembers, setGroupMembers] = useState<Record<string, any[]>>({})
   const [groupSubmissions, setGroupSubmissions] = useState<Record<string, any | null>>({})
+  // Draft links for new submissions (per task)
+  const [draftLinks, setDraftLinks] = useState<Record<string, string[]>>({})
 
   useEffect(() => {
     if (id && user) {
@@ -216,7 +218,7 @@ export function WorkshopFeedPage() {
   }
 
   const handleTaskSubmission = async (taskId: string) => {
-    if (!user || !submissionUrl.trim()) return
+    if (!user || !(submissionUrl.trim() || (draftLinks[taskId]?.length || 0) > 0)) return
 
     try {
       console.log('Submitting task:', taskId, 'for user:', user.id)
@@ -224,10 +226,15 @@ export function WorkshopFeedPage() {
       const existingSubmission = submissions.find(s => s.task_id === taskId)
       const currentTask = tasks.find(t => t.id === taskId)
       
+      const linksArr = [
+        ...(draftLinks[taskId] || []),
+        ...(submissionUrl.trim() ? [submissionUrl.trim()] : [])
+      ]
       const submissionData = {
         task_id: taskId,
         user_id: user.id,
         submission_url: submissionUrl,
+        links: linksArr.length > 0 ? linksArr : null,
         notes: submissionNotes,
         status: 'submitted',
         submitted_at: new Date().toISOString()
@@ -282,6 +289,7 @@ export function WorkshopFeedPage() {
       await fetchWorkshopData()
       setSubmissionUrl('')
       setSubmissionNotes('')
+      setDraftLinks(prev => ({ ...prev, [taskId]: [] }))
       setEditingTaskId(null)
       alert('ส่งงานเรียบร้อยแล้ว!')
       
@@ -859,7 +867,7 @@ export function WorkshopFeedPage() {
                                       <button
                                         className="btn btn-primary px-3 py-1 text-xs"
                                         onClick={async () => {
-                                          const url = prompt('Add link URL')?.trim()
+                                          const url = prompt('เพิ่มลิงก์ URL')?.trim()
                                           if (!url) return
                                           const newLinks = [...links, url]
                                           try {
@@ -873,7 +881,7 @@ export function WorkshopFeedPage() {
                                             }
                                           } catch (e) { console.error('add link failed', e) }
                                         }}
-                                      >Add Link</button>
+                                      >เพิ่มลิงก์</button>
                                     </div>
                                     <div className="text-xs text-gray-600">Submitted at: {submittedTime}</div>
                                     <div className="space-y-2">
@@ -884,15 +892,11 @@ export function WorkshopFeedPage() {
                                               <a href={url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline">{url}</a>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                              <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">View</a>
-                                              <button className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" onClick={async () => {
-                                                const newUrl = prompt('Replace link URL', url)?.trim(); if (!newUrl) return; const newLinks = links.map((u,i)=> i===idx? newUrl:u);
-                                                try { if ((task as any).submission_mode==='group' && g) { await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any); const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed })); } else if (effective?.id) { await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id); await fetchWorkshopData(); } } catch(e){ console.error('replace link failed', e) }
-                                              }}>Replace</button>
+                                              {/* Removed View/Replace per request */}
                                               <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={async ()=>{
-                                                if(!confirm('Remove this link?')) return; const newLinks = links.filter((_,i)=>i!==idx);
+                                                if(!confirm('ลบลิงก์นี้?')) return; const newLinks = links.filter((_,i)=>i!==idx);
                                                 try { if ((task as any).submission_mode==='group' && g) { await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any); const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed })); } else if (effective?.id) { await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id); await fetchWorkshopData(); } } catch(e){ console.error('remove link failed', e) }
-                                              }}>Remove</button>
+                                              }}>ลบ</button>
                                             </div>
                                           </div>
                                         </div>
@@ -922,6 +926,31 @@ export function WorkshopFeedPage() {
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
                                   required
                                 />
+                                <div>
+                                  <button
+                                    className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200"
+                                    onClick={async () => {
+                                      const effective: any = (task as any).submission_mode === 'group' ? gSub : submission
+                                      const links: string[] = Array.isArray(effective?.links)
+                                        ? effective.links
+                                        : (effective?.submission_url ? [effective.submission_url] : [])
+                                      const url = submissionUrl.trim()
+                                      if (!url) return
+                                      const newLinks = [...links, url]
+                                      try {
+                                        if ((task as any).submission_mode === 'group' && g) {
+                                          await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
+                                          const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
+                                          setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
+                                        } else if (effective?.id) {
+                                          await supabase.from('submissions').update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() }).eq('id', effective.id)
+                                          await fetchWorkshopData()
+                                        }
+                                        setSubmissionUrl('')
+                                      } catch (e) { console.error('add link from form failed', e) }
+                                    }}
+                                  >เพิ่มลิงก์</button>
+                                </div>
                                 
                                 <textarea
                                   value={submissionNotes}
@@ -1248,3 +1277,8 @@ function GroupJoinInline({ onDone }: { onDone: () => void }) {
     </div>
   )
 }
+
+
+
+
+
