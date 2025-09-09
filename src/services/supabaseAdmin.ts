@@ -400,11 +400,12 @@ export const adminOperations = {
       if ((task as any).submission_mode === 'group') {
         try {
           // Count distinct group submissions that have actually been submitted
+          // Use group_id to identify group submissions (not is_group_submission field)
           const { count } = await adminClient
             .from('submissions')
             .select('group_id', { count: 'exact', head: true })
             .eq('task_id', task.id)
-            .eq('is_group_submission', true)
+            .not('group_id', 'is', null)  // group_id is not null means it's a group submission
             .neq('status', 'draft')
           task.submissions = [{ count: count || 0 }]
         } catch (e) {
