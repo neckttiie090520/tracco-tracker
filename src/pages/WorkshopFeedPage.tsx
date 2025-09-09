@@ -613,7 +613,7 @@ export function WorkshopFeedPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">ðŸ“š</div>
+                    <div className="text-2xl">📚</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
                       <p className="text-gray-600 text-sm">{t.statsMaterials}</p>
@@ -623,7 +623,7 @@ export function WorkshopFeedPage() {
                 
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">ðŸ“</div>
+                    <div className="text-2xl">📝</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
                       <p className="text-gray-600 text-sm">{t.statsTasks}</p>
@@ -633,7 +633,7 @@ export function WorkshopFeedPage() {
                 
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">âœ…</div>
+                    <div className="text-2xl">✅</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">
                         {submissions.filter(s => s.status === 'submitted').length}
@@ -665,7 +665,7 @@ export function WorkshopFeedPage() {
             {/* Tasks Section */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <span className="mr-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 7h10M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z"/></svg></span>
+                <span className="mr-2">📝</span>
                 {t.tasksSectionTitle(tasks.length)}
               </h2>
               <div className="flex justify-end mb-2">
