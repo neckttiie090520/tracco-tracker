@@ -572,7 +572,7 @@ export function WorkshopFeedPage() {
         )}
 
         {/* Simple Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-sm mb-6 border border-gray-200">
+        <div className="hidden bg-white rounded-lg shadow-sm mb-6 border border-gray-200">
           <div className="flex">
             <button
               onClick={() => setActiveTab('overview')}
