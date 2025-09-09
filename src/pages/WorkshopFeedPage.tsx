@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/supabase'
 import { adminOperations } from '../services/supabaseAdmin'
@@ -51,6 +51,7 @@ interface TaskSubmission {
 export function WorkshopFeedPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [workshop, setWorkshop] = useState<Workshop | null>(null)
   const [materials, setMaterials] = useState<WorkshopMaterial[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
@@ -1216,7 +1217,20 @@ export function WorkshopFeedPage() {
                                           <div className="text-sm">กลุ่ม: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
                                           <div className="text-xs text-gray-600">รหัส: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
                                         </div>
-                                        <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
+                                        <div className="flex items-center gap-2">
+                                          <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
+                                          <button
+                                            onClick={() => navigate(`/group-settings/${taskGroups[task.id]?.id}`)}
+                                            className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 font-medium transition-colors"
+                                            title="การตั้งค่ากลุ่ม - จัดการสมาชิก"
+                                          >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            ตั้งค่า
+                                          </button>
+                                        </div>
                                       </div>
                                       {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || '']?.length > 0 && (
                                         <div className="mt-2">
