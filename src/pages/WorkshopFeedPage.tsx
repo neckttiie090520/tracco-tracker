@@ -984,7 +984,7 @@ export function WorkshopFeedPage() {
                                       onClick={() => setShowGroupManagementFor(task.id)}
                                       className="text-xs px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-700 text-white font-medium"
                                     >
-                                      ตั้งค่า
+                                      ตั้งค่ากลุ่ม
                                     </button>
                                   </div>
                                 )}
