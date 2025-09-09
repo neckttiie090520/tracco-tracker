@@ -603,8 +603,8 @@ export function WorkshopFeedPage() {
           </div>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
+        {/* Combined Content */}
+        {
           <div className="space-y-8">
             {/* Simple Workshop Stats */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
@@ -646,9 +646,9 @@ export function WorkshopFeedPage() {
             </div>
 
           </div>
-        )}
+        }
 
-        {activeTab === 'materials' && (
+        {
           <div className="space-y-8">
             {/* Secondary Materials Section */}
             {secondaryMaterials.length > 0 && (
@@ -713,7 +713,7 @@ export function WorkshopFeedPage() {
                     return (
                           <div key={task.id} className="bg-gray-100 border border-gray-200 rounded-lg shadow-sm relative">
                         {/* Task Header */}
-                        <div className="p-3 bg-gray-800 text-white">
+                        <div className="p-3 bg-blue-600 text-white rounded-t-lg">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <h3 className="text-sm font-medium mb-1">{task.title}</h3>
@@ -1034,7 +1034,7 @@ export function WorkshopFeedPage() {
               )}
             </div>
           </div>
-        )}
+        }
 
       </div>
     </div>
