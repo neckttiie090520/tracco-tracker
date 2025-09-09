@@ -19,6 +19,7 @@ import { DebugRandomizer } from './components/admin/DebugRandomizer'
 import BatchOperationsDashboard from './components/admin/BatchOperationsDashboard'
 import { MaterialsTest } from './pages/MaterialsTest'
 import { SessionManager } from './components/admin/SessionManager'
+import GroupSettingsPage from './pages/GroupSettingsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 
@@ -130,6 +131,16 @@ function App() {
                 <AdminRoute>
                   <RandomizerPage />
                 </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Group Settings Route */}
+          <Route
+            path="/group-settings/:groupId"
+            element={
+              <ProtectedRoute>
+                <GroupSettingsPage />
               </ProtectedRoute>
             }
           />

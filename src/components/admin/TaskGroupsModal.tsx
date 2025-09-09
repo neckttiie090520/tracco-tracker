@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Settings } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { groupService } from '../../services/groups'
 
 interface TaskGroupsModalProps {
@@ -8,6 +10,7 @@ interface TaskGroupsModalProps {
 }
 
 export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
+  const navigate = useNavigate()
   const [groups, setGroups] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -114,9 +117,18 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
                       <div className="text-xs text-gray-600">Code: <span className="font-mono tracking-widest">{g.party_code}</span></div>
                       <div className="text-xs text-gray-600">Members: {members[g.id]?.length || 0}</div>
                     </div>
-                    <button className="text-sm text-blue-600 hover:text-blue-800" onClick={() => setExpandedGroup(expandedGroup === g.id ? null : g.id)}>
-                      {expandedGroup === g.id ? 'Hide' : 'Manage'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        onClick={() => navigate(`/group-settings/${g.id}`)}
+                        title="การตั้งค่ากลุ่ม"
+                      >
+                        <Settings className="h-5 w-5" />
+                      </button>
+                      <button className="text-sm text-blue-600 hover:text-blue-800 px-3 py-1 rounded border border-blue-200 hover:border-blue-300" onClick={() => setExpandedGroup(expandedGroup === g.id ? null : g.id)}>
+                        {expandedGroup === g.id ? 'Hide' : 'Manage'}
+                      </button>
+                    </div>
                   </div>
                   {expandedGroup === g.id && (
                     <div className="mt-3 space-y-2">
@@ -146,7 +158,7 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
                           {(members[g.id] || []).map(m => (
                             <span key={m.user_id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
                               {m.user?.name || m.user_id.slice(0,6)}
-                              <button onClick={() => removeMember(g.id, m.user_id)} className="text-gray-500 hover:text-gray-700">×</button>
+                              <button onClick={() => removeMember(g.id, m.user_id)} className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full w-4 h-4 flex items-center justify-center text-sm font-bold transition-colors">×</button>
                             </span>
                           ))}
                         </div>
