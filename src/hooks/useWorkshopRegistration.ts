@@ -32,7 +32,7 @@ export function useWorkshopRegistration(workshopId: string) {
           .select('*')
           .eq('workshop_id', workshopId)
           .eq('user_id', user.id)
-          .single()
+          .maybeSingle()
 
         if (fetchError && fetchError.code !== 'PGRST116') {
           throw fetchError

@@ -132,33 +132,37 @@ export function SessionFeedPage() {
 
       setSession(sessionReg.sessions)
 
-      // Get workshops for this session
-      const { data: sessionWorkshops, error: workshopError } = await supabase
-        .from('session_workshops')
-        .select(`
-          workshop_id,
-          workshops!inner (
-            id,
-            title,
-            description,
-            instructor,
-            google_doc_url,
-            start_time,
-            end_time,
-            max_participants,
-            is_active,
-            is_archived,
-            created_at
-          )
-        `)
-        .eq('session_id', sessionReg.sessions.id)
-        .eq('workshops.is_archived', false)
+      // Run workshops, instructors, and materials queries in parallel
+      const [workshopsResult, materialsResult] = await Promise.allSettled([
+        // Get workshops for this session
+        supabase
+          .from('session_workshops')
+          .select(`
+            workshop_id,
+            workshops!inner (
+              id,
+              title,
+              description,
+              instructor,
+              google_doc_url,
+              start_time,
+              end_time,
+              max_participants,
+              is_active,
+              is_archived,
+              created_at
+            )
+          `)
+          .eq('session_id', sessionReg.sessions.id)
+          .eq('workshops.is_archived', false),
+        
+        // Get session materials
+        MaterialService.getSessionMaterials(sessionReg.sessions.id)
+      ])
 
-      if (workshopError) {
-        console.error('Workshop query error:', workshopError)
-      }
-
-      if (sessionWorkshops) {
+      // Handle workshops result
+      if (workshopsResult.status === 'fulfilled' && workshopsResult.value.data) {
+        const sessionWorkshops = workshopsResult.value.data
         const workshopData = sessionWorkshops
           .map(sw => sw.workshops)
           .filter(Boolean)
@@ -173,7 +177,7 @@ export function SessionFeedPage() {
         console.log('SessionWorkshops raw:', sessionWorkshops)
         console.log('Workshop data filtered:', workshopData)
         
-        // Fetch instructor names separately
+        // Fetch instructor names if needed
         if (workshopData.length > 0) {
           const instructorIds = [...new Set(workshopData.map(w => w.instructor).filter(Boolean))]
           
@@ -198,18 +202,16 @@ export function SessionFeedPage() {
         }
         
         setWorkshops(workshopData)
-        
       } else {
-        console.log('No sessionWorkshops data')
+        console.error('Workshop query error:', workshopsResult.status === 'rejected' ? workshopsResult.reason : 'No data')
         setWorkshops([])
       }
 
-      // Fetch session materials
-      try {
-        const materials = await MaterialService.getSessionMaterials(sessionReg.sessions.id)
-        setSessionMaterials(materials)
-      } catch (error) {
-        console.error('Error fetching session materials:', error)
+      // Handle materials result
+      if (materialsResult.status === 'fulfilled') {
+        setSessionMaterials(materialsResult.value)
+      } else {
+        console.error('Error fetching session materials:', materialsResult.reason)
         setSessionMaterials([])
       }
 
@@ -236,6 +238,7 @@ export function SessionFeedPage() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
             <p className="text-gray-600 text-lg">กำลังโหลดข้อมูล...</p>
+            <p className="text-gray-500 text-sm mt-2">กรุณารอสักครู่ กำลังดึงข้อมูลงานสัมมนาและเอกสารประกอบ</p>
           </div>
         </div>
       </div>
@@ -420,7 +423,7 @@ export function SessionFeedPage() {
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
-              to="/my-tasks"
+              to="/dashboard"
               className="btn btn-primary px-4 py-2 text-sm font-medium"
             >
               งานของฉัน
