@@ -514,7 +514,7 @@ export function ParticipantDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                       onClick={() => navigate('/sessions')}
-                      className="group bg-gray-800 text-white p-6 rounded-xl hover:shadow-xl transition-all duration-300 hover-lift hover:bg-gray-900"
+                      className="group card p-6 hover:shadow-lg transition-all duration-300 hover-lift"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-left">
@@ -527,7 +527,7 @@ export function ParticipantDashboard() {
 
                     <button
                       onClick={() => setShowProfileModal(true)}
-                      className="group bg-indigo-700 text-white p-6 rounded-xl hover:shadow-xl transition-all duration-300 hover-lift hover:bg-indigo-800"
+                      className="group card p-6 hover:shadow-lg transition-all duration-300 hover-lift"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-left">

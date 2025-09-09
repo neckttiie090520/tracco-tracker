@@ -14,6 +14,7 @@ import { Avatar } from '../components/common/Avatar'
 import type { WorkshopMaterial } from '../types/materials'
 import { groupService } from '../services/groups'
 import { submissionService } from '../services/submissions'
+import { formatDateShort, formatDateTimeShort } from '../utils/date'
 
 interface Workshop {
   id: string
@@ -315,7 +316,7 @@ export function WorkshopFeedPage() {
             <p className="text-gray-600 mb-6">Workshop ที่คุณค้นหาไม่มีอยู่ในระบบ</p>
             <Link
               to="/sessions"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+              className="btn btn-primary px-6 py-3 font-semibold"
             >
               กลับไปหน้า Workshops
             </Link>
@@ -426,13 +427,7 @@ export function WorkshopFeedPage() {
                 
                 <div className="flex items-center gap-2">
                   <span>📅</span>
-                  <span>
-                    {new Date(workshop.workshop_date).toLocaleDateString('th-TH', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </span>
+                  <span>{formatDateShort(workshop.workshop_date, 'CE')}</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -535,11 +530,7 @@ export function WorkshopFeedPage() {
                       วันที่
                     </div>
                     <div className="text-gray-900 text-sm font-medium">
-                      {new Date(workshop.workshop_date).toLocaleDateString('th-TH', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
+                      {formatDateShort(workshop.workshop_date, 'CE')}
                     </div>
                   </div>
                   
@@ -731,7 +722,7 @@ export function WorkshopFeedPage() {
                               )}
                               <div className="flex items-center gap-2 text-xs">
                                 <span className="bg-white/20 px-2 py-1 rounded text-xs">
-                                  📅 {dueDate.toLocaleDateString('th-TH')}
+                                  📅 {formatDateShort(dueDate, 'CE')}
                                 </span>
                                 <StatusBadge 
                                   status={isSubmitted ? 'completed' : isOverdue ? 'overdue' : 'pending'}

@@ -4,6 +4,7 @@ import { Workshop } from '../../types/workshop'
 import { useWorkshopRegistration } from '../../hooks/useWorkshopRegistration'
 import { StatusBadge } from '../ui/StatusBadge'
 import { ProgressRing } from '../ui/ProgressRing'
+import { formatDateShort } from '../../utils/date'
 
 interface ImprovedWorkshopCardProps {
   workshop: Workshop
@@ -23,14 +24,7 @@ export function ImprovedWorkshopCard({ workshop }: ImprovedWorkshopCardProps) {
         <div className="relative z-10 flex justify-between items-center h-full">
           <div className="text-white">
             <p className="text-sm font-medium opacity-90">
-              {workshop.start_time 
-                ? new Date(workshop.start_time).toLocaleDateString('th-TH', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: '2-digit'
-                  })
-                : 'Workshop'
-              }
+              {workshop.start_time ? formatDateShort(workshop.start_time, 'CE') : 'Workshop'}
             </p>
           </div>
           {isRegistered && (
@@ -79,10 +73,7 @@ export function ImprovedWorkshopCard({ workshop }: ImprovedWorkshopCardProps) {
           <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <span>📅</span>
-              <span>{new Date(workshop.start_time).toLocaleDateString('th-TH', {
-                day: 'numeric',
-                month: 'short'
-              })}</span>
+              <span>{formatDateShort(workshop.start_time, 'CE')}</span>
             </div>
             <div className="flex items-center gap-1">
               <span>⏰</span>
@@ -110,9 +101,7 @@ export function ImprovedWorkshopCard({ workshop }: ImprovedWorkshopCardProps) {
         {/* Action Button */}
         <Link
           to={`/workshops/${workshop.id}`}
-          className="block w-full text-center py-2 rounded-lg font-medium text-white
-            transition-all duration-300 transform hover:scale-105
-            bg-indigo-600 hover:bg-indigo-700 hover:shadow-md text-sm"
+          className="btn btn-primary block w-full text-center py-2 text-sm hover:shadow-md hover:scale-[1.01]"
         >
           ดูรายละเอียด
         </Link>

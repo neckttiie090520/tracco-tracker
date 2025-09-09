@@ -10,6 +10,7 @@ import { supabase } from '../services/supabase'
 import { adminOperations } from '../services/supabaseAdmin'
 import { useAuth } from '../hooks/useAuth'
 import type { WorkshopMaterial } from '../types/materials'
+import { formatDateShort, formatDateTimeShort } from '../utils/date'
 
 interface Task {
   id: string
@@ -195,7 +196,7 @@ export function WorkshopDetailPage() {
             <p className="text-gray-600 mb-6">{error || 'Workshop ที่คุณกำลังมองหาไม่มีอยู่'}</p>
             <Link
               to="/sessions"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+              className="btn btn-primary px-6 py-3 font-semibold"
             >
               กลับไปหน้า Workshops
             </Link>
@@ -243,11 +244,7 @@ export function WorkshopDetailPage() {
                       <p className="text-blue-100 text-sm mb-1">วันที่</p>
                       <p className="font-semibold flex items-center gap-2">
                         <span>📅</span>
-                        {new Date(workshop.workshop_date).toLocaleDateString('th-TH', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
+                        {formatDateShort(workshop.workshop_date, 'CE')}
                       </p>
                     </div>
                     
@@ -493,13 +490,7 @@ export function WorkshopDetailPage() {
                               <div className="flex items-center gap-2">
                                 <span>📅</span>
                                 <span className="text-gray-600">กำหนดส่ง:</span>
-                                <span className="font-medium">
-                                  {dueDate.toLocaleDateString('th-TH', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                  })}
-                                </span>
+                                <span className="font-medium">{formatDateShort(dueDate, 'CE')}</span>
                               </div>
                               
                               <div className="flex items-center gap-2">

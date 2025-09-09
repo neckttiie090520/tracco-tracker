@@ -144,6 +144,34 @@
   --z-notification: 80;
 }
 
+/* Design tokens based utilities */
+@layer components {
+  /* Buttons */
+  .btn { @apply inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2; }
+  .btn-primary { background-color: var(--primary-600); color: #fff; }
+  .btn-primary:hover { background-color: var(--primary-700); }
+  .btn-primary:focus { box-shadow: 0 0 0 2px var(--primary-200); }
+
+  .btn-secondary { background-color: var(--secondary-600); color: #fff; }
+  .btn-secondary:hover { background-color: var(--secondary-700); }
+  .btn-secondary:focus { box-shadow: 0 0 0 2px var(--secondary-200); }
+
+  .btn-ghost { background-color: #f3f4f6; color: #374151; }
+  .btn-ghost:hover { background-color: #e5e7eb; }
+
+  /* Cards */
+  .card { @apply bg-white rounded-xl border border-gray-200 shadow-sm; }
+  .card-header { @apply px-6 py-4 border-b border-gray-200; }
+  .card-body { @apply p-6; }
+
+  /* Badges */
+  .badge { @apply inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium; }
+  .badge-info { background-color: var(--primary-50); color: var(--primary-700); border: 1px solid var(--primary-200); }
+  .badge-success { background-color: var(--success-50); color: var(--success-700); border: 1px solid var(--success-200); }
+  .badge-warning { background-color: var(--warning-50); color: var(--warning-700); border: 1px solid var(--warning-200); }
+  .badge-danger { background-color: var(--error-50); color: var(--error-700); border: 1px solid var(--error-200); }
+}
+
 /* Gradient Backgrounds */
 .gradient-primary {
   background: linear-gradient(135deg, var(--primary-500) 0%, var(--secondary-500) 100%);
