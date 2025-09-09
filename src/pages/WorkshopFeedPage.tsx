@@ -875,10 +875,44 @@ export function WorkshopFeedPage() {
                                 const linkObjs: { url: string; note?: string }[] = normalizeLinkObjects(effective?.links?.length ? effective.links : (effective?.submission_url ? [effective.submission_url] : []))
                                 const submittedTime = new Date(effective?.submitted_at || effective?.updated_at || '').toLocaleString('th-TH')
                                 if (!linkObjs || linkObjs.length === 0) return null
+                                // Helper functions
+                                const getLinkIcon = (url: string) => {
+                                  if (url.includes('drive.google.com') || url.includes('docs.google.com')) return '📄'
+                                  if (url.includes('youtube.com') || url.includes('youtu.be')) return '🎥'
+                                  if (url.includes('github.com') || url.includes('gitlab.com')) return '💻'
+                                  if (url.includes('canva.com')) return '🎨'
+                                  if (url.includes('figma.com')) return '🔧'
+                                  if (url.includes('notion.so')) return '📝'
+                                  if (url.includes('slides.com') || url.includes('slideshare.net')) return '📊'
+                                  return '🔗'
+                                }
+                                
+                                const getDomainName = (url: string) => {
+                                  try {
+                                    return new URL(url).hostname.replace('www.', '')
+                                  } catch {
+                                    return 'ลิงก์'
+                                  }
+                                }
+                                
+                                const submittedTimeFormatted = new Date(effective?.submitted_at || effective?.updated_at || '').toLocaleString('th-TH', {
+                                  year: 'numeric',
+                                  month: 'long', 
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                                
                                 return (
-                                  <>
+                                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <div className="text-sm font-medium text-gray-900">ลิงก์ที่ส่ง ({linkObjs.length})</div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-green-600 text-sm">✅</span>
+                                        <div>
+                                          <h4 className="text-sm font-semibold text-green-800">งานที่ส่งแล้ว</h4>
+                                          <p className="text-xs text-green-600">ส่งแล้ว {linkObjs.length} รายการ</p>
+                                        </div>
+                                      </div>
                                       <button
                                         className="btn btn-primary px-3 py-1 text-xs"
                                         onClick={() => {
@@ -887,9 +921,13 @@ export function WorkshopFeedPage() {
                                         }}
                                       >เพิ่มลิงก์</button>
                                     </div>
-                                    <div className="text-xs text-gray-600">ส่งเมื่อ: {submittedTime}</div>
+                                    
+                                    <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded inline-block">
+                                      📅 ส่งครั้งแรก: {submittedTimeFormatted}
+                                    </div>
+                                    
                                     {addLinkInput[task.id] !== undefined && (
-                                      <div className="flex gap-2 items-start">
+                                      <div className="flex gap-2 items-start bg-blue-50 p-2 rounded-lg">
                                         <input
                                           type="url"
                                           value={addLinkInput[task.id] || ''}
@@ -902,7 +940,7 @@ export function WorkshopFeedPage() {
                                           value={addLinkNoteInput[task.id] || ''}
                                           onChange={(e) => setAddLinkNoteInput(prev => ({ ...prev, [task.id]: e.target.value }))}
                                           placeholder="หมายเหตุ (ถ้ามี)"
-                                          className="w-60 px-3 py-2 border border-gray-300 rounded text-sm"
+                                          className="w-40 px-3 py-2 border border-gray-300 rounded text-sm"
                                         />
                                         <button
                                           className="px-3 py-2 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
@@ -910,7 +948,8 @@ export function WorkshopFeedPage() {
                                             const url = (addLinkInput[task.id] || '').trim()
                                             const note = (addLinkNoteInput[task.id] || '').trim()
                                             if (!url) return
-                                            const newLinks = [...linkObjs, note ? { url, note } : { url }]
+                                            const newLink = { url, note: note || '', submitted_at: new Date().toISOString() }
+                                            const newLinks = [...linkObjs, newLink]
                                             try {
                                               if ((task as any).submission_mode === 'group' && g) {
                                                 await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
@@ -942,45 +981,95 @@ export function WorkshopFeedPage() {
                                         >ยกเลิก</button>
                                       </div>
                                     )}
+                                    
                                     <div className="space-y-2">
-                                      {linkObjs.map((item, idx) => (
-                                        <div key={idx} className="border rounded-lg p-2 bg-white">
-                                          <div className="flex items-start justify-between gap-2">
-                                            <div className="flex-1 min-w-0">
-                                              <a href={item.url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline max-w-full">{item.url}</a>
-                                              {item.note && <div className="text-xs text-gray-600 mt-1 break-words">{item.note}</div>}
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              {/* Removed View/Replace per request */}
-                                              <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={async ()=>{
-                                                if(!confirm('ลบลิงก์นี้?')) return; const newLinks = linkObjs.filter((_,i)=>i!==idx);
-                                                try {
-                                                  if (newLinks.length === 0) {
-                                                    if ((task as any).submission_mode==='group' && g) {
-                                                      await submissionService.deleteGroupTaskSubmission(task.id, g.id)
-                                                      setGroupSubmissions(prev => ({ ...prev, [g.id]: null }))
-                                                    } else if (effective?.id) {
-                                                      await submissionService.deleteUserTaskSubmission(user!.id, task.id)
-                                                    }
-                                                    await fetchWorkshopData()
-                                                  } else {
-                                                    if ((task as any).submission_mode==='group' && g) {
-                                                      await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
-                                                      const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
-                                                      setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed }))
-                                                    } else if (effective?.id) {
-                                                      await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id)
-                                                      await fetchWorkshopData()
-                                                    }
-                                                  }
-                                                } catch(e){ console.error('remove link failed', e) }
-                                              }}>ลบ</button>
+                                      {linkObjs.map((item, idx) => {
+                                        const linkSubmittedTime = item.submitted_at 
+                                          ? new Date(item.submitted_at).toLocaleString('th-TH', {
+                                              month: 'short',
+                                              day: 'numeric',
+                                              hour: '2-digit',
+                                              minute: '2-digit'
+                                            })
+                                          : submittedTimeFormatted
+                                        
+                                        return (
+                                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-2 shadow-sm">
+                                            <div className="flex items-start justify-between gap-2">
+                                              <div className="flex items-start gap-2 flex-1 min-w-0">
+                                                <span className="text-sm mt-0.5">{getLinkIcon(item.url)}</span>
+                                                <div className="flex-1 min-w-0">
+                                                  <div className="flex items-center gap-2 mb-1">
+                                                    <a 
+                                                      href={item.url} 
+                                                      target="_blank" 
+                                                      rel="noopener noreferrer" 
+                                                      className="text-sm font-medium text-blue-700 hover:underline truncate"
+                                                      title={item.url}
+                                                    >
+                                                      {getDomainName(item.url)}
+                                                    </a>
+                                                    <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded">
+                                                      {linkSubmittedTime}
+                                                    </span>
+                                                  </div>
+                                                  <p className="text-xs text-gray-600 truncate" title={item.url}>
+                                                    {item.url}
+                                                  </p>
+                                                  {item.note && (
+                                                    <p className="text-xs text-gray-600 mt-1 italic">
+                                                      💬 {item.note}
+                                                    </p>
+                                                  )}
+                                                </div>
+                                              </div>
+                                              
+                                              <div className="flex items-center gap-1">
+                                                <a 
+                                                  href={item.url} 
+                                                  target="_blank" 
+                                                  rel="noopener noreferrer" 
+                                                  className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium"
+                                                >
+                                                  เปิด
+                                                </a>
+                                                <button 
+                                                  className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700" 
+                                                  onClick={async ()=>{
+                                                    if(!confirm(`ลบลิงก์ "${getDomainName(item.url)}" นี้?`)) return; 
+                                                    const newLinks = linkObjs.filter((_,i)=>i!==idx);
+                                                    try {
+                                                      if (newLinks.length === 0) {
+                                                        if (!confirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')) return;
+                                                        if ((task as any).submission_mode==='group' && g) {
+                                                          await submissionService.deleteGroupTaskSubmission(task.id, g.id)
+                                                          setGroupSubmissions(prev => ({ ...prev, [g.id]: null }))
+                                                        } else if (effective?.id) {
+                                                          await submissionService.deleteUserTaskSubmission(user!.id, task.id)
+                                                        }
+                                                        await fetchWorkshopData()
+                                                      } else {
+                                                        if ((task as any).submission_mode==='group' && g) {
+                                                          await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
+                                                          const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
+                                                          setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed }))
+                                                        } else if (effective?.id) {
+                                                          await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id)
+                                                          await fetchWorkshopData()
+                                                        }
+                                                      }
+                                                    } catch(e){ console.error('remove link failed', e) }
+                                                  }}
+                                                >
+                                                  ลบ
+                                                </button>
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        )
+                                      })}
                                     </div>
-                                  </>
+                                  </div>
                                 )
                               })()}
                             </div>

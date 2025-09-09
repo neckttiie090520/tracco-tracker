@@ -582,26 +582,66 @@ export function WorkshopDetailPage() {
                       )}
                       
                       {/* Submission Form */}
-                      {/* Submitted Links (multi-link list) on detail page */}
+                      {/* งานที่ส่ง (Enhanced multi-link submissions with detailed UI) */}
                       {isSubmitted && submission && (
                         <div className="mt-4">
                           {(() => {
-                            const links: string[] = Array.isArray((submission as any)?.links)
-                              ? (submission as any).links
-                              : (submission?.submission_url ? [submission.submission_url] : [])
-                            if (!links || links.length === 0) return null
-                            const submittedTime = new Date(submission.submitted_at || submission.updated_at || '').toLocaleString('th-TH')
+                            // รองรับทั้ง link objects และ string arrays
+                            const linkData = (submission as any)?.links || []
+                            const linkObjects = Array.isArray(linkData) 
+                              ? linkData.map((item: any) => typeof item === 'string' ? { url: item, note: '', submitted_at: submission.submitted_at } : item)
+                              : (submission?.submission_url ? [{ url: submission.submission_url, note: '', submitted_at: submission.submitted_at }] : [])
+                            
+                            if (!linkObjects || linkObjects.length === 0) return null
+                            
+                            // Helper function to get link type icon
+                            const getLinkIcon = (url: string) => {
+                              if (url.includes('drive.google.com') || url.includes('docs.google.com')) return '📄'
+                              if (url.includes('youtube.com') || url.includes('youtu.be')) return '🎥'
+                              if (url.includes('github.com') || url.includes('gitlab.com')) return '💻'
+                              if (url.includes('canva.com')) return '🎨'
+                              if (url.includes('figma.com')) return '🔧'
+                              if (url.includes('notion.so')) return '📝'
+                              if (url.includes('slides.com') || url.includes('slideshare.net')) return '📊'
+                              return '🔗'
+                            }
+                            
+                            // Helper function to get domain name
+                            const getDomainName = (url: string) => {
+                              try {
+                                return new URL(url).hostname.replace('www.', '')
+                              } catch {
+                                return 'ลิงก์'
+                              }
+                            }
+                            
+                            const submittedTime = new Date(submission.submitted_at || submission.updated_at || '').toLocaleString('th-TH', {
+                              year: 'numeric',
+                              month: 'long', 
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                            
                             return (
-                              <div className="space-y-2">
+                              <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-sm font-medium text-gray-900">ลิงก์ที่ส่ง ({links.length})</div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-green-600 text-lg">✅</span>
+                                    <div>
+                                      <h4 className="text-sm font-semibold text-green-800">งานที่ส่งแล้ว</h4>
+                                      <p className="text-xs text-green-600">ส่งแล้ว {linkObjects.length} รายการ</p>
+                                    </div>
+                                  </div>
                                   <button
                                     className="btn btn-primary px-3 py-1 text-xs"
                                     aria-label="เพิ่มลิงก์"
                                     onClick={async () => {
                                       const url = prompt('เพิ่มลิงก์ URL')?.trim()
                                       if (!url) return
-                                      const newLinks = [...links, url]
+                                      const note = prompt('หมายเหตุ (ไม่บังคับ)')?.trim() || ''
+                                      const newLink = { url, note, submitted_at: new Date().toISOString() }
+                                      const newLinks = [...linkObjects, newLink]
                                       try {
                                         await supabase
                                           .from('submissions')
@@ -617,52 +657,71 @@ export function WorkshopDetailPage() {
                                     }}
                                   >เพิ่มลิงก์</button>
                                 </div>
-                                <div className="text-xs text-gray-600">ส่งเมื่อ: {submittedTime}</div>
+                                
+                                <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-md inline-block">
+                                  📅 ส่งครั้งแรก: {submittedTime}
+                                </div>
+                                
                                 <div className="space-y-2">
-                                  {links.map((url, idx) => (
-                                    <div key={idx} className="border rounded-lg p-2 bg-white">
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                          <a href={url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline">{url}</a>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">ดู</a>
-                                          <button
-                                            className="text-xs px-2 py-1 rounded bg-yellow-100 hover:bg-yellow-200"
-                                            aria-label={`แทนที่ลิงก์ ${idx+1}`}
-                                            onClick={async () => {
-                                              const newUrl = prompt('แทนที่ด้วย URL', url)?.trim()
-                                              if (!newUrl || newUrl === url) return
-                                              const newLinks = links.map((u, i) => i === idx ? newUrl : u)
-                                              try {
-                                                await supabase
-                                                  .from('submissions')
-                                                  .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
-                                                  .eq('id', submission.id)
-                                                const { data: refreshed } = await supabase
-                                                  .from('submissions')
-                                                  .select('*')
-                                                  .eq('id', submission.id)
-                                                  .single()
-                                                setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
-                                              } catch (e) { console.error('replace link failed', e) }
-                                            }}
-                                          >แทนที่</button>
-                                          <button
-                                            className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700"
-                                            aria-label={`ลบลิงก์ ${idx+1}`}
-                                            onClick={async () => {
-                                              if (!confirm('ลบลิงก์นี้?')) return
-                                              const newLinks = links.filter((_, i) => i !== idx)
-                                              try {
-                                                if (newLinks.length === 0) {
-                                                  // ถ้าลบลิงก์สุดท้าย ให้ลบงานที่ส่งทิ้งไปด้วย
-                                                  await supabase
-                                                    .from('submissions')
-                                                    .delete()
-                                                    .eq('id', submission.id)
-                                                  setSubmissions(prev => prev.filter(s => s.id !== submission.id))
-                                                } else {
+                                  {linkObjects.map((linkObj: any, idx: number) => {
+                                    const linkSubmittedTime = linkObj.submitted_at 
+                                      ? new Date(linkObj.submitted_at).toLocaleString('th-TH', {
+                                          month: 'short',
+                                          day: 'numeric', 
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })
+                                      : submittedTime
+                                    
+                                    return (
+                                      <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div className="flex items-start gap-2 flex-1 min-w-0">
+                                            <span className="text-lg mt-0.5">{getLinkIcon(linkObj.url)}</span>
+                                            <div className="flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <a 
+                                                  href={linkObj.url} 
+                                                  target="_blank" 
+                                                  rel="noopener noreferrer" 
+                                                  className="text-sm font-medium text-blue-700 hover:underline truncate"
+                                                  title={linkObj.url}
+                                                >
+                                                  {getDomainName(linkObj.url)}
+                                                </a>
+                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                                  {linkSubmittedTime}
+                                                </span>
+                                              </div>
+                                              <p className="text-xs text-gray-600 truncate" title={linkObj.url}>
+                                                {linkObj.url}
+                                              </p>
+                                              {linkObj.note && (
+                                                <p className="text-xs text-gray-600 mt-1 italic">
+                                                  💬 {linkObj.note}
+                                                </p>
+                                              )}
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="flex items-center gap-1">
+                                            <a 
+                                              href={linkObj.url} 
+                                              target="_blank" 
+                                              rel="noopener noreferrer" 
+                                              className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium"
+                                            >
+                                              เปิด
+                                            </a>
+                                            <button
+                                              className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                              onClick={async () => {
+                                                const newUrl = prompt('แทนที่ด้วย URL ใหม่', linkObj.url)?.trim()
+                                                if (!newUrl || newUrl === linkObj.url) return
+                                                const newNote = prompt('หมายเหตุใหม่', linkObj.note || '')?.trim() || ''
+                                                const updatedLink = { ...linkObj, url: newUrl, note: newNote, submitted_at: new Date().toISOString() }
+                                                const newLinks = linkObjects.map((obj: any, i: number) => i === idx ? updatedLink : obj)
+                                                try {
                                                   await supabase
                                                     .from('submissions')
                                                     .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
@@ -673,14 +732,48 @@ export function WorkshopDetailPage() {
                                                     .eq('id', submission.id)
                                                     .single()
                                                   setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
-                                                }
-                                              } catch (e) { console.error('remove link failed', e) }
-                                            }}
-                                          >ลบ</button>
+                                                } catch (e) { console.error('replace link failed', e) }
+                                              }}
+                                            >
+                                              แก้ไข
+                                            </button>
+                                            <button
+                                              className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700"
+                                              onClick={async () => {
+                                                if (!confirm(`ลบลิงก์ "${getDomainName(linkObj.url)}" นี้?`)) return
+                                                const newLinks = linkObjects.filter((_: any, i: number) => i !== idx)
+                                                try {
+                                                  if (newLinks.length === 0) {
+                                                    // ถ้าลบลิงก์สุดท้าย ให้ลบงานที่ส่งทิ้งไปด้วย
+                                                    if (confirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')) {
+                                                      await supabase
+                                                        .from('submissions')
+                                                        .delete()
+                                                        .eq('id', submission.id)
+                                                      setSubmissions(prev => prev.filter(s => s.id !== submission.id))
+                                                    }
+                                                  } else {
+                                                    await supabase
+                                                      .from('submissions')
+                                                      .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
+                                                      .eq('id', submission.id)
+                                                    const { data: refreshed } = await supabase
+                                                      .from('submissions')
+                                                      .select('*')
+                                                      .eq('id', submission.id)
+                                                      .single()
+                                                    setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                                  }
+                                                } catch (e) { console.error('remove link failed', e) }
+                                              }}
+                                            >
+                                              ลบ
+                                            </button>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  ))}
+                                    )
+                                  })}
                                 </div>
                               </div>
                             )
