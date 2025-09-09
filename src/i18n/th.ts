@@ -16,5 +16,17 @@ export const t = {
   members: 'สมาชิก',
   groupWork: 'งานกลุ่ม',
   individualWork: 'งานเดี่ยว',
+  // Session feed
+  sessionNotFoundTitle: 'ไม่พบ Session',
+  sessionNotFoundDesc: 'โปรดลงทะเบียนหรือรีเฟรชอีกครั้ง',
+  dateRange: 'ช่วงเวลา',
+  maxParticipants: 'ผู้เข้าร่วมสูงสุด',
+  relatedWorkshops: 'Workshops ที่เกี่ยวข้อง',
+  relatedWorkshopsEmpty: 'ยังไม่มี Workshops',
+  quickActionsTitle: 'ทางลัด',
+  quickActionsDesc: 'ตรวจสอบความคืบหน้า ส่งงาน และดาวน์โหลดเอกสาร',
+  myTasks: 'งานของฉัน',
+  allMaterials: 'เอกสารทั้งหมด',
+  // Buttons/generic
+  viewDetails: 'ดูรายละเอียด',
 }
-

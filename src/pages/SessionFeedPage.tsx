@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/supabase'
 import { UserNavigation } from '../components/user/UserNavigation'
@@ -47,14 +47,14 @@ interface SessionMaterial {
 const getMaterialTypeFromUrl = (url: string) => {
   const domain = url.toLowerCase()
   
-  if (domain.includes('docs.google.com')) return { type: 'Google Docs', icon: '📄', color: 'from-blue-500 to-blue-600' }
-  if (domain.includes('drive.google.com')) return { type: 'Google Drive', icon: '💾', color: 'from-yellow-500 to-orange-500' }
-  if (domain.includes('youtube.com') || domain.includes('youtu.be')) return { type: 'YouTube', icon: '🎥', color: 'from-red-500 to-red-600' }
-  if (domain.includes('canva.com')) return { type: 'Canva', icon: '🎨', color: 'from-purple-500 to-pink-500' }
-  if (domain.includes('figma.com')) return { type: 'Figma', icon: '🎯', color: 'from-purple-600 to-indigo-600' }
-  if (domain.includes('slides.google.com')) return { type: 'Google Slides', icon: '📊', color: 'from-orange-500 to-red-500' }
+  if (domain.includes('docs.google.com')) return { type: 'Google Docs', icon: 'ðŸ“„', color: 'from-blue-500 to-blue-600' }
+  if (domain.includes('drive.google.com')) return { type: 'Google Drive', icon: 'ðŸ’¾', color: 'from-yellow-500 to-orange-500' }
+  if (domain.includes('youtube.com') || domain.includes('youtu.be')) return { type: 'YouTube', icon: 'ðŸŽ¥', color: 'from-red-500 to-red-600' }
+  if (domain.includes('canva.com')) return { type: 'Canva', icon: 'ðŸŽ¨', color: 'from-purple-500 to-pink-500' }
+  if (domain.includes('figma.com')) return { type: 'Figma', icon: 'ðŸŽ¯', color: 'from-purple-600 to-indigo-600' }
+  if (domain.includes('slides.google.com')) return { type: 'Google Slides', icon: 'ðŸ“Š', color: 'from-orange-500 to-red-500' }
   
-  return { type: 'Web Link', icon: '🔗', color: 'from-gray-500 to-gray-600' }
+  return { type: 'Web Link', icon: 'ðŸ”—', color: 'from-gray-500 to-gray-600' }
 }
 
 // Function to create embed URL
@@ -235,7 +235,7 @@ export function SessionFeedPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">กำลังโหลดข้อมูล...</p>
+            <p className="text-gray-600 text-lg">{t.loading}</p>
           </div>
         </div>
       </div>
@@ -248,15 +248,10 @@ export function SessionFeedPage() {
         <UserNavigation />
         <div className="max-w-4xl mx-auto px-8 py-12">
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="text-red-500 text-5xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">ไม่พบงานสัมมนา</h2>
-            <p className="text-gray-600 mb-6">คุณยังไม่ได้ลงทะเบียนงานสัมมนาใดๆ</p>
-            <Link
-              to="/sessions"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
-            >
-              ลงทะเบียนงานสัมมนา
-            </Link>
+            <div className="text-red-500 text-5xl mb-4">!</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.sessionNotFoundTitle}</h2>
+            <p className="text-gray-600 mb-6">{t.sessionNotFoundDesc}</p>
+            <Link to="/sessions" className="btn btn-primary px-6 py-3 font-semibold">{t.goSessions}</Link>
           </div>
         </div>
       </div>
@@ -301,7 +296,7 @@ export function SessionFeedPage() {
               {/* Session Meta Info - Minimal badges */}
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
-                  📅 {new Date(session.start_date).toLocaleDateString('th-TH', {
+                  ðŸ“… {new Date(session.start_date).toLocaleDateString('th-TH', {
                     day: 'numeric',
                     month: 'short'
                   })} - {new Date(session.end_date).toLocaleDateString('th-TH', {
@@ -311,7 +306,7 @@ export function SessionFeedPage() {
                 </span>
                 
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs">
-                  👥 {session.max_participants} คน
+                  ðŸ‘¥ {session.max_participants} à¸„à¸™
                 </span>
               </div>
               
@@ -326,7 +321,7 @@ export function SessionFeedPage() {
                         onClick={() => setShowFullDescription(!showFullDescription)}
                         className="ml-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
                       >
-                        {showFullDescription ? 'ย่อลง' : 'ดูเพิ่มเติม'}
+                        {showFullDescription ? 'à¸¢à¹ˆà¸­à¸¥à¸‡' : 'à¸”à¸¹à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡'}
                       </button>
                     )}
                   </div>
@@ -340,7 +335,7 @@ export function SessionFeedPage() {
             <div className="absolute inset-0 bg-black/10"></div>
             <div className="relative z-10 px-8 py-12">
               <div className="flex items-center gap-4 mb-4">
-                <div className="text-6xl">🎯</div>
+                <div className="text-6xl">ðŸŽ¯</div>
                 <div>
                   <h1 className="text-4xl font-bold mb-2">{session.title}</h1>
                 </div>
@@ -356,7 +351,7 @@ export function SessionFeedPage() {
                         onClick={() => setShowFullDescription(!showFullDescription)}
                         className="ml-2 text-white/90 hover:text-white font-medium transition-colors"
                       >
-                        {showFullDescription ? 'ย่อลง' : 'ดูเพิ่มเติม'}
+                        {showFullDescription ? 'à¸¢à¹ˆà¸­à¸¥à¸‡' : 'à¸”à¸¹à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡'}
                       </button>
                     )}
                   </div>
@@ -365,15 +360,15 @@ export function SessionFeedPage() {
               
               <div className="flex flex-wrap gap-6 text-sm">
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                  <span className="text-white/80">📅 วันที่:</span>
+                  <span className="text-white/80">ðŸ“… à¸§à¸±à¸™à¸—à¸µà¹ˆ:</span>
                   <span className="font-semibold ml-2">
                     {new Date(session.start_date).toLocaleDateString('th-TH')} - {new Date(session.end_date).toLocaleDateString('th-TH')}
                   </span>
                 </div>
                 
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                  <span className="text-white/80">👥 ผู้เข้าร่วม:</span>
-                  <span className="font-semibold ml-2">{session.max_participants} คน</span>
+                  <span className="text-white/80">ðŸ‘¥ à¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡:</span>
+                  <span className="font-semibold ml-2">{session.max_participants} à¸„à¸™</span>
                 </div>
               </div>
             </div>
@@ -386,21 +381,21 @@ export function SessionFeedPage() {
         <div className="mb-8">
           <div className="mb-6">
             <h2 className="text-lg font-medium text-gray-900 mb-1">
-              🏫 Workshops ในงานสัมมนานี้
+              ðŸ« Workshops à¹ƒà¸™à¸‡à¸²à¸™à¸ªà¸±à¸¡à¸¡à¸™à¸²à¸™à¸µà¹‰
             </h2>
             <p className="text-sm text-gray-600">
-              กิจกรรมและการเรียนรู้ที่จัดขึ้นในงานสัมมนาครั้งนี้
+              à¸à¸´à¸ˆà¸à¸£à¸£à¸¡à¹à¸¥à¸°à¸à¸²à¸£à¹€à¸£à¸µà¸¢à¸™à¸£à¸¹à¹‰à¸—à¸µà¹ˆà¸ˆà¸±à¸”à¸‚à¸¶à¹‰à¸™à¹ƒà¸™à¸‡à¸²à¸™à¸ªà¸±à¸¡à¸¡à¸™à¸²à¸„à¸£à¸±à¹‰à¸‡à¸™à¸µà¹‰
             </p>
           </div>
 
           {workshops.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-              <div className="text-4xl mb-3">🏫</div>
+              <div className="text-4xl mb-3">ðŸ«</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                ยังไม่มี Workshops
+                à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µ Workshops
               </h3>
               <p className="text-sm text-gray-600">
-                ยังไม่มี Workshops ที่เปิดให้ลงทะเบียนในงานสัมมนานี้
+                à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µ Workshops à¸—à¸µà¹ˆà¹€à¸›à¸´à¸”à¹ƒà¸«à¹‰à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™à¹ƒà¸™à¸‡à¸²à¸™à¸ªà¸±à¸¡à¸¡à¸™à¸²à¸™à¸µà¹‰
               </p>
             </div>
           ) : (
@@ -414,22 +409,22 @@ export function SessionFeedPage() {
 
         {/* Quick Actions - Minimal style */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">จัดการงานของคุณ</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-3">à¸ˆà¸±à¸”à¸à¸²à¸£à¸‡à¸²à¸™à¸‚à¸­à¸‡à¸„à¸¸à¸“</h3>
           <p className="text-sm text-gray-600 mb-4">
-            ตรวจสอบความคืบหน้า ส่งงาน และดาวน์โหลดเอกสารประกอบ
+            à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸„à¸§à¸²à¸¡à¸„à¸·à¸šà¸«à¸™à¹‰à¸² à¸ªà¹ˆà¸‡à¸‡à¸²à¸™ à¹à¸¥à¸°à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¹€à¸­à¸à¸ªà¸²à¸£à¸›à¸£à¸°à¸à¸­à¸š
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
               to="/my-tasks"
               className="btn btn-primary px-4 py-2 text-sm font-medium"
             >
-              งานของฉัน
+              à¸‡à¸²à¸™à¸‚à¸­à¸‡à¸‰à¸±à¸™
             </Link>
             <Link
               to="/materials"
               className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
             >
-              เอกสารทั้งหมด
+              à¹€à¸­à¸à¸ªà¸²à¸£à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”
             </Link>
           </div>
         </div>
