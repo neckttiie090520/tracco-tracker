@@ -106,7 +106,7 @@ export function WorkshopFeedPage() {
       if (taskIds.length > 0) {
         const { data: subData, error: subError } = await supabase
           .from('submissions')
-          .select('*')
+          .select('id, task_id, user_id, submission_url, links, notes, status, submitted_at')
           .eq('user_id', user?.id)
           .in('task_id', taskIds)
         
@@ -118,30 +118,55 @@ export function WorkshopFeedPage() {
 
       setSubmissions(submissionsData || [])
 
-      // Refresh group info for group-mode tasks
+      // Refresh group info for group-mode tasks (optimized parallel)
       if (user && tasks && tasks.length > 0) {
-        const newTaskGroups: Record<string, any | null> = {}
-        const newGroupMembers: Record<string, any[]> = {}
-        const newGroupSubs: Record<string, any | null> = {}
-        for (const t of tasks) {
-          if ((t as any).submission_mode === 'group') {
-            try {
-              const g = await groupService.getUserGroupForTask(t.id, user.id)
-              newTaskGroups[t.id] = g
-              if (g) {
-                const mem = await groupService.listMembers(g.id)
-                newGroupMembers[g.id] = mem || []
-                const gs = await submissionService.getGroupTaskSubmission(t.id, g.id)
-                newGroupSubs[g.id] = gs || null
+        const groupTasks = tasks.filter(t => (t as any).submission_mode === 'group')
+        
+        if (groupTasks.length > 0) {
+          try {
+            const groupPromises = groupTasks.map(async (t) => {
+              try {
+                const g = await groupService.getUserGroupForTask(t.id, user.id)
+                if (!g) return { taskId: t.id, group: null, members: [], submission: null }
+
+                const [mem, gs] = await Promise.all([
+                  groupService.listMembers(g.id),
+                  submissionService.getGroupTaskSubmission(t.id, g.id)
+                ])
+
+                return {
+                  taskId: t.id,
+                  group: g,
+                  members: mem || [],
+                  submission: gs || null
+                }
+              } catch (e) {
+                console.warn('Group refresh failed for task', t.id, e)
+                return { taskId: t.id, group: null, members: [], submission: null }
               }
-            } catch (e) {
-              console.warn('Group refresh failed for task', t.id, e)
-            }
+            })
+
+            const groupResults = await Promise.all(groupPromises)
+            
+            const newTaskGroups: Record<string, any | null> = {}
+            const newGroupMembers: Record<string, any[]> = {}
+            const newGroupSubs: Record<string, any | null> = {}
+
+            groupResults.forEach(result => {
+              newTaskGroups[result.taskId] = result.group
+              if (result.group) {
+                newGroupMembers[result.group.id] = result.members
+                newGroupSubs[result.group.id] = result.submission
+              }
+            })
+
+            setTaskGroups(prev => ({ ...prev, ...newTaskGroups }))
+            setGroupMembers(prev => ({ ...prev, ...newGroupMembers }))
+            setGroupSubmissions(prev => ({ ...prev, ...newGroupSubs }))
+          } catch (e) {
+            console.error('Group refresh failed:', e)
           }
         }
-        setTaskGroups(prev => ({ ...prev, ...newTaskGroups }))
-        setGroupMembers(prev => ({ ...prev, ...newGroupMembers }))
-        setGroupSubmissions(prev => ({ ...prev, ...newGroupSubs }))
       }
 
     } catch (error) {
@@ -155,99 +180,98 @@ export function WorkshopFeedPage() {
     try {
       setLoading(true)
 
-      // Fetch workshop details
-      const { data: workshopData, error: workshopError } = await supabase
-        .from('workshops')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (workshopError) throw workshopError
-      setWorkshop(workshopData)
-
-      // Fetch instructor profile if instructor field contains UUID
-      if (workshopData?.instructor) {
-        // Check if instructor is a UUID (contains hyphens and is 36 characters long)
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workshopData.instructor)
+      // Start all main data fetching in parallel
+      const [workshopResult, materialsResult, tasksResult] = await Promise.allSettled([
+        // Fetch workshop details
+        supabase.from('workshops').select('*').eq('id', id).single(),
         
-        if (isUUID) {
-          try {
-            // Get user info from users table (using maybeSingle to avoid 404)
-            const { data: userData, error: userError } = await supabase
+        // Fetch materials
+        MaterialService.getWorkshopMaterials(id),
+        
+        // Fetch tasks
+        adminOperations.getWorkshopTasks(id)
+      ])
+
+      // Handle workshop data
+      if (workshopResult.status === 'fulfilled' && workshopResult.value.data) {
+        const workshopData = workshopResult.value.data
+        setWorkshop(workshopData)
+
+        // Fetch instructor profile if needed (parallel with other operations)
+        if (workshopData?.instructor) {
+          const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workshopData.instructor)
+          
+          if (isUUID) {
+            // Don't await this - let it load in background
+            supabase
               .from('users')
               .select('*')
               .eq('id', workshopData.instructor)
               .maybeSingle()
-            
-            if (userError) {
-              console.log('User query error:', userError)
-            } else if (userData) {
-              setInstructorProfile({
-                name: userData.name || userData.email?.split('@')[0] || 'ไม่ระบุชื่อ',
-                email: userData.email,
-                avatar_seed: userData.avatar_seed,
-                avatar_saturation: userData.avatar_saturation,
-                avatar_lightness: userData.avatar_lightness
+              .then(({ data: userData }) => {
+                if (userData) {
+                  setInstructorProfile({
+                    name: userData.name || userData.email?.split('@')[0] || 'ไม่ระบุชื่อ',
+                    email: userData.email,
+                    avatar_seed: userData.avatar_seed,
+                    avatar_saturation: userData.avatar_saturation,
+                    avatar_lightness: userData.avatar_lightness
+                  })
+                } else {
+                  setInstructorProfile({
+                    name: `User ${workshopData.instructor.slice(0, 8)}...`,
+                    email: null,
+                    avatar_seed: workshopData.instructor,
+                    avatar_saturation: 50,
+                    avatar_lightness: 50
+                  })
+                }
               })
-            } else {
-              // If user doesn't exist, show UUID as fallback
-              setInstructorProfile({
-                name: `User ${workshopData.instructor.slice(0, 8)}...`,
-                email: null,
-                avatar_seed: workshopData.instructor,
-                avatar_saturation: 50,
-                avatar_lightness: 50
+              .catch(() => {
+                setInstructorProfile({
+                  name: `User ${workshopData.instructor.slice(0, 8)}...`,
+                  email: null,
+                  avatar_seed: workshopData.instructor,
+                  avatar_saturation: 50,
+                  avatar_lightness: 50
+                })
               })
-            }
-          } catch (error) {
-            console.log('Error fetching instructor data:', error)
-            // Fallback: show UUID with generated avatar
-            setInstructorProfile({
-              name: `User ${workshopData.instructor.slice(0, 8)}...`,
-              email: null,
-              avatar_seed: workshopData.instructor,
-              avatar_saturation: 50,
-              avatar_lightness: 50
-            })
+          } else {
+            setInstructorProfile(null)
           }
-        } else {
-          // If it's not a UUID, it's probably already a name
-          setInstructorProfile(null)
         }
+      } else {
+        throw workshopResult.status === 'rejected' ? workshopResult.reason : new Error('Workshop not found')
       }
 
-      // Fetch workshop materials using the existing service
-      try {
-        const materialsData = await MaterialService.getWorkshopMaterials(id)
-        setMaterials(materialsData || [])
-      } catch (materialError) {
-        console.error('Materials error:', materialError)
+      // Handle materials
+      if (materialsResult.status === 'fulfilled') {
+        setMaterials(materialsResult.value || [])
+      } else {
+        console.error('Materials error:', materialsResult.reason)
         setMaterials([])
       }
 
-      // Get tasks using admin operations (this bypasses RLS for reading)
+      // Handle tasks and submissions
       let tasksData = []
-      try {
-        tasksData = await adminOperations.getWorkshopTasks(id)
-        console.log('Tasks fetched successfully:', tasksData?.length || 0)
-        // Exclude archived tasks from end-user feed
-        const visibleTasks = (tasksData || []).filter((t: any) => !t.is_archived)
+      if (tasksResult.status === 'fulfilled') {
+        tasksData = tasksResult.value || []
+        console.log('Tasks fetched successfully:', tasksData.length)
+        const visibleTasks = tasksData.filter((t: any) => !t.is_archived)
         setTasks(visibleTasks)
-      } catch (tasksError) {
-        console.error('Tasks query error:', tasksError)
+      } else {
+        console.error('Tasks query error:', tasksResult.reason)
         setTasks([])
       }
 
-      // Fetch user's submissions
-      const finalTasksForSubmissions = tasksData || []
-      
-      const taskIds = finalTasksForSubmissions.map(t => t.id).filter(Boolean)
-      
+      // Fetch submissions with minimal data needed for display
+      const taskIds = tasksData.map(t => t.id).filter(Boolean)
       let submissionsData = []
+      
       if (taskIds.length > 0) {
         const { data: subData, error: subError } = await supabase
           .from('submissions')
-          .select('*')
+          .select('id, task_id, user_id, submission_url, links, notes, status, submitted_at')
           .eq('user_id', user?.id)
           .in('task_id', taskIds)
         
@@ -259,37 +283,58 @@ export function WorkshopFeedPage() {
 
       setSubmissions(submissionsData || [])
 
-      // Load group info for group-mode tasks
+      // Load group info for group-mode tasks (optimized parallel loading)
       if (user && tasksData && tasksData.length > 0) {
-        // Cleanup empty groups first
-        try {
-          await groupService.cleanupEmptyGroups()
-        } catch (e) {
-          console.warn('Group cleanup failed:', e)
-        }
+        const groupTasks = tasksData.filter(t => (t as any).submission_mode === 'group')
+        
+        if (groupTasks.length > 0) {
+          try {
+            // Load all group data in parallel (no cleanup to avoid slowdown)
+            const groupPromises = groupTasks.map(async (t) => {
+              try {
+                const g = await groupService.getUserGroupForTask(t.id, user.id)
+                if (!g) return { taskId: t.id, group: null, members: [], submission: null }
 
-        const newTaskGroups: Record<string, any | null> = {}
-        const newGroupMembers: Record<string, any[]> = {}
-        const newGroupSubs: Record<string, any | null> = {}
-        for (const t of tasksData) {
-          if ((t as any).submission_mode === 'group') {
-            try {
-              const g = await groupService.getUserGroupForTask(t.id, user.id)
-              newTaskGroups[t.id] = g
-              if (g) {
-                const mem = await groupService.listMembers(g.id)
-                newGroupMembers[g.id] = mem || []
-                const gs = await submissionService.getGroupTaskSubmission(t.id, g.id)
-                newGroupSubs[g.id] = gs || null
+                // Load members and submission in parallel for this group
+                const [mem, gs] = await Promise.all([
+                  groupService.listMembers(g.id),
+                  submissionService.getGroupTaskSubmission(t.id, g.id)
+                ])
+
+                return {
+                  taskId: t.id,
+                  group: g,
+                  members: mem || [],
+                  submission: gs || null
+                }
+              } catch (e) {
+                console.warn('Group load failed for task', t.id, e)
+                return { taskId: t.id, group: null, members: [], submission: null }
               }
-            } catch (e) {
-              console.warn('Group load failed for task', t.id, e)
-            }
+            })
+
+            const groupResults = await Promise.all(groupPromises)
+            
+            // Update state in batch
+            const newTaskGroups: Record<string, any | null> = {}
+            const newGroupMembers: Record<string, any[]> = {}
+            const newGroupSubs: Record<string, any | null> = {}
+
+            groupResults.forEach(result => {
+              newTaskGroups[result.taskId] = result.group
+              if (result.group) {
+                newGroupMembers[result.group.id] = result.members
+                newGroupSubs[result.group.id] = result.submission
+              }
+            })
+
+            setTaskGroups(prev => ({ ...prev, ...newTaskGroups }))
+            setGroupMembers(prev => ({ ...prev, ...newGroupMembers }))
+            setGroupSubmissions(prev => ({ ...prev, ...newGroupSubs }))
+          } catch (e) {
+            console.error('Group loading failed:', e)
           }
         }
-        setTaskGroups(prev => ({ ...prev, ...newTaskGroups }))
-        setGroupMembers(prev => ({ ...prev, ...newGroupMembers }))
-        setGroupSubmissions(prev => ({ ...prev, ...newGroupSubs }))
       }
 
     } catch (error) {

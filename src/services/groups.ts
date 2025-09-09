@@ -187,21 +187,29 @@ export const groupService = {
   },
 
   async cleanupEmptyGroups() {
-    // Find groups with no members
-    const { data: emptyGroups } = await supabase
-      .from('task_groups')
-      .select(`
-        id,
-        task_group_members!left(user_id)
-      `)
-    
-    if (!emptyGroups) return
+    try {
+      // Find groups that have no members using a more efficient query
+      const { data: emptyGroups } = await supabase
+        .from('task_groups')
+        .select('id')
+        .not('id', 'in', 
+          supabase
+            .from('task_group_members')
+            .select('task_group_id')
+        )
+        .limit(10) // Limit to prevent too many operations
+      
+      if (!emptyGroups || emptyGroups.length === 0) return
 
-    for (const group of emptyGroups) {
-      // Check if group has no members
-      if (!group.task_group_members || group.task_group_members.length === 0) {
-        await this.deleteGroup(group.id)
+      // Delete empty groups in batch (parallel)
+      const deletePromises = emptyGroups.map(group => this.deleteGroup(group.id))
+      await Promise.allSettled(deletePromises)
+      
+      if (emptyGroups.length > 0) {
+        console.log(`Cleaned up ${emptyGroups.length} empty groups`)
       }
+    } catch (error) {
+      console.warn('Group cleanup failed:', error)
     }
   },
 }
