@@ -22,7 +22,7 @@ export function WorkshopManagement() {
   
   // Search and Filter State
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('current') // Start with "In Use" instead of "All"
   const [sessionFilter, setSessionFilter] = useState('all')
   const [instructorFilter, setInstructorFilter] = useState('all')
   
@@ -204,12 +204,12 @@ export function WorkshopManagement() {
 
   const handleClearFilters = () => {
     setSearchTerm('')
-    setStatusFilter('all')
+    setStatusFilter('current')
     setSessionFilter('all')
     setInstructorFilter('all')
   }
 
-  const hasActiveFilters = searchTerm || statusFilter !== 'all' || sessionFilter !== 'all' || instructorFilter !== 'all'
+  const hasActiveFilters = searchTerm || statusFilter !== 'current' || sessionFilter !== 'all' || instructorFilter !== 'all'
 
   const handleToggleActive = async (workshop: any) => {
     try {

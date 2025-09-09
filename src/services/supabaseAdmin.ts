@@ -449,9 +449,12 @@ export const adminOperations = {
     console.log('Admin raw submissions data:', data)
     console.log('Admin number of submissions found:', data?.length || 0)
 
-    // Fetch user details separately
+    // Fetch user details and group information separately
     if (data && data.length > 0) {
       const userIds = [...new Set(data.map(s => s.user_id))]
+      const groupIds = [...new Set(data.filter(s => s.group_id).map(s => s.group_id))]
+
+      // Fetch users
       const { data: users } = await adminClient
         .from('users')
         .select('id, name, email')
@@ -459,13 +462,64 @@ export const adminOperations = {
 
       console.log('Admin users fetched:', users)
 
-      // Map users to submissions
-      const result = data.map(submission => ({
-        ...submission,
-        user: users?.find(u => u.id === submission.user_id) || null
-      }))
+      // Fetch groups and their members if there are group submissions
+      let groups: any[] = []
+      let groupMembers: any[] = []
       
-      console.log('Admin final result with users:', result)
+      if (groupIds.length > 0) {
+        // Fetch group details
+        const { data: groupsData } = await adminClient
+          .from('task_groups')
+          .select('id, name, task_id, owner_id, party_code, created_at')
+          .in('id', groupIds)
+
+        groups = groupsData || []
+
+        // Fetch group members with user details
+        const { data: membersData } = await adminClient
+          .from('task_group_members')
+          .select(`
+            task_group_id,
+            user_id,
+            role,
+            joined_at,
+            user:users(id, name, email)
+          `)
+          .in('task_group_id', groupIds)
+
+        groupMembers = membersData || []
+      }
+
+      // Map users, groups, and members to submissions
+      const result = data.map(submission => {
+        let displayInfo = {
+          ...submission,
+          user: users?.find(u => u.id === submission.user_id) || null
+        }
+
+        // For group submissions, add group information
+        if (submission.group_id) {
+          const group = groups.find(g => g.id === submission.group_id)
+          const members = groupMembers
+            .filter(m => m.task_group_id === submission.group_id)
+            .map(m => ({
+              ...m.user,
+              role: m.role,
+              joined_at: m.joined_at
+            }))
+
+          displayInfo = {
+            ...displayInfo,
+            group,
+            group_members: members,
+            is_group_submission: true
+          }
+        }
+
+        return displayInfo
+      })
+      
+      console.log('Admin final result with users and groups:', result)
       return result
     }
 

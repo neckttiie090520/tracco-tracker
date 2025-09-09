@@ -819,7 +819,7 @@ export function SessionManager() {
   
   // Search and Filter State
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('current') // Start with "In Use" instead of "All"
   const [publishedFilter, setPublishedFilter] = useState('all')
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' })
   
@@ -1171,12 +1171,12 @@ export function SessionManager() {
 
   const handleClearFilters = () => {
     setSearchTerm('')
-    setStatusFilter('all')
+    setStatusFilter('current') // Reset to default "In Use"
     setPublishedFilter('all')
     setDateRange({ startDate: '', endDate: '' })
   }
 
-  const hasActiveFilters = searchTerm || statusFilter !== 'all' || publishedFilter !== 'all' || dateRange.startDate || dateRange.endDate
+  const hasActiveFilters = searchTerm || statusFilter !== 'current' || publishedFilter !== 'all' || dateRange.startDate || dateRange.endDate
 
   if (loading) {
     return (
