@@ -68,6 +68,23 @@ export function WorkshopFeedPage() {
   const [groupSubmissions, setGroupSubmissions] = useState<Record<string, any | null>>({})
   // Draft links for new submissions (per task)
   const [draftLinks, setDraftLinks] = useState<Record<string, string[]>>({})
+  // Inline add-link inputs per task (for submitted cards)
+  const [addLinkInput, setAddLinkInput] = useState<Record<string, string>>({})
+  const [addLinkNoteInput, setAddLinkNoteInput] = useState<Record<string, string>>({})
+  // Edit-mode link list per task (array of {url, note})
+  const [editLinksMap, setEditLinksMap] = useState<Record<string, { url: string; note?: string }[]>>({})
+
+  const normalizeLinkObjects = (raw: any): { url: string; note?: string }[] => {
+    if (!raw) return []
+    const arr = Array.isArray(raw) ? raw : []
+    return arr.map((v: any) =>
+      typeof v === 'string'
+        ? { url: v }
+        : (v && typeof v === 'object' && typeof v.url === 'string')
+          ? { url: v.url, note: typeof v.note === 'string' ? v.note : undefined }
+          : null
+    ).filter(Boolean) as { url: string; note?: string }[]
+  }
 
   useEffect(() => {
     if (id && user) {
@@ -855,47 +872,93 @@ export function WorkshopFeedPage() {
                             <div className="mt-3 space-y-2">
                               {(() => {
                                 const effective: any = (task as any).submission_mode === 'group' ? gSub : submission
-                                const links: string[] = Array.isArray(effective?.links)
-                                  ? effective.links
-                                  : (effective?.submission_url ? [effective.submission_url] : [])
+                                const linkObjs: { url: string; note?: string }[] = normalizeLinkObjects(effective?.links?.length ? effective.links : (effective?.submission_url ? [effective.submission_url] : []))
                                 const submittedTime = new Date(effective?.submitted_at || effective?.updated_at || '').toLocaleString('th-TH')
-                                if (!links || links.length === 0) return null
+                                if (!linkObjs || linkObjs.length === 0) return null
                                 return (
                                   <>
                                     <div className="flex items-center justify-between">
-                                      <div className="text-sm font-medium text-gray-900">Submitted Links ({links.length})</div>
+                                      <div className="text-sm font-medium text-gray-900">ลิงก์ที่ส่ง ({linkObjs.length})</div>
                                       <button
                                         className="btn btn-primary px-3 py-1 text-xs"
-                                        onClick={async () => {
-                                          const url = prompt('เพิ่มลิงก์ URL')?.trim()
-                                          if (!url) return
-                                          const newLinks = [...links, url]
-                                          try {
-                                            if ((task as any).submission_mode === 'group' && g) {
-                                              await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
-                                              const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
-                                              setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
-                                            } else if (effective?.id) {
-                                              await supabase.from('submissions').update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() }).eq('id', effective.id)
-                                              await fetchWorkshopData()
-                                            }
-                                          } catch (e) { console.error('add link failed', e) }
+                                        onClick={() => {
+                                          setAddLinkInput(prev => ({ ...prev, [task.id]: '' }))
+                                          setAddLinkNoteInput(prev => ({ ...prev, [task.id]: '' }))
                                         }}
                                       >เพิ่มลิงก์</button>
                                     </div>
-                                    <div className="text-xs text-gray-600">Submitted at: {submittedTime}</div>
+                                    <div className="text-xs text-gray-600">ส่งเมื่อ: {submittedTime}</div>
+                                    {addLinkInput[task.id] !== undefined && (
+                                      <div className="flex gap-2 items-start">
+                                        <input
+                                          type="url"
+                                          value={addLinkInput[task.id] || ''}
+                                          onChange={(e) => setAddLinkInput(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                          placeholder="วางลิงก์ที่นี่"
+                                          className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
+                                        />
+                                        <input
+                                          type="text"
+                                          value={addLinkNoteInput[task.id] || ''}
+                                          onChange={(e) => setAddLinkNoteInput(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                          placeholder="หมายเหตุ (ถ้ามี)"
+                                          className="w-60 px-3 py-2 border border-gray-300 rounded text-sm"
+                                        />
+                                        <button
+                                          className="px-3 py-2 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
+                                          onClick={async () => {
+                                            const url = (addLinkInput[task.id] || '').trim()
+                                            const note = (addLinkNoteInput[task.id] || '').trim()
+                                            if (!url) return
+                                            const newLinks = [...linkObjs, note ? { url, note } : { url }]
+                                            try {
+                                              if ((task as any).submission_mode === 'group' && g) {
+                                                await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
+                                                const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
+                                                setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
+                                              } else if (effective?.id) {
+                                                await supabase.from('submissions').update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() }).eq('id', effective.id)
+                                                await fetchWorkshopData()
+                                              }
+                                              setAddLinkInput(prev => ({ ...prev, [task.id]: '' }))
+                                              setAddLinkNoteInput(prev => ({ ...prev, [task.id]: '' }))
+                                            } catch (e) { console.error('add link inline failed', e) }
+                                          }}
+                                        >บันทึก</button>
+                                      </div>
+                                    )}
                                     <div className="space-y-2">
-                                      {links.map((url, idx) => (
+                                      {linkObjs.map((item, idx) => (
                                         <div key={idx} className="border rounded-lg p-2 bg-white">
                                           <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1 min-w-0">
-                                              <a href={url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline">{url}</a>
+                                              <a href={item.url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline max-w-full">{item.url}</a>
+                                              {item.note && <div className="text-xs text-gray-600 mt-1 break-words">{item.note}</div>}
                                             </div>
                                             <div className="flex items-center gap-2">
                                               {/* Removed View/Replace per request */}
                                               <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={async ()=>{
-                                                if(!confirm('ลบลิงก์นี้?')) return; const newLinks = links.filter((_,i)=>i!==idx);
-                                                try { if ((task as any).submission_mode==='group' && g) { await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any); const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed })); } else if (effective?.id) { await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id); await fetchWorkshopData(); } } catch(e){ console.error('remove link failed', e) }
+                                                if(!confirm('ลบลิงก์นี้?')) return; const newLinks = linkObjs.filter((_,i)=>i!==idx);
+                                                try {
+                                                  if (newLinks.length === 0) {
+                                                    if ((task as any).submission_mode==='group' && g) {
+                                                      await submissionService.deleteGroupTaskSubmission(task.id, g.id)
+                                                      setGroupSubmissions(prev => ({ ...prev, [g.id]: null }))
+                                                    } else if (effective?.id) {
+                                                      await submissionService.deleteUserTaskSubmission(user!.id, task.id)
+                                                    }
+                                                    await fetchWorkshopData()
+                                                  } else {
+                                                    if ((task as any).submission_mode==='group' && g) {
+                                                      await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
+                                                      const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
+                                                      setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed }))
+                                                    } else if (effective?.id) {
+                                                      await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id)
+                                                      await fetchWorkshopData()
+                                                    }
+                                                  }
+                                                } catch(e){ console.error('remove link failed', e) }
                                               }}>ลบ</button>
                                             </div>
                                           </div>
@@ -909,81 +972,54 @@ export function WorkshopFeedPage() {
                           )}
 
                           {/* Edit Form for Submitted Tasks */}
-                          {isSubmitted && editingTaskId === task.id && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                              <div className="mb-2 inline-flex items-center gap-2 text-xs text-blue-800 bg-blue-50 border border-blue-200 px-2 py-1 rounded">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span>กำลังแก้ไขงานที่ส่ง</span>
-                              </div>
-                              <div className="space-y-3">
-                                <input
-                                  type="url"
-                                  value={submissionUrl}
-                                  onChange={(e) => setSubmissionUrl(e.target.value)}
-                                  placeholder="https://example.com/my-work"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
-                                  required
-                                />
-                                <div>
-                                  <button
-                                    className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200"
-                                    onClick={async () => {
-                                      const effective: any = (task as any).submission_mode === 'group' ? gSub : submission
-                                      const links: string[] = Array.isArray(effective?.links)
-                                        ? effective.links
-                                        : (effective?.submission_url ? [effective.submission_url] : [])
-                                      const url = submissionUrl.trim()
-                                      if (!url) return
-                                      const newLinks = [...links, url]
-                                      try {
-                                        if ((task as any).submission_mode === 'group' && g) {
-                                          await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
-                                          const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
-                                          setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
-                                        } else if (effective?.id) {
-                                          await supabase.from('submissions').update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() }).eq('id', effective.id)
-                                          await fetchWorkshopData()
-                                        }
-                                        setSubmissionUrl('')
-                                      } catch (e) { console.error('add link from form failed', e) }
-                                    }}
-                                  >เพิ่มลิงก์</button>
-                                </div>
-                                
-                                <textarea
-                                  value={submissionNotes}
-                                  onChange={(e) => setSubmissionNotes(e.target.value)}
-                                  placeholder="หมายเหตุ..."
-                                  rows={2}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm resize-none"
-                                />
-                                
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => handleTaskSubmission(task.id)}
-                                    disabled={!submissionUrl.trim()}
-                                    className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    บันทึก
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setEditingTaskId(null)
-                                      setSubmissionUrl('')
-                                      setSubmissionNotes('')
-                                    }}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-                                  >
-                                    ยกเลิก
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Materials below when editing */}
+{isSubmitted && editingTaskId === task.id && (
+  <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+    <div className="mb-2 inline-flex items-center gap-2 text-xs text-blue-800 bg-blue-50 border border-blue-200 px-2 py-1 rounded">
+      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span>??????????????</span>
+    </div>
+    {(() => {
+      const effective: any = (task as any).submission_mode === 'group' ? gSub : submission
+      const current = editLinksMap[task.id] ?? normalizeLinkObjects(effective?.links?.length ? effective.links : (effective?.submission_url ? [effective.submission_url] : []))
+      if (!editLinksMap[task.id]) setEditLinksMap(prev => ({ ...prev, [task.id]: current }))
+      const list = editLinksMap[task.id] || []
+      return (
+        <div className="space-y-3">
+          {list.map((it, idx) => (
+            <div key={idx} className="flex gap-2 items-start">
+              <input type="url" value={it.url} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], url:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder={`???????? ${idx+1}`} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
+              <input type="text" value={it.note || ''} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], note:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder="????????" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
+              <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={()=> setEditLinksMap(prev=>({ ...prev, [task.id]: (prev[task.id]||[]).filter((_,i)=>i!==idx) }))}>??</button>
+            </div>
+          ))}
+          <div className="flex gap-2 items-start">
+            <input type="url" value={submissionUrl} onChange={(e)=> setSubmissionUrl(e.target.value)} placeholder="??????????????" className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
+            <input type="text" value={submissionNotes} onChange={(e)=> setSubmissionNotes(e.target.value)} placeholder="????????????????????" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
+            <button className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200" onClick={()=>{ const url=submissionUrl.trim(); if(!url) return; setEditLinksMap(prev=>({ ...prev, [task.id]: [ ...(prev[task.id]||[]), submissionNotes.trim()? {url, note:submissionNotes.trim()} : {url} ] })); setSubmissionUrl(''); setSubmissionNotes('') }}>??????????</button>
+          </div>
+          <div className="flex gap-2">
+            <button className="btn btn-primary px-4 py-2 text-sm font-medium" onClick={async ()=>{
+              const toSave=(editLinksMap[task.id]||[]).filter(it=>it.url && it.url.trim())
+              try{
+                if (toSave.length===0){
+                  if ((task as any).submission_mode==='group' && g){ await submissionService.deleteGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: null })) }
+                  else { await submissionService.deleteUserTaskSubmission(user!.id, task.id) }
+                } else {
+                  if ((task as any).submission_mode==='group' && g){ await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user!.id, group_id: g.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any) }
+                  else { await supabase.from('submissions').upsert({ task_id: task.id, user_id: user!.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any, { onConflict: 'task_id,user_id' }) }
+                }
+                await fetchWorkshopData(); setEditingTaskId(null)
+              }catch(e){ console.error('save links failed', e)}
+            }}>??????</button>
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm" onClick={()=>{ setEditingTaskId(null); setSubmissionUrl(''); setSubmissionNotes(''); setEditLinksMap(prev=>({ ...prev, [task.id]: [] })) }}>??????</button>
+          </div>
+        </div>
+      )
+    })()}
+  </div>
+)}/* Materials below when editing */}
                           {editingTaskId === task.id && Array.isArray((task as any).materials) && (task as any).materials.length > 0 && (
                             <div className="mt-3">
                               <TaskMaterialDisplay materials={(task as any).materials} />
@@ -1277,6 +1313,7 @@ function GroupJoinInline({ onDone }: { onDone: () => void }) {
     </div>
   )
 }
+
 
 
 
