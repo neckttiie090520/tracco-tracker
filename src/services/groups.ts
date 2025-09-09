@@ -37,6 +37,16 @@ export const groupService = {
     return data
   },
 
+  async getGroupById(groupId: string) {
+    const { data, error } = await supabase
+      .from('task_groups')
+      .select('*')
+      .eq('id', groupId)
+      .single()
+    if (error) throw error
+    return data
+  },
+
   async listTaskGroups(taskId: string) {
     const { data, error } = await supabase
       .from('task_groups')

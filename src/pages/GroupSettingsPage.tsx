@@ -48,18 +48,16 @@ export default function GroupSettingsPage() {
   const loadGroupData = async () => {
     try {
       setLoading(true)
+      
+      // Get group info directly by ID
+      const groupData = await groupService.getGroupById(groupId!)
+      setGroup(groupData)
+      setNewGroupName(groupData.name)
+      
+      // Get members list
       const membersData = await groupService.listMembers(groupId!)
       setMembers(membersData || [])
       
-      // Get group info from the first member's group data
-      if (membersData && membersData.length > 0) {
-        // We need to fetch group details separately since listMembers doesn't return full group info
-        const userGroup = await groupService.getUserGroupForTask(membersData[0].user_id, membersData[0].user_id)
-        if (userGroup) {
-          setGroup(userGroup)
-          setNewGroupName(userGroup.name)
-        }
-      }
     } catch (err) {
       console.error('Failed to load group data:', err)
       setError('ไม่สามารถโหลดข้อมูลกลุ่มได้')
