@@ -594,12 +594,12 @@ export function WorkshopDetailPage() {
                             return (
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-sm font-medium text-gray-900">Submitted Links ({links.length})</div>
+                                  <div className="text-sm font-medium text-gray-900">ลิงก์ที่ส่ง ({links.length})</div>
                                   <button
                                     className="btn btn-primary px-3 py-1 text-xs"
-                                    aria-label="Add Link"
+                                    aria-label="เพิ่มลิงก์"
                                     onClick={async () => {
-                                      const url = prompt('Add link URL')?.trim()
+                                      const url = prompt('เพิ่มลิงก์ URL')?.trim()
                                       if (!url) return
                                       const newLinks = [...links, url]
                                       try {
@@ -615,9 +615,9 @@ export function WorkshopDetailPage() {
                                         setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
                                       } catch (e) { console.error('add link failed', e) }
                                     }}
-                                  >Add Link</button>
+                                  >เพิ่มลิงก์</button>
                                 </div>
-                                <div className="text-xs text-gray-600">Submitted at: {submittedTime}</div>
+                                <div className="text-xs text-gray-600">ส่งเมื่อ: {submittedTime}</div>
                                 <div className="space-y-2">
                                   {links.map((url, idx) => (
                                     <div key={idx} className="border rounded-lg p-2 bg-white">
@@ -626,12 +626,12 @@ export function WorkshopDetailPage() {
                                           <a href={url} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-700 truncate hover:underline">{url}</a>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">View</a>
+                                          <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200">ดู</a>
                                           <button
                                             className="text-xs px-2 py-1 rounded bg-yellow-100 hover:bg-yellow-200"
-                                            aria-label={`Replace link ${idx+1}`}
+                                            aria-label={`แทนที่ลิงก์ ${idx+1}`}
                                             onClick={async () => {
-                                              const newUrl = prompt('Replace with URL', url)?.trim()
+                                              const newUrl = prompt('แทนที่ด้วย URL', url)?.trim()
                                               if (!newUrl || newUrl === url) return
                                               const newLinks = links.map((u, i) => i === idx ? newUrl : u)
                                               try {
@@ -647,27 +647,36 @@ export function WorkshopDetailPage() {
                                                 setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
                                               } catch (e) { console.error('replace link failed', e) }
                                             }}
-                                          >Replace</button>
+                                          >แทนที่</button>
                                           <button
                                             className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700"
-                                            aria-label={`Remove link ${idx+1}`}
+                                            aria-label={`ลบลิงก์ ${idx+1}`}
                                             onClick={async () => {
-                                              if (!confirm('Remove this link?')) return
+                                              if (!confirm('ลบลิงก์นี้?')) return
                                               const newLinks = links.filter((_, i) => i !== idx)
                                               try {
-                                                await supabase
-                                                  .from('submissions')
-                                                  .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
-                                                  .eq('id', submission.id)
-                                                const { data: refreshed } = await supabase
-                                                  .from('submissions')
-                                                  .select('*')
-                                                  .eq('id', submission.id)
-                                                  .single()
-                                                setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                                if (newLinks.length === 0) {
+                                                  // ถ้าลบลิงก์สุดท้าย ให้ลบงานที่ส่งทิ้งไปด้วย
+                                                  await supabase
+                                                    .from('submissions')
+                                                    .delete()
+                                                    .eq('id', submission.id)
+                                                  setSubmissions(prev => prev.filter(s => s.id !== submission.id))
+                                                } else {
+                                                  await supabase
+                                                    .from('submissions')
+                                                    .update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() })
+                                                    .eq('id', submission.id)
+                                                  const { data: refreshed } = await supabase
+                                                    .from('submissions')
+                                                    .select('*')
+                                                    .eq('id', submission.id)
+                                                    .single()
+                                                  setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                                }
                                               } catch (e) { console.error('remove link failed', e) }
                                             }}
-                                          >Remove</button>
+                                          >ลบ</button>
                                         </div>
                                       </div>
                                     </div>
