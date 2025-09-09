@@ -76,6 +76,8 @@ export function WorkshopFeedPage() {
   const [addLinkNoteInput, setAddLinkNoteInput] = useState<Record<string, string>>({})
   // Edit-mode link list per task (array of {url, note})
   const [editLinksMap, setEditLinksMap] = useState<Record<string, { url: string; note?: string }[]>>({})
+  // Show group management modal for submitted tasks
+  const [showGroupManagementFor, setShowGroupManagementFor] = useState<string | null>(null)
 
   const normalizeLinkObjects = (raw: any): { url: string; note?: string }[] => {
     if (!raw) return []
@@ -974,8 +976,16 @@ export function WorkshopFeedPage() {
                                   </div>
                                 </div>
                                 {g && (
-                                  <div className="text-xs text-purple-600">
-                                    รหัสกลุ่ม: <span className="font-mono font-semibold">{g.party_code}</span>
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-xs text-purple-600">
+                                      รหัสกลุ่ม: <span className="font-mono font-semibold">{g.party_code}</span>
+                                    </div>
+                                    <button
+                                      onClick={() => setShowGroupManagementFor(task.id)}
+                                      className="text-xs px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                                    >
+                                      ตั้งค่า
+                                    </button>
                                   </div>
                                 )}
                               </div>
@@ -997,6 +1007,37 @@ export function WorkshopFeedPage() {
                                     <div className="text-xs text-green-600 mt-1">ดูรายละเอียดได้ที่หน้างาน</div>
                                   </div>
                                 </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Group Management Modal/Card (for submitted tasks) */}
+                          {showGroupManagementFor === task.id && (task as any).submission_mode === 'group' && taskGroups[task.id] && (
+                            <div className="mt-3">
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex justify-end mb-2">
+                                  <button
+                                    onClick={() => setShowGroupManagementFor(null)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                  >
+                                    <i className="bx bx-x text-xl"></i>
+                                  </button>
+                                </div>
+                                <GroupManagementCard
+                                  group={taskGroups[task.id]}
+                                  taskId={task.id}
+                                  onGroupUpdated={async (group) => {
+                                    setTaskGroups(prev => ({ ...prev, [task.id]: group }))
+                                    if (group) {
+                                      const mem = await groupService.listMembers(group.id)
+                                      setGroupMembers(prev => ({ ...prev, [group.id]: mem || [] }))
+                                    }
+                                  }}
+                                  onGroupDeleted={() => {
+                                    setTaskGroups(prev => ({ ...prev, [task.id]: null }))
+                                    setShowGroupManagementFor(null)
+                                  }}
+                                />
                               </div>
                             </div>
                           )}
@@ -1063,35 +1104,6 @@ export function WorkshopFeedPage() {
                                           }}
                                         >เพิ่มลิงก์</button>
                                         
-                                        {(task as any).submission_mode === 'group' && g && (
-                                          <>
-                                            <button
-                                              className="text-xs px-3 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium border border-blue-300"
-                                              onClick={() => setEditingTaskId(task.id)}
-                                            >
-                                              ตั้งค่ากลุ่ม
-                                            </button>
-                                            
-                                            {!groupService.isOwner(g, user?.id) && (
-                                              <button
-                                                className="text-xs px-3 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700 font-medium border border-red-300"
-                                                onClick={async () => {
-                                                  if (!window.confirm('คุณแน่ใจหรือไม่ที่จะออกจากกลุ่ม?')) return
-                                                  try {
-                                                    await groupService.removeMember(g.id, user!.id)
-                                                    // Refresh data to reflect changes
-                                                    await refreshTasksData()
-                                                  } catch (error) {
-                                                    console.error('Leave group failed:', error)
-                                                    alert('ไม่สามารถออกจากกลุ่มได้')
-                                                  }
-                                                }}
-                                              >
-                                                ออกจากกลุ่ม
-                                              </button>
-                                            )}
-                                          </>
-                                        )}
                                       </div>
                                     </div>
                                     
