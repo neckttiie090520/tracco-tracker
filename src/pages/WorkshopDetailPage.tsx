@@ -466,8 +466,8 @@ export function WorkshopDetailPage() {
               tasks.map((task) => {
                 const submission = submissions.find(s => s.task_id === task.id)
                 const isSubmitted = submission?.status === 'submitted'
-                const dueDate = new Date(task.due_date)
-                const isOverdue = !isSubmitted && dueDate < new Date()
+                const dueDate = task.due_date ? new Date(task.due_date) : null
+                const isOverdue = !isSubmitted && dueDate && dueDate < new Date()
                 
                 return (
                   <div 
@@ -490,7 +490,7 @@ export function WorkshopDetailPage() {
                               <div className="flex items-center gap-2">
                                 <span>📅</span>
                                 <span className="text-gray-600">กำหนดส่ง:</span>
-                                <span className="font-medium">{formatDateShort(dueDate, 'CE')}</span>
+                                <span className="font-medium">{formatDateShort(task.due_date, 'CE')}</span>
                               </div>
                               
                               <div className="flex items-center gap-2">
@@ -515,51 +515,8 @@ export function WorkshopDetailPage() {
                         />
                       </div>
                       
-                      {/* Submission Section */}
-                      {isSubmitted && submission ? (
-                        <div className="bg-green-50 rounded-xl p-4 mt-4 border border-green-200">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <p className="text-green-900 font-medium flex items-center gap-2">
-                                <span>✅</span>
-                                ส่งงานเรียบร้อยแล้ว
-                              </p>
-                              <p className="text-sm text-green-700 mt-1">
-                                ส่งเมื่อ: {new Date(submission.submitted_at).toLocaleString('th-TH')}
-                              </p>
-                              {submission.submission_url && (
-                                <a 
-                                  href={submission.submission_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-blue-600 hover:text-blue-700 mt-2 inline-flex items-center gap-1"
-                                >
-                                  <span>🔗</span>
-                                  ดูงานที่ส่ง
-                                </a>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => {
-                                setActiveTaskId(task.id)
-                                setSubmissionForm({
-                                  submission_url: submission.submission_url || '',
-                                  notes: submission.notes || ''
-                                })
-                              }}
-                              className="text-sm text-gray-600 hover:text-gray-800"
-                            >
-                              แก้ไข
-                            </button>
-                          </div>
-                          {submission.notes && (
-                            <div className="mt-3 p-3 bg-white rounded-lg">
-                              <p className="text-sm text-gray-600">หมายเหตุ:</p>
-                              <p className="text-sm text-gray-800">{submission.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
+                      {/* Submission Section - Enhanced multi-link UI only */}
+                      {!isSubmitted ? (
                         <>
                           {!isOverdue && activeTaskId !== task.id && (
                             <button
@@ -579,7 +536,7 @@ export function WorkshopDetailPage() {
                             </div>
                           )}
                         </>
-                      )}
+                      ) : null}
                       
                       {/* Submission Form */}
                       {/* งานที่ส่ง (Enhanced multi-link submissions with detailed UI) */}
@@ -781,7 +738,7 @@ export function WorkshopDetailPage() {
                         </div>
                       )}
 
-                      {activeTaskId === task.id && (
+                      {activeTaskId === task.id && !isSubmitted && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
                           <h4 className="font-medium text-gray-900 mb-3">ส่งงาน</h4>
                           

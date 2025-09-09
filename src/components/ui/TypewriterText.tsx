@@ -23,6 +23,15 @@ export const TypewriterText = ({ examples, className = "" }: TypewriterTextProps
     return () => clearInterval(intervalId);
   }, [examples.length]);
 
+  // Helper function to properly segment Thai text
+  const segmentText = (text: string) => {
+    // For Thai text, we'll split by words and spaces to preserve character combinations
+    // This prevents breaking Thai vowels and tone marks from their base characters
+    return text.split(/(\s+)/).filter(segment => segment.length > 0);
+  };
+
+  const segments = segmentText(examples[exampleIndex]);
+
   return (
     <span 
       className={`${className}`} 
@@ -33,7 +42,7 @@ export const TypewriterText = ({ examples, className = "" }: TypewriterTextProps
         paddingBottom: '0.5em'
       }}
     >
-      {examples[exampleIndex].split("").map((l, i) => (
+      {segments.map((segment, i) => (
         <motion.span
           key={`${exampleIndex}-${i}`}
           className="relative inline-block"
@@ -51,14 +60,14 @@ export const TypewriterText = ({ examples, className = "" }: TypewriterTextProps
               opacity: [0, 1, 1, 0],
             }}
             transition={{
-              delay: i * LETTER_DELAY,
+              delay: i * LETTER_DELAY * 3, // Slower animation for word segments
               duration: SWAP_DELAY_IN_MS / 1000,
               times: [0, 0.02, 0.8, 1],
               ease: "easeInOut",
             }}
-            className="inline-block"
+            className="inline-block whitespace-pre"
           >
-            {l}
+            {segment}
           </motion.span>
           <motion.span
             initial={{
@@ -68,7 +77,7 @@ export const TypewriterText = ({ examples, className = "" }: TypewriterTextProps
               opacity: [0, 1, 0],
             }}
             transition={{
-              delay: i * LETTER_DELAY,
+              delay: i * LETTER_DELAY * 3,
               times: [0, 0.1, 1],
               duration: BOX_FADE_DURATION,
               ease: "easeInOut",

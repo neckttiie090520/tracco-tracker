@@ -1095,7 +1095,7 @@ export function WorkshopFeedPage() {
             <div key={idx} className="flex gap-2 items-start">
               <input type="url" value={it.url} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], url:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder={`ลิงก์ ${idx+1}`} className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm" />
               <input type="text" value={it.note || ''} onChange={(e)=> setEditLinksMap(prev=>{ const arr=[...(prev[task.id]||[])]; arr[idx]={...arr[idx], note:e.target.value}; return { ...prev, [task.id]: arr } })} placeholder="หมายเหตุ" className="w-60 px-3 py-2 border border-gray-300 rounded text-sm" />
-              <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={()=> setEditLinksMap(prev=>({ ...prev, [task.id]: (prev[task.id]||[]).filter((_,i)=>i!==idx) }))}>??</button>
+              <button className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100" onClick={()=> setEditLinksMap(prev=>({ ...prev, [task.id]: (prev[task.id]||[]).filter((_,i)=>i!==idx) }))}>ลบ</button>
             </div>
           ))}
           <div className="flex gap-2 items-start">

@@ -196,21 +196,51 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-gray-800"><span className="font-medium">Group:</span> {group.name}</div>
-                    <div className="text-sm text-gray-600">Code: <span className="font-mono tracking-widest">{group.party_code}</span></div>
+                    <div className="text-gray-800"><span className="font-medium">กลุ่ม:</span> {group.name}</div>
+                    <div className="text-sm text-gray-600">รหัส: <span className="font-mono tracking-widest">{group.party_code}</span></div>
                   </div>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(group.party_code)}
-                    className="text-xs text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded hover:bg-blue-50"
-                  >Copy Code</button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => navigator.clipboard.writeText(group.party_code)}
+                      className="text-xs text-blue-700 bg-white border border-blue-200 px-2 py-1 rounded hover:bg-blue-50"
+                    >คัดลอกรหัส</button>
+                    <GroupSettingsMenu 
+                      group={group}
+                      isOwner={groupService.isOwner(group, user?.id)}
+                      onLeaveGroup={async () => {
+                        if (!user) return
+                        if (confirm('ต้องการออกจากกลุ่มนี้?')) {
+                          await groupService.removeMember(group.id, user.id)
+                          setGroup(null)
+                          setGroupMembers([])
+                          setGroupSubmission(null)
+                        }
+                      }}
+                      onRenameGroup={async (newName: string) => {
+                        await groupService.renameGroup(group.id, newName)
+                        setGroup({ ...group, name: newName })
+                      }}
+                      onDeleteGroup={async () => {
+                        if (confirm('ต้องการลบกลุ่มนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้')) {
+                          await groupService.deleteGroup(group.id)
+                          setGroup(null)
+                          setGroupMembers([])
+                          setGroupSubmission(null)
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
                 {groupMembers.length > 0 && (
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Members</div>
+                    <div className="text-sm text-gray-600 mb-1">สมาชิก</div>
                     <div className="flex flex-wrap gap-2">
                       {groupMembers.map((m) => (
-                        <div key={m.user_id} className="px-2 py-1 bg-gray-100 rounded text-sm">
-                          {m.user?.name || m.user_id.slice(0, 6)} {m.role === 'owner' ? '(owner)' : ''}
+                        <div key={m.user_id} className="px-2 py-1 bg-gray-100 rounded text-sm flex items-center gap-1">
+                          {m.user?.name || m.user_id.slice(0, 6)} {m.role === 'owner' ? '(เจ้าของ)' : ''}
+                          {m.user_id === user?.id && (
+                            <span className="text-blue-600 font-medium">(คุณ)</span>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -425,6 +455,131 @@ function JoinGroupInline({ onJoined }: { onJoined: () => void }) {
       >
         {loading ? 'Joining...' : 'Join Group'}
       </button>
+    </div>
+  )
+}
+
+function GroupSettingsMenu({ 
+  group, 
+  isOwner, 
+  onLeaveGroup, 
+  onRenameGroup, 
+  onDeleteGroup 
+}: {
+  group: any
+  isOwner: boolean
+  onLeaveGroup: () => Promise<void>
+  onRenameGroup: (newName: string) => Promise<void>
+  onDeleteGroup: () => Promise<void>
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [showRenameModal, setShowRenameModal] = useState(false)
+  const [newGroupName, setNewGroupName] = useState(group.name)
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center gap-1"
+      >
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        ตั้งค่า
+      </button>
+      
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+            <div className="py-1">
+              {isOwner && (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      setShowRenameModal(true)
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    เปลี่ยนชื่อกลุ่ม
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setIsOpen(false)
+                      await onDeleteGroup()
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    ลบกลุ่ม
+                  </button>
+                  <div className="border-t border-gray-100 my-1" />
+                </>
+              )}
+              <button
+                onClick={async () => {
+                  setIsOpen(false)
+                  await onLeaveGroup()
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                ออกจากกลุ่ม
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Rename Modal */}
+      {showRenameModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
+            <h3 className="text-lg font-semibold mb-4">เปลี่ยนชื่อกลุ่ม</h3>
+            <input
+              type="text"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
+              placeholder="ชื่อกลุ่มใหม่"
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => {
+                  setShowRenameModal(false)
+                  setNewGroupName(group.name)
+                }}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={async () => {
+                  if (newGroupName.trim() && newGroupName.trim() !== group.name) {
+                    await onRenameGroup(newGroupName.trim())
+                  }
+                  setShowRenameModal(false)
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              >
+                บันทึก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
