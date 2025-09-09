@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../services/supabase'
@@ -67,7 +67,6 @@ export function WorkshopFeedPage() {
   const [groupMembers, setGroupMembers] = useState<Record<string, any[]>>({})
   const [groupSubmissions, setGroupSubmissions] = useState<Record<string, any | null>>({})
 
-  const [confirmLeaveTaskId, setConfirmLeaveTaskId] = useState<string | null>(null)
   useEffect(() => {
     if (id && user) {
       fetchWorkshopData()
@@ -106,7 +105,7 @@ export function WorkshopFeedPage() {
               console.log('User query error:', userError)
             } else if (userData) {
               setInstructorProfile({
-                name: userData.name || userData.email?.split('@')[0] || 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸à¸Šà¸·à¹ˆà¸­',
+                name: userData.name || userData.email?.split('@')[0] || 'ไม่ระบุชื่อ',
                 email: userData.email,
                 avatar_seed: userData.avatar_seed,
                 avatar_saturation: userData.avatar_saturation,
@@ -237,7 +236,7 @@ export function WorkshopFeedPage() {
       if ((currentTask as any)?.submission_mode === 'group') {
         const g = taskGroups[taskId]
         if (!g) {
-          alert('à¸à¸£à¸¸à¸“à¸²à¸ªà¸£à¹‰à¸²à¸‡à¸«à¸£à¸·à¸­à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡à¸à¸¥à¸¸à¹ˆà¸¡à¸à¹ˆà¸­à¸™à¸ªà¹ˆà¸‡à¸‡à¸²à¸™')
+          alert('กรุณาสร้างหรือเข้าร่วมกลุ่มก่อนส่งงาน')
           return
         }
         const saved = await submissionService.upsertGroupSubmission({
@@ -284,11 +283,11 @@ export function WorkshopFeedPage() {
       setSubmissionUrl('')
       setSubmissionNotes('')
       setEditingTaskId(null)
-      alert('à¸ªà¹ˆà¸‡à¸‡à¸²à¸™à¹€à¸£à¸µà¸¢à¸šà¸£à¹‰à¸­à¸¢à¹à¸¥à¹‰à¸§!')
+      alert('ส่งงานเรียบร้อยแล้ว!')
       
     } catch (error) {
       console.error('Error submitting task:', error)
-      alert(`à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¸ªà¹ˆà¸‡à¸‡à¸²à¸™: ${error.message || error}`)
+      alert(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
     }
   }
 
@@ -299,7 +298,7 @@ export function WorkshopFeedPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥...</p>
+            <p className="text-gray-600 text-lg">กำลังโหลดข้อมูล...</p>
           </div>
         </div>
       </div>
@@ -312,14 +311,14 @@ export function WorkshopFeedPage() {
         <UserNavigation />
         <div className="max-w-4xl mx-auto px-8 py-12">
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="text-red-500 text-5xl mb-4">âš ï¸</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">à¹„à¸¡à¹ˆà¸žà¸š Workshop</h2>
-            <p className="text-gray-600 mb-6">Workshop à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸„à¹‰à¸™à¸«à¸²à¹„à¸¡à¹ˆà¸¡à¸µà¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸£à¸°à¸šà¸š</p>
+            <div className="text-red-500 text-5xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">ไม่พบ Workshop</h2>
+            <p className="text-gray-600 mb-6">Workshop ที่คุณค้นหาไม่มีอยู่ในระบบ</p>
             <Link
               to="/sessions"
               className="btn btn-primary px-6 py-3 font-semibold"
             >
-              à¸à¸¥à¸±à¸šà¹„à¸›à¸«à¸™à¹‰à¸² Workshops
+              กลับไปหน้า Workshops
             </Link>
           </div>
         </div>
@@ -398,7 +397,7 @@ export function WorkshopFeedPage() {
               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-rose-100 text-rose-700">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"/></svg>
               </span>
-              <h3 className="text-sm font-semibold text-gray-700">à¹€à¸­à¸à¸ªà¸²à¸£à¸›à¸£à¸°à¸à¸­à¸šà¸‚à¸­à¸‡ Workshop à¸™à¸µà¹‰</h3>
+              <h3 className="text-sm font-semibold text-gray-700">เอกสารประกอบของ Workshop นี้</h3>
             </div>
             {/* Material Display: embed hero only if embed mode */}
             {mainMaterial.display_mode === 'embed' && (mainMaterial as any).embed_url ? (
@@ -421,38 +420,38 @@ export function WorkshopFeedPage() {
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
-                    <span>ðŸ«</span>
+                    <span>🏫</span>
                     <span>Phase {workshop.phase || '1'}</span>
                   </span>
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <span>ðŸ“…</span>
+                  <span>📅</span>
                   <span>{formatDateShort(workshop.workshop_date, 'CE')}</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <span>â°</span>
+                  <span>⏰</span>
                   <span>{workshop.start_time} - {workshop.end_time}</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <span>ðŸ‘¥</span>
-                  <span>{workshop.max_participants} à¸—à¸µà¹ˆà¸™à¸±à¹ˆà¸‡</span>
+                  <span>👥</span>
+                  <span>{workshop.max_participants} ที่นั่ง</span>
                 </div>
 
                 {workshop.instructor && (
                   <div className="flex items-center gap-2">
-                    <span>ðŸ‘¨â€ðŸ«</span>
+                    <span>👨‍🏫</span>
                     <span className="flex items-center gap-2">
-                      à¸§à¸´à¸—à¸¢à¸²à¸à¸£: {renderInstructor()}
+                      วิทยากร: {renderInstructor()}
                     </span>
                   </div>
                 )}
                 
                 {workshop.location && (
                   <div className="flex items-center gap-2">
-                    <span>ðŸ“</span>
+                    <span>📍</span>
                     <span>{workshop.location}</span>
                   </div>
                 )}
@@ -470,7 +469,7 @@ export function WorkshopFeedPage() {
                       onClick={() => setShowFullDescription(!showFullDescription)}
                       className="mt-2 text-indigo-600 hover:text-indigo-800 font-medium text-sm transition-colors"
                     >
-                      {showFullDescription ? 'à¸¢à¹ˆà¸­à¸¥à¸‡' : 'à¹à¸ªà¸”à¸‡à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡'}
+                      {showFullDescription ? 'ย่อลง' : 'แสดงเพิ่มเติม'}
                     </button>
                   )}
                 </div>
@@ -482,14 +481,14 @@ export function WorkshopFeedPage() {
           <div className="bg-white rounded-lg mb-6 shadow-sm border border-gray-200">
             <div className="px-6 py-6">
               <div className="flex items-start gap-4 mb-4">
-                <div className="text-3xl">ðŸŽ“</div>
+                <div className="text-3xl">🎓</div>
                 <div className="flex-1">
                   <div className="inline-flex items-center gap-2 bg-gray-100 rounded px-3 py-1 mb-2">
-                    <span className="text-sm">âœ¨</span>
+                    <span className="text-sm">✨</span>
                     <span className="text-gray-700 text-sm font-medium">Phase {workshop.phase || '1'}</span>
                   </div>
                   <h1 className="text-2xl font-bold mb-2 text-gray-900">{workshop.title}</h1>
-                  <p className="text-gray-600 text-sm">à¹€à¸£à¸µà¸¢à¸™à¸£à¸¹à¹‰à¹à¸¥à¸°à¸žà¸±à¸’à¸™à¸²à¹„à¸›à¸à¸±à¸šà¹€à¸£à¸²à¹ƒà¸™à¹‚à¸¥à¸à¸‚à¸­à¸‡ AI</p>
+                  <p className="text-gray-600 text-sm">เรียนรู้และพัฒนาไปกับเราในโลกของ AI</p>
                 </div>
               </div>
               
@@ -504,7 +503,7 @@ export function WorkshopFeedPage() {
                       onClick={() => setShowFullDescription(!showFullDescription)}
                       className="mt-2 text-blue-600 hover:text-blue-700 text-sm underline"
                     >
-                      {showFullDescription ? 'à¸¢à¹ˆà¸­à¸¥à¸‡' : 'à¹à¸ªà¸”à¸‡à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡'}
+                      {showFullDescription ? 'ย่อลง' : 'แสดงเพิ่มเติม'}
                     </button>
                   )}
                 </div>
@@ -516,7 +515,7 @@ export function WorkshopFeedPage() {
                 {workshop.instructor && (
                   <div className="mb-4">
                     <div className="text-gray-500 text-xs font-medium mb-1">
-                      à¸§à¸´à¸—à¸¢à¸²à¸à¸£
+                      วิทยากร
                     </div>
                     <div className="flex items-center gap-2">
                       {renderInstructor()}
@@ -528,7 +527,7 @@ export function WorkshopFeedPage() {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <div className="text-gray-500 text-xs font-medium mb-1">
-                      à¸§à¸±à¸™à¸—à¸µà¹ˆ
+                      วันที่
                     </div>
                     <div className="text-gray-900 text-sm font-medium">
                       {formatDateShort(workshop.workshop_date, 'CE')}
@@ -537,7 +536,7 @@ export function WorkshopFeedPage() {
                   
                   <div>
                     <div className="text-gray-500 text-xs font-medium mb-1">
-                      à¹€à¸§à¸¥à¸²
+                      เวลา
                     </div>
                     <div className="text-gray-900 text-sm font-medium">
                       {workshop.start_time} - {workshop.end_time}
@@ -549,7 +548,7 @@ export function WorkshopFeedPage() {
                 {workshop.location && (
                   <div className="mb-4">
                     <div className="text-gray-500 text-xs font-medium mb-1">
-                      à¸ªà¸–à¸²à¸™à¸—à¸µà¹ˆ
+                      สถานที่
                     </div>
                     <div className="text-gray-900 text-sm font-medium">
                       {workshop.location}
@@ -560,10 +559,10 @@ export function WorkshopFeedPage() {
                 {/* Participants */}
                 <div>
                   <div className="text-gray-500 text-xs font-medium mb-1">
-                    à¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡
+                    ผู้เข้าร่วม
                   </div>
                   <div className="text-gray-900 text-sm font-medium">
-                    {workshop.current_participants}/{workshop.max_participants} à¸„à¸™
+                    {workshop.current_participants}/{workshop.max_participants} คน
                   </div>
                 </div>
               </div>
@@ -584,8 +583,8 @@ export function WorkshopFeedPage() {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>ðŸ“Š</span>
-                <span>à¸ªà¸–à¸´à¸•à¸´ Workshop</span>
+                <span>📊</span>
+                <span>สถิติ Workshop</span>
               </div>
             </button>
             <button
@@ -597,8 +596,8 @@ export function WorkshopFeedPage() {
               }`}
             >
               <div className="flex items-center justify-center gap-2">
-                <span>ðŸ“</span>
-                <span>à¹€à¸­à¸à¸ªà¸²à¸£à¹à¸¥à¸°à¸‡à¸²à¸™ ({materials.length + (mainMaterial ? -1 : 0)} à¹€à¸­à¸à¸ªà¸²à¸£, {tasks.length} à¸‡à¸²à¸™)</span>
+                <span>📝</span>
+                <span>เอกสารและงาน ({materials.length + (mainMaterial ? -1 : 0)} เอกสาร, {tasks.length} งาน)</span>
               </div>
             </button>
           </div>
@@ -609,37 +608,37 @@ export function WorkshopFeedPage() {
           <div className="space-y-8">
             {/* Simple Workshop Stats */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">à¸ªà¸–à¸´à¸•à¸´ Workshop</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">สถิติ Workshop</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">ðŸ“š</div>
+                    <div className="text-2xl">📚</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
-                      <p className="text-gray-600 text-sm">à¹€à¸­à¸à¸ªà¸²à¸£à¸›à¸£à¸°à¸à¸­à¸š</p>
+                      <p className="text-gray-600 text-sm">เอกสารประกอบ</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">ðŸ“</div>
+                    <div className="text-2xl">📝</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">{tasks.length}</p>
-                      <p className="text-gray-600 text-sm">à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸ªà¹ˆà¸‡</p>
+                      <p className="text-gray-600 text-sm">งานที่ต้องส่ง</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-2xl">âœ…</div>
+                    <div className="text-2xl">✅</div>
                     <div>
                       <p className="text-2xl font-bold text-gray-900">
                         {submissions.filter(s => s.status === 'submitted').length}
                       </p>
-                      <p className="text-gray-600 text-sm">à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸ªà¹ˆà¸‡à¹à¸¥à¹‰à¸§</p>
+                      <p className="text-gray-600 text-sm">งานที่ส่งแล้ว</p>
                     </div>
                   </div>
                 </div>
@@ -655,8 +654,8 @@ export function WorkshopFeedPage() {
             {secondaryMaterials.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="mr-3">ðŸ“š</span>
-                  à¹€à¸­à¸à¸ªà¸²à¸£à¸›à¸£à¸°à¸à¸­à¸šà¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡
+                  <span className="mr-3">📚</span>
+                  เอกสารประกอบเพิ่มเติม
                 </h2>
                 <WorkshopMaterialsList materials={secondaryMaterials} />
               </div>
@@ -666,36 +665,36 @@ export function WorkshopFeedPage() {
             {/* Tasks Section */}
             <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <span className="mr-2">ðŸ“</span>
-                à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸ªà¹ˆà¸‡ ({tasks.length} à¸‡à¸²à¸™)
+                <span className="mr-2">📝</span>
+                งานที่ต้องส่ง ({tasks.length} งาน)
               </h2>
               <div className="flex justify-end mb-2">
                 <button
                   onClick={fetchWorkshopData}
                   className="inline-flex items-center gap-2 text-sm px-3 py-1.5 border rounded-md text-gray-700 hover:bg-gray-50"
-                  title="à¸£à¸µà¹€à¸Ÿà¸£à¸Šà¸«à¸™à¹‰à¸²"
+                  title="รีเฟรชหน้า"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014-7V9m0-4a9 9 0 00-14 7v3" />
                   </svg>
-                  à¸£à¸µà¹€à¸Ÿà¸£à¸Šà¸«à¸™à¹‰à¸²
+                  รีเฟรชหน้า
                 </button>
               </div>
               
               {tasks.length === 0 ? (
                 <div className="text-center py-6">
-                  <div className="text-3xl mb-3">ðŸ“</div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">à¸£à¸­à¸à¸²à¸£à¸¡à¸­à¸šà¸«à¸¡à¸²à¸¢à¸‡à¸²à¸™</h3>
-                  <p className="text-gray-600 text-xs mb-4">à¸§à¸´à¸—à¸¢à¸²à¸à¸£à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸ªà¸£à¹‰à¸²à¸‡à¸‡à¸²à¸™à¸ªà¸³à¸«à¸£à¸±à¸š Workshop à¸™à¸µà¹‰</p>
+                  <div className="text-3xl mb-3">📝</div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">รอการมอบหมายงาน</h3>
+                  <p className="text-gray-600 text-xs mb-4">วิทยากรยังไม่ได้สร้างงานสำหรับ Workshop นี้</p>
                   <div className="bg-blue-50 border border-blue-200 rounded p-3 max-w-md mx-auto">
                     <div className="flex items-start gap-2">
-                      <div className="text-blue-600 text-sm">ðŸ’¡</div>
+                      <div className="text-blue-600 text-sm">💡</div>
                       <div className="text-left">
-                        <p className="text-blue-900 font-medium text-xs mb-1">à¸ªà¸³à¸«à¸£à¸±à¸šà¸œà¸¹à¹‰à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡:</p>
+                        <p className="text-blue-900 font-medium text-xs mb-1">สำหรับผู้เข้าร่วม:</p>
                         <ul className="text-blue-800 text-xs space-y-1 list-disc list-inside">
-                          <li>à¸‡à¸²à¸™à¸ˆà¸°à¸›à¸£à¸²à¸à¸à¸‚à¸¶à¹‰à¸™à¹€à¸¡à¸·à¹ˆà¸­à¸§à¸´à¸—à¸¢à¸²à¸à¸£à¸ªà¸£à¹‰à¸²à¸‡à¹ƒà¸™à¸£à¸°à¸šà¸š</li>
-                          <li>à¸„à¸¸à¸“à¸ˆà¸°à¹„à¸”à¹‰à¸£à¸±à¸šà¸à¸²à¸£à¹à¸ˆà¹‰à¸‡à¹€à¸•à¸·à¸­à¸™à¹€à¸¡à¸·à¹ˆà¸­à¸¡à¸µà¸‡à¸²à¸™à¹ƒà¸«à¸¡à¹ˆ</li>
-                          <li>à¸ªà¸²à¸¡à¸²à¸£à¸–à¸ªà¹ˆà¸‡à¸‡à¸²à¸™à¸œà¹ˆà¸²à¸™ URL à¸«à¸£à¸·à¸­à¹„à¸Ÿà¸¥à¹Œà¹à¸™à¸š</li>
+                          <li>งานจะปรากฏขึ้นเมื่อวิทยากรสร้างในระบบ</li>
+                          <li>คุณจะได้รับการแจ้งเตือนเมื่อมีงานใหม่</li>
+                          <li>สามารถส่งงานผ่าน URL หรือไฟล์แนบ</li>
                         </ul>
                       </div>
                     </div>
@@ -723,7 +722,7 @@ export function WorkshopFeedPage() {
                               )}
                               <div className="flex items-center gap-2 text-xs">
                                 <span className="bg-white/20 px-2 py-1 rounded text-xs">
-                                  ðŸ“… {formatDateShort(dueDate, 'CE')}
+                                  📅 {formatDateShort(dueDate, 'CE')}
                                 </span>
                                 <StatusBadge 
                                   status={isSubmitted ? 'completed' : isOverdue ? 'overdue' : 'pending'}
@@ -741,12 +740,12 @@ export function WorkshopFeedPage() {
                                   }}
                                   className="px-3 py-1 rounded border border-blue-200 text-blue-700 bg-white hover:bg-blue-50 text-xs"
                                 >
-                                  à¹à¸à¹‰à¹„à¸‚
+                                  แก้ไข
                                 </button>
                                 <button
                                   onClick={async () => {
                                     if (!user) return
-                                    const ok = confirm('à¸¢à¸·à¸™à¸¢à¸±à¸™à¸à¸²à¸£à¸¢à¸à¹€à¸¥à¸´à¸/à¸¥à¸šà¸‡à¸²à¸™à¸—à¸µà¹ˆà¸ªà¹ˆà¸‡?')
+                                    const ok = confirm('ยืนยันการยกเลิก/ลบงานที่ส่ง?')
                                     if (!ok) return
                                     try {
                                       if ((task as any).submission_mode === 'group') {
@@ -768,13 +767,13 @@ export function WorkshopFeedPage() {
                                   }}
                                   className="px-3 py-1 rounded border border-red-200 text-red-700 bg-white hover:bg-red-50 text-xs"
                                 >
-                                  à¸¥à¸šà¸‡à¸²à¸™à¸—à¸µà¹ˆà¸ªà¹ˆà¸‡
+                                  ลบงานที่ส่ง
                                 </button>
                               </div>
                             </div>
                             {/* per-card refresh removed */}
                             <div className="text-lg ml-2">
-                              {isSubmitted ? 'âœ…' : isOverdue ? 'âš ï¸' : 'ðŸ“'}
+                              {isSubmitted ? '✅' : isOverdue ? '⚠️' : '📝'}
                             </div>
                           </div>
                         </div>
@@ -792,9 +791,9 @@ export function WorkshopFeedPage() {
                                   className="inline-flex items-center space-x-2 p-3 border rounded-lg transition-all duration-200 group bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
                                 >
                                   <div className="flex items-center space-x-2 flex-1">
-                                    <span className="text-green-600 text-sm">âœ…</span>
+                                    <span className="text-green-600 text-sm">✅</span>
                                     <div className="flex-1 min-w-0">
-                                      <div className="font-medium text-sm truncate">à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸ªà¹ˆà¸‡</div>
+                                      <div className="font-medium text-sm truncate">งานที่ส่ง</div>
                                       <div className="text-xs opacity-75">{new Date(submission?.submitted_at || '').toLocaleDateString('th-TH')}</div>
                                     </div>
                                   </div>
@@ -830,7 +829,7 @@ export function WorkshopFeedPage() {
                                   }}
                                   className="text-gray-600 hover:text-gray-800 text-xs px-2 py-1 rounded hover:bg-gray-100 transition-colors"
                                 >
-                                  à¹à¸à¹‰à¹„à¸‚
+                                  แก้ไข
                                 </button>
                               </div>
                             </div>
@@ -850,7 +849,7 @@ export function WorkshopFeedPage() {
                                 <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span>à¸à¸³à¸¥à¸±à¸‡à¹à¸à¹‰à¹„à¸‚à¸‡à¸²à¸™à¸—à¸µà¹ˆà¸ªà¹ˆà¸‡</span>
+                                <span>กำลังแก้ไขงานที่ส่ง</span>
                               </div>
                               <div className="space-y-3">
                                 <input
@@ -865,7 +864,7 @@ export function WorkshopFeedPage() {
                                 <textarea
                                   value={submissionNotes}
                                   onChange={(e) => setSubmissionNotes(e.target.value)}
-                                  placeholder="à¸«à¸¡à¸²à¸¢à¹€à¸«à¸•à¸¸..."
+                                  placeholder="หมายเหตุ..."
                                   rows={2}
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm resize-none"
                                 />
@@ -876,7 +875,7 @@ export function WorkshopFeedPage() {
                                     disabled={!submissionUrl.trim()}
                                     className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
-                                    à¸šà¸±à¸™à¸—à¸¶à¸
+                                    บันทึก
                                   </button>
                                   <button
                                     onClick={() => {
@@ -886,7 +885,7 @@ export function WorkshopFeedPage() {
                                     }}
                                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                                   >
-                                    à¸¢à¸à¹€à¸¥à¸´à¸
+                                    ยกเลิก
                                   </button>
                                 </div>
                               </div>
@@ -906,7 +905,7 @@ export function WorkshopFeedPage() {
                               onClick={() => setEditingTaskId(task.id)}
                               className="absolute bottom-3 right-3 btn btn-primary px-3 py-1 text-sm font-medium"
                             >
-                              à¸ªà¹ˆà¸‡à¸‡à¸²à¸™
+                              ส่งงาน
                             </button>
                           )}
                           
@@ -918,7 +917,7 @@ export function WorkshopFeedPage() {
                                   {!taskGroups[task.id] ? (
                                     <div className="grid gap-3 md:grid-cols-2">
                                       <div className="border rounded p-3">
-                                        <div className="font-medium mb-2">à¸ªà¸£à¹‰à¸²à¸‡à¸à¸¥à¸¸à¹ˆà¸¡</div>
+                                        <div className="font-medium mb-2">สร้างกลุ่ม</div>
                                         <GroupCreateInline taskId={task.id} onDone={async () => {
                                           if (!user) return;
                                           const g = await groupService.getUserGroupForTask(task.id, user.id);
@@ -930,7 +929,7 @@ export function WorkshopFeedPage() {
                                         }} />
                                       </div>
                                       <div className="border rounded p-3">
-                                        <div className="font-medium mb-2">à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡à¸”à¹‰à¸§à¸¢à¸£à¸«à¸±à¸ª</div>
+                                        <div className="font-medium mb-2">เข้าร่วมด้วยรหัส</div>
                                         <GroupJoinInline onDone={async () => {
                                           if (!user) return;
                                           const g = await groupService.getUserGroupForTask(task.id, user.id);
@@ -943,18 +942,18 @@ export function WorkshopFeedPage() {
                                       </div>
                                     </div>
                                   ) : (
-                                    <div className="p-3 bg-white rounded border relative">
+                                    <div className="p-3 bg-white rounded border">
                                       <div className="flex items-center justify-between">
                                         <div>
-                                          <div className="text-sm">à¸à¸¥à¸¸à¹ˆà¸¡: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
-                                          <div className="text-xs text-gray-600">à¸£à¸«à¸±à¸ª: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
+                                          <div className="text-sm">กลุ่ม: <span className="font-medium">{taskGroups[task.id]?.name}</span></div>
+                                          <div className="text-xs text-gray-600">รหัส: <span className="font-mono tracking-widest">{taskGroups[task.id]?.party_code}</span></div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                          <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
-                                          <button aria-label="ออกจากกลุ่ม" title="ออกจากกลุ่ม" onClick={() => setConfirmLeaveTaskId(task.id)} className="inline-flex items-center gap-2 h-11 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> ออกจากกลุ่ม
-                                          </button>
-                                        </div>
+                                        <button onClick={() => navigator.clipboard.writeText(taskGroups[task.id]?.party_code)} className="text-xs px-2 py-1 border rounded bg-white hover:bg-gray-50">คัดลอกรหัส</button>
+                                      </div>
+                                      {taskGroups[task.id] && groupMembers[taskGroups[task.id]?.id || '']?.length > 0 && (
+                                        <div className="mt-2">
+                                          <div className="text-xs text-gray-600 mb-1">Members</div>
+                                          <div className="flex flex-wrap gap-2">
                                             {groupMembers[taskGroups[task.id]?.id || ''].map((m: any) => (
                                               <span key={m.user_id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
                                                 {m.user?.name || m.user_id.slice(0,6)}
@@ -976,13 +975,15 @@ export function WorkshopFeedPage() {
                                                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs"
                                                     title={m.user_id === user?.id ? 'Leave group' : 'Remove member'}
                                                   >
-                                                    Ã—
+                                                    ×
                                                   </button>
                                                 )}
                                               </span>
                                             ))}
                                           </div>
                                         </div>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
                               )}
@@ -991,7 +992,7 @@ export function WorkshopFeedPage() {
                                   type="url"
                                   value={submissionUrl}
                                   onChange={(e) => setSubmissionUrl(e.target.value)}
-                                  placeholder="https://drive.google.com/... à¸«à¸£à¸·à¸­ https://docs.google.com/..."
+                                  placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
                                 />
                                 
@@ -999,7 +1000,7 @@ export function WorkshopFeedPage() {
                                   value={submissionNotes}
                                   onChange={(e) => setSubmissionNotes(e.target.value)}
                                   rows={2}
-                                  placeholder="à¸«à¸¡à¸²à¸¢à¹€à¸«à¸•à¸¸..."
+                                  placeholder="หมายเหตุ..."
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm resize-none"
                                 />
                                 
@@ -1009,7 +1010,7 @@ export function WorkshopFeedPage() {
                                     disabled={!submissionUrl.trim()}
                                     className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
-                                    à¸ªà¹ˆà¸‡à¸‡à¸²à¸™
+                                    ส่งงาน
                                   </button>
                                   <button
                                     onClick={() => {
@@ -1019,7 +1020,7 @@ export function WorkshopFeedPage() {
                                     }}
                                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                                   >
-                                    à¸¢à¸à¹€à¸¥à¸´à¸
+                                    ยกเลิก
                                   </button>
                                 </div>
                               </div>
@@ -1086,17 +1087,17 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full border px-3 py-2 rounded mb-2"
-        placeholder="à¸Šà¸·à¹ˆà¸­à¸à¸¥à¸¸à¹ˆà¸¡"
+        placeholder="ชื่อกลุ่ม"
       />
 
       <div className="mb-2">
-        <div className="text-xs text-gray-600 mb-1">à¹€à¸žà¸´à¹ˆà¸¡à¸ªà¸¡à¸²à¸Šà¸´à¸ (à¸žà¸´à¸¡à¸žà¹Œà¸Šà¸·à¹ˆà¸­à¸«à¸£à¸·à¸­à¸­à¸µà¹€à¸¡à¸¥)</div>
+        <div className="text-xs text-gray-600 mb-1">เพิ่มสมาชิก (พิมพ์ชื่อหรืออีเมล)</div>
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full border px-3 py-2 rounded"
-          placeholder="à¹€à¸Šà¹ˆà¸™ student@domain.com"
+          placeholder="เช่น student@domain.com"
         />
         {suggestions.length > 0 && (
           <div className="border rounded mt-1 bg-white max-h-40 overflow-auto text-sm">
@@ -1113,7 +1114,7 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
             {selectedUsers.map(u => (
               <span key={u.id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
                 {u.name || u.email}
-                <button onClick={() => removeSelected(u.id)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs">Ã—</button>
+                <button onClick={() => removeSelected(u.id)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs">×</button>
               </span>
             ))}
           </div>
@@ -1134,7 +1135,7 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
             }
             await onDone()
           } catch (e: any) {
-            setError(e?.message || 'à¸ªà¸£à¹‰à¸²à¸‡à¸à¸¥à¸¸à¹ˆà¸¡à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ')
+            setError(e?.message || 'สร้างกลุ่มไม่สำเร็จ')
           } finally {
             setLoading(false)
           }
@@ -1142,7 +1143,7 @@ function GroupCreateInline({ taskId, onDone }: { taskId: string; onDone: () => v
         disabled={loading}
         className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
       >
-        {loading ? 'à¸à¸³à¸¥à¸±à¸‡à¸ªà¸£à¹‰à¸²à¸‡...' : 'à¸ªà¸£à¹‰à¸²à¸‡à¸à¸¥à¸¸à¹ˆà¸¡'}
+        {loading ? 'กำลังสร้าง...' : 'สร้างกลุ่ม'}
       </button>
     </div>
   )
@@ -1172,7 +1173,7 @@ function GroupJoinInline({ onDone }: { onDone: () => void }) {
             await groupService.joinByCode(code.trim(), user.id)
             await onDone()
           } catch (e: any) {
-            setError(e?.message || 'à¸£à¸«à¸±à¸ªà¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡')
+            setError(e?.message || 'รหัสไม่ถูกต้อง')
           } finally {
             setLoading(false)
           }
@@ -1180,20 +1181,8 @@ function GroupJoinInline({ onDone }: { onDone: () => void }) {
         disabled={loading}
         className="bg-gray-800 hover:bg-black text-white px-3 py-2 rounded text-sm"
       >
-        {loading ? 'à¸à¸³à¸¥à¸±à¸‡à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡...' : 'à¹€à¸‚à¹‰à¸²à¸£à¹ˆà¸§à¸¡'}
+        {loading ? 'กำลังเข้าร่วม...' : 'เข้าร่วม'}
       </button>
-      {confirmLeaveTaskId && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">ยืนยันออกจากกลุ่ม?</h3>
-            <p className="text-sm text-gray-600 mb-4">เมื่อออกจากกลุ่ม งานที่ส่งแบบกลุ่มจะไม่ผูกกับคุณอีกต่อไป และอาจต้องเข้าร่วมใหม่ด้วยรหัส</p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmLeaveTaskId(null)} className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">ยกเลิก</button>
-              <button onClick={async () => { try { const tId = confirmLeaveTaskId!; const g = taskGroups[tId]; if (!g || !user) return; await groupService.removeMember(g.id, user.id); const mem = await groupService.listMembers(g.id); setGroupMembers(prev => ({ ...prev, [g.id]: mem || [] })); setTaskGroups(prev => ({ ...prev, [tId]: null })); } catch (e) { console.error("Leave group failed", e); } finally { setConfirmLeaveTaskId(null); } }} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">ยืนยันออกจากกลุ่ม</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
