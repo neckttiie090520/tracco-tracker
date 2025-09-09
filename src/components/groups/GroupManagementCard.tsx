@@ -193,9 +193,10 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
         
         {group && (
           <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-600 font-medium">รหัสเข้าร่วมกลุ่ม:</span>
             <button
               onClick={copyGroupCode}
-              className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded flex items-center gap-1 transition-colors"
+              className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded flex items-center gap-1 transition-colors font-mono"
               title="คัดลอกรหัสกลุ่ม"
             >
               <Copy className="h-3 w-3" />
