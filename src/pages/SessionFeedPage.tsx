@@ -253,7 +253,7 @@ export function SessionFeedPage() {
             <p className="text-gray-600 mb-6">คุณยังไม่ได้ลงทะเบียนงานสัมมนาใดๆ</p>
             <Link
               to="/sessions"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+              className="btn btn-primary px-6 py-3 font-semibold"
             >
               ลงทะเบียนงานสัมมนา
             </Link>

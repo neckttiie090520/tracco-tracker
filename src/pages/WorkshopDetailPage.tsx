@@ -564,7 +564,7 @@ export function WorkshopDetailPage() {
                           {!isOverdue && activeTaskId !== task.id && (
                             <button
                               onClick={() => setActiveTaskId(task.id)}
-                              className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                              className="absolute bottom-4 right-4 btn btn-primary px-4 py-2 font-medium"
                             >
                               ส่งงาน
                             </button>

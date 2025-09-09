@@ -873,7 +873,7 @@ export function WorkshopFeedPage() {
                                   <button
                                     onClick={() => handleTaskSubmission(task.id)}
                                     disabled={!submissionUrl.trim()}
-                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                                    className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     บันทึก
                                   </button>
@@ -903,7 +903,7 @@ export function WorkshopFeedPage() {
                           {!isSubmitted && editingTaskId !== task.id && (
                             <button
                               onClick={() => setEditingTaskId(task.id)}
-                              className="absolute bottom-3 right-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                              className="absolute bottom-3 right-3 btn btn-primary px-3 py-1 text-sm font-medium"
                             >
                               ส่งงาน
                             </button>
@@ -1008,7 +1008,7 @@ export function WorkshopFeedPage() {
                                   <button
                                     onClick={() => handleTaskSubmission(task.id)}
                                     disabled={!submissionUrl.trim()}
-                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                                    className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     ส่งงาน
                                   </button>
