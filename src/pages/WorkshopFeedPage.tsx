@@ -17,6 +17,7 @@ import { submissionService } from '../services/submissions'
 import { formatDateShort, formatDateTimeShort } from '../utils/date'
 import { GroupManagementCard } from '../components/groups/GroupManagementCard'
 import { JoinGroupCard } from '../components/groups/JoinGroupCard'
+import { Copy } from 'lucide-react'
 
 interface Workshop {
   id: string
@@ -78,6 +79,7 @@ export function WorkshopFeedPage() {
   const [editLinksMap, setEditLinksMap] = useState<Record<string, { url: string; note?: string }[]>>({})
   // Show group management modal for submitted tasks
   const [showGroupManagementFor, setShowGroupManagementFor] = useState<string | null>(null)
+  const [success, setSuccess] = useState('')
 
   const normalizeLinkObjects = (raw: any): { url: string; note?: string }[] => {
     if (!raw) return []
@@ -89,6 +91,12 @@ export function WorkshopFeedPage() {
           ? { url: v.url, note: typeof v.note === 'string' ? v.note : undefined }
           : null
     ).filter(Boolean) as { url: string; note?: string }[]
+  }
+
+  const copyPartyCode = (partyCode: string) => {
+    navigator.clipboard.writeText(partyCode)
+    setSuccess('คัดลอกรหัสกลุ่มแล้ว')
+    setTimeout(() => setSuccess(''), 3000)
   }
 
   useEffect(() => {
@@ -131,9 +139,22 @@ export function WorkshopFeedPage() {
                 const g = await groupService.getUserGroupForTask(t.id, user.id)
                 if (!g) return { taskId: t.id, group: null, members: [], submission: null }
 
+                // Load with timeout to prevent hanging
+                const loadWithTimeout = async (promise: Promise<any>, timeoutMs: number = 3000) => {
+                  const timeout = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), timeoutMs)
+                  )
+                  try {
+                    return await Promise.race([promise, timeout])
+                  } catch (error) {
+                    console.warn('Operation timed out or failed:', error)
+                    return null
+                  }
+                }
+
                 const [mem, gs] = await Promise.all([
-                  groupService.listMembers(g.id),
-                  submissionService.getGroupTaskSubmission(t.id, g.id)
+                  loadWithTimeout(groupService.listMembers(g.id), 3000).then(m => m || []),
+                  loadWithTimeout(submissionService.getGroupTaskSubmission(t.id, g.id), 3000)
                 ])
 
                 return {
@@ -297,10 +318,22 @@ export function WorkshopFeedPage() {
                 const g = await groupService.getUserGroupForTask(t.id, user.id)
                 if (!g) return { taskId: t.id, group: null, members: [], submission: null }
 
-                // Load members and submission in parallel for this group
+                // Load members and submission in parallel for this group with timeout
+                const loadWithTimeout = async (promise: Promise<any>, timeoutMs: number = 3000) => {
+                  const timeout = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), timeoutMs)
+                  )
+                  try {
+                    return await Promise.race([promise, timeout])
+                  } catch (error) {
+                    console.warn('Operation timed out or failed:', error)
+                    return null
+                  }
+                }
+                
                 const [mem, gs] = await Promise.all([
-                  groupService.listMembers(g.id),
-                  submissionService.getGroupTaskSubmission(t.id, g.id)
+                  loadWithTimeout(groupService.listMembers(g.id), 3000).then(m => m || []),
+                  loadWithTimeout(submissionService.getGroupTaskSubmission(t.id, g.id), 3000)
                 ])
 
                 return {
@@ -523,6 +556,12 @@ export function WorkshopFeedPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <UserNavigation />
+      
+      {success && (
+        <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          {success}
+        </div>
+      )}
       
       <div className="max-w-6xl mx-auto px-8 py-8">
         <div className="mb-4">
@@ -977,8 +1016,15 @@ export function WorkshopFeedPage() {
                                 </div>
                                 {g && (
                                   <div className="flex items-center gap-2">
-                                    <div className="text-xs text-purple-600">
+                                    <div className="flex items-center gap-1 text-xs text-purple-600">
                                       รหัสกลุ่ม: <span className="font-mono font-semibold">{g.party_code}</span>
+                                      <button
+                                        onClick={() => copyPartyCode(g.party_code)}
+                                        className="p-1 rounded hover:bg-purple-100 transition-colors"
+                                        title="คัดลอกรหัสกลุ่ม"
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                      </button>
                                     </div>
                                     <button
                                       onClick={() => setShowGroupManagementFor(task.id)}

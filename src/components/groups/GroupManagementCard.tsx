@@ -48,10 +48,22 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
   const loadMembers = async () => {
     if (!group) return
     try {
-      const membersData = await groupService.listMembers(group.id)
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout loading members')), 5000)
+      )
+      
+      const membersPromise = groupService.listMembers(group.id)
+      const membersData = await Promise.race([membersPromise, timeoutPromise])
+        .catch(err => {
+          console.error('Failed to load members:', err)
+          return []
+        })
+      
       setMembers(membersData || [])
     } catch (err) {
       console.error('Failed to load members:', err)
+      setMembers([])
     }
   }
 

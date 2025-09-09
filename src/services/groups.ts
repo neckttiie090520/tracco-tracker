@@ -99,20 +99,6 @@ export const groupService = {
     }
   },
 
-  async deleteGroup(groupId: string) {
-    // Delete all group members first
-    await supabase
-      .from('task_group_members')
-      .delete()
-      .eq('task_group_id', groupId)
-    
-    // Delete the group
-    const { error } = await supabase
-      .from('task_groups')
-      .delete()
-      .eq('id', groupId)
-    if (error) throw error
-  },
 
   isOwner(group: { owner_id: string }, userId?: string | null) {
     return !!userId && group?.owner_id === userId
@@ -149,12 +135,46 @@ export const groupService = {
   },
 
   async listMembers(groupId: string) {
-    const { data, error } = await supabase
-      .from('task_group_members')
-      .select('user_id, role, joined_at, user:users(id, name, email)')
-      .eq('task_group_id', groupId)
-    if (error) throw error
-    return data
+    try {
+      // First get member IDs (fast query)
+      const { data: memberData, error: memberError } = await supabase
+        .from('task_group_members')
+        .select('user_id, role, joined_at')
+        .eq('task_group_id', groupId)
+      
+      if (memberError) {
+        console.error('Failed to fetch members:', memberError)
+        return []
+      }
+      
+      if (!memberData || memberData.length === 0) return []
+      
+      // Then get user details in parallel (if we have members)
+      const userIds = memberData.map(m => m.user_id)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email')
+        .in('id', userIds)
+      
+      if (userError) {
+        console.error('Failed to fetch user details:', userError)
+        // Return members without user details rather than failing completely
+        return memberData.map(m => ({
+          ...m,
+          user: { id: m.user_id, name: 'Unknown', email: '' }
+        }))
+      }
+      
+      // Combine member data with user data
+      const userMap = new Map(userData?.map(u => [u.id, u]) || [])
+      return memberData.map(m => ({
+        ...m,
+        user: userMap.get(m.user_id) || { id: m.user_id, name: 'Unknown', email: '' }
+      }))
+    } catch (error) {
+      console.error('listMembers error:', error)
+      return []
+    }
   },
 
   async renameGroup(groupId: string, newName: string) {
