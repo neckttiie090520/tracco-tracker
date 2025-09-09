@@ -998,12 +998,6 @@ export function WorkshopFeedPage() {
                                   </div>
                                 </div>
                               </div>
-                              
-                              {submission?.notes && (
-                                <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                                  {submission.notes}
-                                </div>
-                              )}
                             </div>
                           )}
 
@@ -1060,13 +1054,45 @@ export function WorkshopFeedPage() {
                                           <p className="text-xs text-green-600">ส่งแล้ว {linkObjs.length} รายการ</p>
                                         </div>
                                       </div>
-                                      <button
-                                        className="btn btn-primary px-3 py-1 text-xs"
-                                        onClick={() => {
-                                          setAddLinkInput(prev => ({ ...prev, [task.id]: '' }))
-                                          setAddLinkNoteInput(prev => ({ ...prev, [task.id]: '' }))
-                                        }}
-                                      >เพิ่มลิงก์</button>
+                                      <div className="flex gap-2">
+                                        <button
+                                          className="btn btn-primary px-3 py-1 text-xs"
+                                          onClick={() => {
+                                            setAddLinkInput(prev => ({ ...prev, [task.id]: '' }))
+                                            setAddLinkNoteInput(prev => ({ ...prev, [task.id]: '' }))
+                                          }}
+                                        >เพิ่มลิงก์</button>
+                                        
+                                        {(task as any).submission_mode === 'group' && g && (
+                                          <>
+                                            <button
+                                              className="text-xs px-3 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium border border-blue-300"
+                                              onClick={() => setEditingTaskId(task.id)}
+                                            >
+                                              ตั้งค่ากลุ่ม
+                                            </button>
+                                            
+                                            {!groupService.isOwner(g, user?.id) && (
+                                              <button
+                                                className="text-xs px-3 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700 font-medium border border-red-300"
+                                                onClick={async () => {
+                                                  if (!window.confirm('คุณแน่ใจหรือไม่ที่จะออกจากกลุ่ม?')) return
+                                                  try {
+                                                    await groupService.removeMember(g.id, user!.id)
+                                                    // Refresh data to reflect changes
+                                                    await refreshTasksData()
+                                                  } catch (error) {
+                                                    console.error('Leave group failed:', error)
+                                                    alert('ไม่สามารถออกจากกลุ่มได้')
+                                                  }
+                                                }}
+                                              >
+                                                ออกจากกลุ่ม
+                                              </button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
                                     </div>
                                     
                                     <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded inline-block">

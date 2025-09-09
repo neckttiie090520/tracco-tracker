@@ -331,37 +331,84 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
           </div>
         )}
 
-        {/* Members List */}
+        {/* Members List - Optimized Display */}
         {group && members.length > 0 && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               สมาชิกในกลุ่ม ({members.length} คน)
             </label>
-            <div className="space-y-2">
-              {members.map((member) => (
-                <div key={member.user_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                  <div>
-                    <div className="font-medium text-gray-900">{member.user.name}</div>
-                    <div className="text-xs text-gray-500">{member.user.email}</div>
-                    {member.role === 'owner' && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
-                        เจ้าของกลุ่ม
-                      </span>
+            
+            {/* Compact Member Display */}
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="flex flex-wrap gap-2">
+                {members.slice(0, 4).map((member) => (
+                  <div key={member.user_id} className="flex items-center gap-2 bg-white px-3 py-2 rounded-md border">
+                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-800">
+                      {member.user?.name?.charAt(0) || member.user_id.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium text-gray-900 truncate">{member.user.name}</div>
+                      {member.role === 'owner' && (
+                        <div className="text-xs text-blue-600">👑 เจ้าของ</div>
+                      )}
+                    </div>
+                    {(isOwner || member.user_id === user?.id) && member.role !== 'owner' && (
+                      <button
+                        onClick={() => handleRemoveMember(member.user_id)}
+                        disabled={loading}
+                        className="w-5 h-5 flex items-center justify-center text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                        title={member.user_id === user?.id ? 'ออกจากกลุ่ม' : 'ลบสมาชิก'}
+                      >
+                        <i className="bx bx-x text-sm"></i>
+                      </button>
                     )}
                   </div>
-                  
-                  {(isOwner || member.user_id === user?.id) && member.role !== 'owner' && (
-                    <button
-                      onClick={() => handleRemoveMember(member.user_id)}
-                      disabled={loading}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
-                      title={member.user_id === user?.id ? 'ออกจากกลุ่ม' : 'ลบสมาชิก'}
-                    >
-                      <i className="bx bx-x text-lg"></i>
-                    </button>
-                  )}
-                </div>
-              ))}
+                ))}
+                
+                {members.length > 4 && (
+                  <div className="flex items-center gap-2 bg-gray-200 px-3 py-2 rounded-md border">
+                    <span className="text-xs text-gray-600">+{members.length - 4} คนเพิ่มเติม</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Expandable Full List */}
+              {members.length > 4 && (
+                <details className="mt-3">
+                  <summary className="text-xs text-blue-600 cursor-pointer hover:text-blue-800">
+                    ดูสมาชิกทั้งหมด
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {members.slice(4).map((member) => (
+                      <div key={member.user_id} className="flex items-center justify-between p-2 bg-white rounded border">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-800">
+                            {member.user?.name?.charAt(0) || member.user_id.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="text-xs font-medium text-gray-900">{member.user.name}</div>
+                            <div className="text-xs text-gray-500">{member.user.email}</div>
+                            {member.role === 'owner' && (
+                              <span className="text-xs text-blue-600">👑 เจ้าของกลุ่ม</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {(isOwner || member.user_id === user?.id) && member.role !== 'owner' && (
+                          <button
+                            onClick={() => handleRemoveMember(member.user_id)}
+                            disabled={loading}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                            title={member.user_id === user?.id ? 'ออกจากกลุ่ม' : 'ลบสมาชิก'}
+                          >
+                            <i className="bx bx-x text-sm"></i>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         )}
