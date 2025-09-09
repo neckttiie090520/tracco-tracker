@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { adminService } from '../services/admin'
 import { taskService } from '../services/tasks'
 import { supabase } from '../services/supabase'
@@ -242,15 +242,31 @@ export function useParticipantData() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastFetch, setLastFetch] = useState(0)
+  const lastFetchRef = useRef(0)
   
   // Cache duration: 5 minutes
   const CACHE_DURATION = 5 * 60 * 1000
 
-  const fetchParticipantData = async (forceRefresh = false) => {
-    if (!user) return
+  const fetchParticipantData = useCallback(async (forceRefresh = false) => {
+    if (!user) {
+      console.log('❌ No user, skipping fetch')
+      return
+    }
 
     // Check cache first
-    if (!forceRefresh && lastFetch > 0 && (Date.now() - lastFetch) < CACHE_DURATION) {
+    const currentTime = Date.now()
+    const cacheAge = lastFetchRef.current > 0 ? currentTime - lastFetchRef.current : 0
+    const isCacheValid = lastFetchRef.current > 0 && cacheAge < CACHE_DURATION
+    
+    console.log(`🔍 Cache check:`, {
+      forceRefresh,
+      lastFetch: lastFetchRef.current > 0 ? new Date(lastFetchRef.current).toISOString() : 'never',
+      cacheAge: `${Math.round(cacheAge / 1000)}s`,
+      isCacheValid,
+      CACHE_DURATION: `${CACHE_DURATION / 1000}s`
+    })
+
+    if (!forceRefresh && isCacheValid) {
       console.log('📦 Using cached participant data')
       return
     }
@@ -437,7 +453,9 @@ export function useParticipantData() {
       console.log('⏰ Upcoming tasks details:', upcomingTasks)
       
       // Set cache timestamp
-      setLastFetch(Date.now())
+      const timestamp = Date.now()
+      setLastFetch(timestamp)
+      lastFetchRef.current = timestamp
 
     } catch (err) {
       console.error('❌ Error fetching participant data:', err)
@@ -445,34 +463,56 @@ export function useParticipantData() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
 
   useEffect(() => {
     if (user?.id) {
       fetchParticipantData()
     }
-  }, [user?.id])
+  }, [user?.id, fetchParticipantData])
 
   // Handle visibility change - only refresh if data is stale
   useEffect(() => {
     const handleVisibilityChange = () => {
+      console.log('👀 Visibility changed:', {
+        hidden: document.hidden,
+        userId: user?.id,
+        lastFetch: lastFetchRef.current > 0 ? new Date(lastFetchRef.current).toISOString() : 'never'
+      })
+      
       if (!document.hidden && user?.id) {
-        // Only fetch if cache is expired
-        if (lastFetch === 0 || (Date.now() - lastFetch) >= CACHE_DURATION) {
+        const currentTime = Date.now()
+        const cacheAge = currentTime - lastFetchRef.current
+        const shouldRefresh = lastFetchRef.current === 0 || cacheAge >= CACHE_DURATION
+        
+        console.log('🔄 Visibility check:', {
+          cacheAge: `${Math.round(cacheAge / 1000)}s`,
+          shouldRefresh,
+          CACHE_DURATION: `${CACHE_DURATION / 1000}s`
+        })
+        
+        if (shouldRefresh) {
+          console.log('🚀 Triggering refresh from visibility change')
           fetchParticipantData()
+        } else {
+          console.log('📦 Cache still valid, skipping refresh')
         }
       }
     }
 
+    console.log('📡 Setting up visibility listener', { userId: user?.id })
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [user?.id, lastFetch])
+    return () => {
+      console.log('🧹 Cleaning up visibility listener')
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [user?.id, fetchParticipantData])
 
   return {
     stats,
     loading,
     error,
     refetch: (forceRefresh = false) => fetchParticipantData(forceRefresh),
-    isCacheValid: lastFetch > 0 && (Date.now() - lastFetch) < CACHE_DURATION
+    isCacheValid: lastFetchRef.current > 0 && (Date.now() - lastFetchRef.current) < CACHE_DURATION
   }
 }
