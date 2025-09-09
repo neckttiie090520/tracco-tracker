@@ -745,10 +745,32 @@ export function WorkshopFeedPage() {
                               {task.description && (
                                 <p className="text-white/80 text-xs mb-2">{task.description}</p>
                               )}
-                              <div className="flex items-center gap-2 text-xs">
+                              <div className="flex flex-wrap items-center gap-2 text-xs">
                                 <span className="bg-white/20 px-2 py-1 rounded text-xs">
                                   📅 {formatDateShort(dueDate, 'CE')}
                                 </span>
+                                
+                                {/* Submission Mode Badge */}
+                                {(task as any).submission_mode === 'group' ? (
+                                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs flex items-center gap-1 font-medium">
+                                    <span>👥</span>
+                                    <span>ส่งแบบกลุ่ม</span>
+                                    {(() => {
+                                      const g = taskGroups[task.id]
+                                      const members = g ? (groupMembers[g.id] || []) : []
+                                      if (members.length > 0) {
+                                        return <span className="text-purple-600">• {members.length} คน</span>
+                                      }
+                                      return null
+                                    })()}
+                                  </span>
+                                ) : (
+                                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs flex items-center gap-1 font-medium">
+                                    <span>👤</span>
+                                    <span>ส่งเดี่ยว</span>
+                                  </span>
+                                )}
+                                
                                 <StatusBadge 
                                   status={isSubmitted ? 'completed' : isOverdue ? 'overdue' : 'pending'}
                                   size="sm"
@@ -807,6 +829,48 @@ export function WorkshopFeedPage() {
                             </div>
                           </div>
                         </div>
+
+                        {/* Group Members Display (only for group tasks) */}
+                        {(task as any).submission_mode === 'group' && (() => {
+                          const g = taskGroups[task.id]
+                          const members = g ? (groupMembers[g.id] || []) : []
+                          
+                          if (members.length === 0) return null
+
+                          const displayMembers = members.slice(0, 3) // Show first 3 members
+                          const remainingCount = Math.max(0, members.length - 3)
+                          const owner = members.find(m => m.role === 'owner')
+                          
+                          return (
+                            <div className="px-3 py-2 bg-purple-50 border-t border-purple-100">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-purple-700 font-medium">สมาชิกในกลุ่ม:</span>
+                                  <div className="flex items-center gap-1">
+                                    {displayMembers.map((member, idx) => (
+                                      <div key={member.user_id} className="flex items-center">
+                                        <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center text-xs font-medium text-purple-800">
+                                          {member.user?.name?.charAt(0) || member.user_id.charAt(0).toUpperCase()}
+                                        </div>
+                                        {member.role === 'owner' && (
+                                          <span className="text-xs text-purple-600 ml-1">👑</span>
+                                        )}
+                                      </div>
+                                    ))}
+                                    {remainingCount > 0 && (
+                                      <span className="text-xs text-purple-600 ml-1">+{remainingCount}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                {g && (
+                                  <div className="text-xs text-purple-600">
+                                    รหัสกลุ่ม: <span className="font-mono font-semibold">{g.party_code}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })()}
 
                         {/* Task Content */}
                         <div className="p-3 pb-12">

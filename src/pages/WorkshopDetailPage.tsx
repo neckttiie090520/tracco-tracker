@@ -493,6 +493,21 @@ export function WorkshopDetailPage() {
                                 <span className="text-gray-600">ประเภท:</span>
                                 <span className="font-medium">{task.task_type}</span>
                               </div>
+                              
+                              {/* Submission Mode Badge */}
+                              <div className="flex items-center gap-2">
+                                {(task as any).submission_mode === 'group' ? (
+                                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm flex items-center gap-1 font-medium">
+                                    <span>👥</span>
+                                    <span>ส่งแบบกลุ่ม</span>
+                                  </span>
+                                ) : (
+                                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-1 font-medium">
+                                    <span>👤</span>
+                                    <span>ส่งเดี่ยว</span>
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
