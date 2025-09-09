@@ -85,6 +85,18 @@ export const groupService = {
       .eq('task_group_id', groupId)
       .eq('user_id', userId)
     if (error) throw error
+
+    // Check if group is now empty and auto-delete if no members left
+    const { data: remainingMembers } = await supabase
+      .from('task_group_members')
+      .select('user_id')
+      .eq('task_group_id', groupId)
+      .limit(1)
+    
+    if (!remainingMembers || remainingMembers.length === 0) {
+      // Group is empty, delete it entirely
+      await this.deleteGroup(groupId)
+    }
   },
 
   async deleteGroup(groupId: string) {
@@ -161,10 +173,35 @@ export const groupService = {
       .eq('task_group_id', groupId)
     if (memErr && (memErr as any).code !== 'PGRST116') throw memErr
 
+    // Delete group submissions
+    await supabase
+      .from('group_submissions')
+      .delete()
+      .eq('group_id', groupId)
+
     const { error } = await supabase
       .from('task_groups')
       .delete()
       .eq('id', groupId)
     if (error) throw error
+  },
+
+  async cleanupEmptyGroups() {
+    // Find groups with no members
+    const { data: emptyGroups } = await supabase
+      .from('task_groups')
+      .select(`
+        id,
+        task_group_members!left(user_id)
+      `)
+    
+    if (!emptyGroups) return
+
+    for (const group of emptyGroups) {
+      // Check if group has no members
+      if (!group.task_group_members || group.task_group_members.length === 0) {
+        await this.deleteGroup(group.id)
+      }
+    }
   },
 }

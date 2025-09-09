@@ -205,6 +205,13 @@ export function WorkshopFeedPage() {
 
       // Load group info for group-mode tasks
       if (user && tasksData && tasksData.length > 0) {
+        // Cleanup empty groups first
+        try {
+          await groupService.cleanupEmptyGroups()
+        } catch (e) {
+          console.warn('Group cleanup failed:', e)
+        }
+
         const newTaskGroups: Record<string, any | null> = {}
         const newGroupMembers: Record<string, any[]> = {}
         const newGroupSubs: Record<string, any | null> = {}

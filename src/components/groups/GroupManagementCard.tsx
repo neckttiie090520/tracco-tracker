@@ -133,11 +133,20 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
       setLoading(true)
       await groupService.removeMember(group.id, userId)
       
-      if (isLeavingGroup) {
-        onGroupDeleted() // User left the group
-      } else {
+      // Check if group still exists (might have been auto-deleted)
+      try {
+        await groupService.getGroupById(group.id)
+        // Group still exists, reload members
         await loadMembers()
-        setSuccess('ลบสมาชิกแล้ว')
+        if (isLeavingGroup) {
+          onGroupDeleted() // User left the group
+        } else {
+          setSuccess('ลบสมาชิกแล้ว')
+        }
+      } catch {
+        // Group was auto-deleted because it's empty
+        onGroupDeleted()
+        setSuccess('กลุ่มถูกลบเนื่องจากไม่มีสมาชิกเหลือ')
       }
     } catch (err: any) {
       setError(err.message || 'ไม่สามารถลบสมาชิกได้')
