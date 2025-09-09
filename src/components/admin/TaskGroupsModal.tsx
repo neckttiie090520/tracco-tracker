@@ -158,7 +158,7 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
                           {(members[g.id] || []).map(m => (
                             <span key={m.user_id} className="inline-flex items-center gap-1 bg-gray-100 border px-2 py-1 rounded text-xs">
                               {m.user?.name || m.user_id.slice(0,6)}
-                              <button onClick={() => removeMember(g.id, m.user_id)} className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full w-4 h-4 flex items-center justify-center text-sm font-bold transition-colors">×</button>
+                              <button onClick={() => removeMember(g.id, m.user_id)} className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full w-6 h-6 flex items-center justify-center text-base font-bold transition-colors">×</button>
                             </span>
                           ))}
                         </div>

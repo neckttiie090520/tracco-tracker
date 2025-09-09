@@ -1240,7 +1240,7 @@ export function WorkshopFeedPage() {
                                                         console.error('remove member failed', e)
                                                       }
                                                     }}
-                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-red-600 border-red-300 hover:bg-red-50 text-xs"
+                                                    className="ml-1 w-5 h-5 inline-flex items-center justify-center rounded-full text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors font-bold text-sm"
                                                     title={m.user_id === user?.id ? 'Leave group' : 'Remove member'}
                                                   >
                                                     ×
