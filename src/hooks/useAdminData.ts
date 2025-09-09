@@ -244,8 +244,53 @@ export function useParticipantData() {
   const [lastFetch, setLastFetch] = useState(0)
   const lastFetchRef = useRef(0)
   
+  // SessionStorage key for caching data
+  const STORAGE_KEY = `adminData_${user?.id || 'anonymous'}`
+  const STORAGE_TIMESTAMP_KEY = `${STORAGE_KEY}_timestamp`
+  
   // Cache duration: 15 minutes (increased to reduce frequent refreshes on tab switch)
   const CACHE_DURATION = 15 * 60 * 1000
+
+  // Load cached data from sessionStorage on init
+  const loadCachedData = useCallback(() => {
+    try {
+      const cachedData = sessionStorage.getItem(STORAGE_KEY)
+      const cachedTimestamp = sessionStorage.getItem(STORAGE_TIMESTAMP_KEY)
+      
+      if (cachedData && cachedTimestamp) {
+        const timestamp = parseInt(cachedTimestamp, 10)
+        const cacheAge = Date.now() - timestamp
+        
+        if (cacheAge < CACHE_DURATION) {
+          console.log('📦 Loading data from sessionStorage cache')
+          const parsedData = JSON.parse(cachedData)
+          setStats(parsedData)
+          setLastFetch(timestamp)
+          lastFetchRef.current = timestamp
+          setLoading(false)
+          return true
+        } else {
+          console.log('🗑️ SessionStorage cache expired, clearing')
+          sessionStorage.removeItem(STORAGE_KEY)
+          sessionStorage.removeItem(STORAGE_TIMESTAMP_KEY)
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Error loading cached data:', error)
+    }
+    return false
+  }, [STORAGE_KEY, STORAGE_TIMESTAMP_KEY, CACHE_DURATION])
+  
+  // Save data to sessionStorage
+  const saveToCache = useCallback((data: any, timestamp: number) => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+      sessionStorage.setItem(STORAGE_TIMESTAMP_KEY, timestamp.toString())
+      console.log('💾 Saved data to sessionStorage cache')
+    } catch (error) {
+      console.warn('⚠️ Error saving to cache:', error)
+    }
+  }, [STORAGE_KEY, STORAGE_TIMESTAMP_KEY])
 
   const fetchParticipantData = useCallback(async (forceRefresh = false) => {
     if (!user) {
@@ -475,7 +520,7 @@ export function useParticipantData() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, saveToCache])
 
   // Initial fetch when user changes - try cache first
   useEffect(() => {
