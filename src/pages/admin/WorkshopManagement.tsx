@@ -389,12 +389,7 @@ export function WorkshopManagement() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.length === filteredWorkshops.length && filteredWorkshops.length > 0}
-                          onChange={selectedItems.length === filteredWorkshops.length ? handleDeselectAll : handleSelectAll}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                        {/* Selection column - controlled by BulkActionBar */}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Workshop
