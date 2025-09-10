@@ -517,7 +517,7 @@ export function TaskManagement() {
           </div>
 
           {/* Tasks Table */}
-          <div className="bg-white rounded-lg shadow-sm overflow-visible">
+          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-32">
             {/* Table Header with Refresh Button */}
             <div className="flex items-center justify-end px-6 py-3 bg-gray-50 border-b border-gray-200">
               <button

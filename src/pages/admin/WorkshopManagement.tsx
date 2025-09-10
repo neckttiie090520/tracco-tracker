@@ -362,7 +362,7 @@ export function WorkshopManagement() {
         </div>
 
           {/* Workshops Table */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-32">
             {/* Bulk Action Bar */}
             {filteredWorkshops.length > 0 && (
               <BulkActionBar

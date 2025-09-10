@@ -1348,7 +1348,7 @@ export function SessionManager() {
           </div>
 
           {/* Sessions Table */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-32">
             {/* Bulk Action Bar */}
             {filteredSessions.length > 0 && (
               <BulkActionBar
