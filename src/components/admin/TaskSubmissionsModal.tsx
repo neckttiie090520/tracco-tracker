@@ -423,7 +423,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Submitted
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Actions
                           </th>
                         </tr>
@@ -531,8 +531,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                             <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap text-sm text-gray-500`}>
                               {formatDate(submission.submitted_at)}
                             </td>
-                            <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap text-sm font-medium`}>
-                              <div className="flex items-center justify-end">
+                            <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap text-sm font-medium relative`}>
+                              <div className="flex items-center justify-center">
                                 <div className="relative group">
                                   <button
                                     className="text-gray-500 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
@@ -542,7 +542,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                       <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                     </svg>
                                   </button>
-                                  <div className="absolute right-0 z-10 w-48 py-1 mt-1 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                  <div className="absolute right-0 top-full z-50 w-48 py-1 mt-1 bg-white rounded-md shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right"
+                                       style={{ transform: 'translateX(-50%)' }}>
                                     <button
                                       onClick={() => setSelectedSubmissionItems(submission)}
                                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
