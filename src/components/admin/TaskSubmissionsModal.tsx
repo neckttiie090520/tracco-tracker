@@ -775,34 +775,67 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                 </div>
               </div>
 
+              {((selectedSubmissionItems.links && selectedSubmissionItems.links.length > 0) || selectedSubmissionItems.submission_url) && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">
+                    Links ({(selectedSubmissionItems.links?.length || 0) + (selectedSubmissionItems.submission_url && !selectedSubmissionItems.links ? 1 : 0)})
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedSubmissionItems.links && selectedSubmissionItems.links.map((link: any, index: number) => {
+                      const linkUrl = typeof link === 'string' ? link : link.url || link;
+                      const linkNote = typeof link === 'object' ? link.note : '';
+                      return (
+                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-gray-700">Link {index + 1}</span>
+                              <p className="text-sm text-blue-600 break-all mt-1">{linkUrl}</p>
+                              {linkNote && <p className="text-xs text-gray-500 mt-1">{linkNote}</p>}
+                            </div>
+                            <a
+                              href={linkUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-2 p-2 text-gray-400 hover:text-blue-600 rounded"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    {(!selectedSubmissionItems.links || selectedSubmissionItems.links.length === 0) && selectedSubmissionItems.submission_url && (
+                      <div className="bg-white border border-gray-200 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <span className="text-sm font-medium text-gray-700">Submission Link</span>
+                            <p className="text-sm text-blue-600 break-all mt-1">{selectedSubmissionItems.submission_url}</p>
+                          </div>
+                          <a
+                            href={selectedSubmissionItems.submission_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 p-2 text-gray-400 hover:text-blue-600 rounded"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {selectedSubmissionItems.notes && (
                 <div className="mb-6">
                   <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Notes</h3>
                   <div className="bg-white border border-gray-200 rounded-lg p-4">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedSubmissionItems.notes}</p>
-                  </div>
-                </div>
-              )}
-
-              {selectedSubmissionItems.submission_url && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Submission URL</h3>
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm text-blue-600 break-all">{selectedSubmissionItems.submission_url}</p>
-                      </div>
-                      <a
-                        href={selectedSubmissionItems.submission_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-2 p-2 text-gray-400 hover:text-blue-600 rounded"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    </div>
                   </div>
                 </div>
               )}
