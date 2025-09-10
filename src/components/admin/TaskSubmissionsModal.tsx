@@ -239,8 +239,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         ref={modalRef}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm"
       >
-        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-200 scale-100 opacity-100">
-          <div className="p-6">
+        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col transform transition-all duration-200 scale-100 opacity-100">
+          <div className="p-6 flex-shrink-0 border-b border-gray-200">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">{task.title} - Submissions</h2>
@@ -291,7 +291,9 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                 </button>
               </div>
             </div>
-
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-6" style={{ minHeight: 0 }}>
             {loading && (
               <div className="flex items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
