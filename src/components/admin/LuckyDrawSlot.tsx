@@ -73,37 +73,61 @@ export function LuckyDrawSlot({ names, reelId, onWinner }: LuckyDrawSlotProps) {
 
   return (
     <div className={`w-full lucky-slot ${spinning ? 'spinning' : ''}`}>
-      <div className="bg-white border rounded-lg p-4 slot-frame relative overflow-hidden">
+      <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50 border-2 border-purple-200 rounded-xl p-6 slot-frame relative overflow-hidden shadow-lg">
         <div className="absolute inset-0 pointer-events-none lights" aria-hidden="true" />
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm text-gray-600">Eligible: {cleanNames.length} • Remaining: {remaining.length}</div>
-          <label className="inline-flex items-center space-x-2 text-sm text-gray-700">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 animate-pulse"></div>
+        
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            🎯 Eligible: {cleanNames.length} • 🎪 Remaining: {remaining.length}
+          </div>
+          <label className="inline-flex items-center space-x-2 text-sm bg-white/70 backdrop-blur-sm rounded-full px-3 py-1 border border-purple-200">
             <input
               type="checkbox"
-              className="rounded"
+              className="rounded text-purple-600 focus:ring-purple-500"
               checked={removal}
               onChange={(e) => setRemoval(e.target.checked)}
             />
-            <span>Remove winner from list</span>
+            <span className="text-purple-700 font-medium">Remove winner</span>
           </label>
         </div>
-        <div className="rounded-md overflow-hidden border bg-gray-50">
-          <div id={reelId} className="reel" style={{ height: 120 }} />
+        
+        <div className="rounded-xl overflow-hidden border-2 border-gradient-to-r from-purple-300 to-pink-300 bg-gradient-to-br from-white via-purple-50 to-pink-50 shadow-inner relative">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-200/20 animate-pulse opacity-50"></div>
+          <div id={reelId} className="reel relative z-10" style={{ height: 120 }} />
         </div>
-        <div className="mt-4 flex items-center space-x-2">
+        
+        <div className="mt-6 flex items-center space-x-3">
           <button
             onClick={handleSpin}
             disabled={spinning || cleanNames.length === 0}
-            className="px-4 py-2 rounded-md text-white bg-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 rounded-xl text-white font-bold bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 hover:from-purple-600 hover:via-pink-600 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
           >
-            {spinning ? 'Spinning…' : 'Lucky Draw'}
+            {spinning ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>🎰 Spinning…</span>
+              </>
+            ) : (
+              <>
+                <span>🎲 Lucky Draw</span>
+                <span className="animate-bounce">✨</span>
+              </>
+            )}
           </button>
-          <div className="text-xs text-gray-500">Uses the slot animation to pick a random name.</div>
+          <div className="text-sm text-purple-600 font-medium bg-white/60 backdrop-blur-sm rounded-full px-3 py-1">
+            🎪 Slot animation magic!
+          </div>
         </div>
+        
         {winner && (
-          <div className="mt-3 p-3 rounded-md bg-gradient-to-r from-yellow-100 to-pink-100 border border-yellow-300 animate-winner">
-            <span className="text-sm font-semibold text-yellow-800">Winner:</span>
-            <span className="ml-2 text-sm font-bold text-pink-700">{winner}</span>
+          <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-yellow-200 via-pink-200 to-purple-200 border-2 border-yellow-400 animate-winner shadow-lg">
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-lg">🏆</span>
+              <span className="text-sm font-bold text-yellow-800">WINNER:</span>
+              <span className="text-lg font-black text-purple-700 animate-bounce">{winner}</span>
+              <span className="text-lg animate-pulse">🎉</span>
+            </div>
           </div>
         )}
       </div>
