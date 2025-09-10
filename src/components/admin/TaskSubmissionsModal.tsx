@@ -291,11 +291,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                 <div className="relative bg-white border-4 border-transparent bg-clip-padding rounded-xl shadow-2xl overflow-hidden">
                   <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 p-1 rounded-xl">
                     <div className="bg-white rounded-lg p-4">
-                      <div className="text-center mb-4">
-                        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-full font-bold text-sm animate-bounce">
-                          🎲 เลือกผู้โชคดี 🎲
-                        </div>
-                      </div>
                       <LuckyDrawSlot
                         names={eligibleNames}
                         reelId={`reel-${task?.id || 'task'}`}

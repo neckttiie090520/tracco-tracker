@@ -92,9 +92,15 @@ export function LuckyDrawSlot({ names, reelId, onWinner }: LuckyDrawSlotProps) {
           </label>
         </div>
         
-        <div className="rounded-xl overflow-hidden border-2 border-gradient-to-r from-purple-300 to-pink-300 bg-gradient-to-br from-white via-purple-50 to-pink-50 shadow-inner relative">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-200/20 animate-pulse opacity-50"></div>
-          <div id={reelId} className="reel relative z-10" style={{ height: 120 }} />
+        <div className="rounded-xl overflow-hidden border-4 border-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 shadow-inner relative">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-yellow-300/30 via-pink-300/30 to-purple-300/30 animate-pulse"></div>
+          <div id={reelId} className="reel relative z-10 font-bold text-lg" style={{ 
+            height: 120,
+            background: 'linear-gradient(135deg, #fbbf24 0%, #ec4899 50%, #8b5cf6 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            color: 'transparent'
+          }} />
         </div>
         
         <div className="mt-6 flex items-center space-x-3">
