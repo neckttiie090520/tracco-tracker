@@ -707,7 +707,7 @@ export function TaskManagement() {
                                 </button>
                                 
                                 {/* Dropdown Menu */}
-                                <div className="absolute right-0 z-10 w-48 py-1 mt-1 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div className="absolute right-0 z-50 w-48 py-1 mt-1 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                   {task.submission_mode === 'group' && (
                                     <button
                                       onClick={() => setViewingGroups(task)}
