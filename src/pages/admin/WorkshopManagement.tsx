@@ -511,7 +511,9 @@ export function WorkshopManagement() {
                                   </svg>
                                 </button>
                                 
-                                <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div className={`absolute right-0 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ${
+                                  index >= filteredWorkshops.length - 2 ? 'bottom-8' : 'top-8'
+                                }`}>
                                   <a
                                     href={`/workshops/${workshop.id}`}
                                     target="_blank"
