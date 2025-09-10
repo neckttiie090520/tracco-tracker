@@ -406,7 +406,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     <p className="text-gray-600">No items match your search or filters.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto pb-6">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr>
