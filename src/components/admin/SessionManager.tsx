@@ -1238,7 +1238,7 @@ export function SessionManager() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6" style={{maxHeight: '80vh', minHeight: '80vh'}}>
+        <div className="flex-1 overflow-y-auto p-6 pb-20" style={{maxHeight: '80vh', minHeight: '80vh'}}>
 
         {/* Quick Status Tabs */}
         {sessions.length > 0 && (
