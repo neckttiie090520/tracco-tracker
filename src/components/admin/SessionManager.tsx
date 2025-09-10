@@ -1506,7 +1506,7 @@ export function SessionManager() {
                                 </svg>
                               </button>
                               
-                              <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:opacity-100 hover:visible transition-all duration-200">
+                              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:opacity-100 hover:visible transition-all duration-200">
                                 {session.is_archived ? (
                                   <button
                                     onClick={() => restoreSession(session.id)}
