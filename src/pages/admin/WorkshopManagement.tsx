@@ -432,7 +432,7 @@ export function WorkshopManagement() {
                       
                       return (
                         <tr key={workshop.id} className={`hover:bg-gray-50 ${selectedItems.includes(workshop.id) ? 'bg-blue-50' : ''}`} style={{ position: 'relative', overflow: 'visible' }}>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-2 whitespace-nowrap">
                             <input
                               type="checkbox"
                               checked={selectedItems.includes(workshop.id)}
@@ -440,7 +440,7 @@ export function WorkshopManagement() {
                               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-2 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
                                 {workshop.title}
@@ -455,7 +455,7 @@ export function WorkshopManagement() {
                               )}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-2 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
                               {workshop.instructor?.name || 'Not assigned'}
                             </div>
@@ -463,12 +463,12 @@ export function WorkshopManagement() {
                               {workshop.instructor?.email || ''}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-2 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
                               {participantCount}/{workshop.max_participants}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-2 whitespace-nowrap">
                             <button
                               onClick={() => handleToggleActive(workshop)}
                               className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
@@ -491,7 +491,7 @@ export function WorkshopManagement() {
                               {workshop.is_active ? 'Show' : 'Hide'}
                             </button>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => setEditingWorkshop(workshop)}
