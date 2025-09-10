@@ -239,7 +239,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         ref={modalRef}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm"
       >
-        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col transform transition-all duration-200 scale-100 opacity-100">
+        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-200 scale-100 opacity-100">
           <div className="p-6 flex-shrink-0 border-b border-gray-200">
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -708,7 +708,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             }
           }}
         >
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col">
             {/* Lucky Winner Header */}
             {luckyWinner && (
               (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
