@@ -360,7 +360,7 @@ export function TaskManagement() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6" style={{minHeight: '120vh'}}>
+        <div className="flex-1 overflow-y-auto p-6" style={{maxHeight: '80vh', minHeight: '80vh'}}>
           {/* Quick Status Tabs */}
         {tasks.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-2 mb-4">
