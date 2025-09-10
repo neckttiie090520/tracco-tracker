@@ -68,20 +68,71 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
           <div className="flex-1 overflow-y-auto p-6">
             {/* Student/Group Info */}
             <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Student Information</h3>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">
+                {submission.is_group_submission ? 'Group Information' : 'Student Information'}
+              </h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 {submission.is_group_submission && submission.group ? (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
-                      </svg>
-                      <span className="font-semibold text-blue-800">{submission.group.name}</span>
+                  <div className="space-y-4">
+                    {/* Group Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                        </svg>
+                        <div>
+                          <span className="font-semibold text-blue-800 text-base">{submission.group.name}</span>
+                          <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                            {submission.group_members?.length || 0} สมาชิก
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p><span className="font-medium">Members:</span> {submission.group_members?.map(m => m.name).join(', ') || 'N/A'}</p>
-                      <p><span className="font-medium">Submitted by:</span> {submission.user?.name} ({submission.user?.email})</p>
+                    
+                    {/* Submitter Info */}
+                    <div className="border-l-4 border-green-500 pl-3 py-1 bg-green-50 rounded-r">
+                      <div className="text-xs font-medium text-green-700 uppercase tracking-wider mb-1">ผู้ส่งงาน</div>
+                      <div className="text-sm text-gray-900 font-medium">{submission.user?.name}</div>
+                      <div className="text-xs text-gray-600">{submission.user?.email}</div>
                     </div>
+                    
+                    {/* Members List */}
+                    {submission.group_members && submission.group_members.length > 0 && (
+                      <div>
+                        <div className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-2">สมาชิกทั้งหมด</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {submission.group_members.map((member: any, idx: number) => (
+                            <div key={idx} className={`flex items-center gap-2 p-2 rounded ${
+                              member.email === submission.user?.email 
+                                ? 'bg-green-100 border border-green-300' 
+                                : 'bg-white border border-gray-200'
+                            }`}>
+                              <div className="flex-shrink-0">
+                                {member.email === submission.user?.email ? (
+                                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                  </svg>
+                                ) : (
+                                  <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className={`text-xs font-medium truncate ${
+                                  member.email === submission.user?.email ? 'text-green-800' : 'text-gray-900'
+                                }`}>
+                                  {member.name}
+                                  {member.email === submission.user?.email && (
+                                    <span className="ml-1 text-green-600">(ผู้ส่ง)</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">

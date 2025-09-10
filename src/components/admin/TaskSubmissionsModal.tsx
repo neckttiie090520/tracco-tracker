@@ -419,21 +419,49 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filtered?.map((submission) => (
                         <tr key={submission.id} className={`hover:bg-gray-50 ${compact ? 'text-sm' : ''}`} onDoubleClick={() => setSelectedSubmissionItems(submission)}>
-                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap`}>
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'}`}>
                             {submission.is_group_submission && submission.group ? (
-                              <div>
-                                <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                              <div className="space-y-1">
+                                {/* Group Name Header */}
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
                                   </svg>
                                   <span className="font-semibold text-blue-800">{submission.group.name}</span>
+                                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                                    {submission.group_members?.length || 0} คน
+                                  </span>
                                 </div>
-                                <div className="text-sm text-gray-500 mt-1">
-                                  {submission.group_members?.length || 0} members: {submission.group_members?.map(member => member.name).join(', ')}
+                                
+                                {/* Submitter Badge */}
+                                <div className="flex items-center gap-1">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd"/>
+                                    </svg>
+                                    ผู้ส่ง: {submission.user?.name}
+                                  </span>
                                 </div>
-                                <div className="text-xs text-gray-400">
-                                  Submitted by: {submission.user?.name} ({submission.user?.email})
-                                </div>
+                                
+                                {/* Members List - Collapsible for many members */}
+                                {submission.group_members && submission.group_members.length > 0 && (
+                                  <details className="text-xs text-gray-600">
+                                    <summary className="cursor-pointer hover:text-gray-800 select-none">
+                                      สมาชิก ({submission.group_members.length} คน)
+                                    </summary>
+                                    <div className="mt-1 pl-3 space-y-0.5">
+                                      {submission.group_members.map((member: any, idx: number) => (
+                                        <div key={idx} className="flex items-center gap-1">
+                                          <span className="text-gray-400">•</span>
+                                          <span className={member.email === submission.user?.email ? 'font-semibold text-green-700' : ''}>
+                                            {member.name}
+                                            {member.email === submission.user?.email && ' (ผู้ส่ง)'}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </details>
+                                )}
                               </div>
                             ) : (
                               <div>
