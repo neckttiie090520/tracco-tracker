@@ -322,7 +322,7 @@ export function TaskManagement() {
     <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-visible">
         {/* Fixed Header */}
         <div className="p-6 bg-white border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center mb-6">
@@ -517,7 +517,7 @@ export function TaskManagement() {
           </div>
 
           {/* Tasks Table */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm overflow-visible">
             {/* Table Header with Refresh Button */}
             <div className="flex items-center justify-end px-6 py-3 bg-gray-50 border-b border-gray-200">
               <button
@@ -571,7 +571,7 @@ export function TaskManagement() {
               </div>
             ) : (
               <div>
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="min-w-full divide-y divide-gray-200" style={{ overflow: 'visible' }}>
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
