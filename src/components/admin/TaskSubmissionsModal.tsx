@@ -688,22 +688,22 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             {/* Lucky Winner Header */}
             {luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) && (
               <div className="relative z-50 rounded-t-lg overflow-visible">
-                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-12 text-center relative z-50 rounded-t-lg">
+                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative z-50 rounded-t-lg">
                   {/* Decorative background elements */}
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
-                  <div className="absolute -top-2 -left-2 w-16 h-16 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
-                  <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
-                  <div className="absolute top-1/2 left-1/4 w-8 h-8 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
+                  <div className="absolute -top-1 -left-1 w-12 h-12 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute -bottom-1 -right-1 w-14 h-14 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
+                  <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
                   
                   {/* Content */}
                   <div className="relative z-50">
                     {/* Trophy and celebration icons */}
-                    <div className="flex justify-center items-center gap-3 mb-4">
-                      <div className="text-3xl animate-bounce">🎉</div>
-                      <svg className="w-8 h-8 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="flex justify-center items-center gap-2 mb-3">
+                      <div className="text-xl animate-bounce">🎉</div>
+                      <svg className="w-6 h-6 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                       </svg>
-                      <div className="text-3xl animate-bounce delay-300">🎊</div>
+                      <div className="text-xl animate-bounce delay-300">🎊</div>
                     </div>
 
                     {/* Winner announcement */}
@@ -721,10 +721,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </svg>
                               GROUP WINNER
                             </div>
-                            <div className="text-4xl md:text-5xl font-black text-white drop-shadow-2xl mb-3 leading-tight">
+                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl mb-2 leading-tight">
                               {selectedSubmissionItems.group.name}
                             </div>
-                            <div className="text-xl text-white/95 font-semibold">
+                            <div className="text-lg text-white/95 font-semibold">
                               Team Leader: {selectedSubmissionItems.user?.name || luckyWinner}
                             </div>
                           </div>
@@ -736,7 +736,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </svg>
                               INDIVIDUAL WINNER
                             </div>
-                            <div className="text-4xl md:text-5xl font-black text-white drop-shadow-2xl leading-tight">
+                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl leading-tight">
                               {selectedSubmissionItems.user?.name || luckyWinner}
                             </div>
                           </div>
