@@ -299,7 +299,7 @@ export function WorkshopManagement() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 pb-20" style={{maxHeight: '80vh', minHeight: '80vh'}}>
+        <div className="flex-1 overflow-y-auto p-6 pb-32" style={{maxHeight: '80vh', minHeight: '80vh'}}>
 
         {/* Quick Status Tabs */}
         {workshops.length > 0 && (
