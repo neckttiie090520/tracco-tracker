@@ -262,8 +262,9 @@ export function WorkshopManagement() {
     <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
       
-      <div className="flex-1 overflow-y-auto p-6" style={{maxHeight: '80vh', minHeight: '80vh'}}>
-          {/* Header */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Fixed Header */}
+        <div className="p-6 bg-white border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Traco Workshop Management</h1>
@@ -278,7 +279,11 @@ export function WorkshopManagement() {
               </svg>
               Create Workshop
             </button>
+          </div>
         </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6" style={{maxHeight: '80vh', minHeight: '80vh'}}>
 
         {/* Quick Status Tabs */}
         {workshops.length > 0 && (
@@ -521,6 +526,7 @@ export function WorkshopManagement() {
               </div>
             )}
           </div>
+        </div>
       </div>
 
       {/* Create Workshop Modal */}
