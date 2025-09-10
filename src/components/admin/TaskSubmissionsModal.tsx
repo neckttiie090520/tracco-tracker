@@ -493,7 +493,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               
                               return (
                                 <button
-                                  onClick={() => setSelectedSubmissionItems(submission)}
+                                  onClick={() => {
+                                    console.log('Items button clicked, submission:', submission)
+                                    setSelectedSubmissionItems(submission)
+                                  }}
                                   className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
                                   title="View all submission items"
                                 >

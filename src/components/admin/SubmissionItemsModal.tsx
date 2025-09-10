@@ -8,6 +8,12 @@ interface SubmissionItemsModalProps {
 }
 
 export function SubmissionItemsModal({ submission, task, onClose }: SubmissionItemsModalProps) {
+  // Add null check
+  if (!submission) {
+    console.error('SubmissionItemsModal: No submission provided')
+    return null
+  }
+
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleString('en-US', {
@@ -34,7 +40,8 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
 
   const modalContent = (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[10001] backdrop-blur-sm"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      style={{ zIndex: 10001 }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -336,6 +343,12 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
       </div>
     </div>
   )
+
+  // Ensure document.body exists before creating portal
+  if (typeof document === 'undefined' || !document.body) {
+    console.error('SubmissionItemsModal: document.body not available')
+    return null
+  }
 
   return createPortal(modalContent, document.body)
 }
