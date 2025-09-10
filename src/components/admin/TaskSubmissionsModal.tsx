@@ -248,12 +248,12 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                 {eligibleNames.length > 0 && (
                   <button
                     onClick={() => setShowLuckyDraw((v) => !v)}
-                    className="text-sm bg-pink-600 hover:bg-pink-700 text-white px-3 py-2 rounded-md font-medium flex items-center"
+                    className="text-sm bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
                   >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mr-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    Lucky Draw
+                    ✨ Lucky Draw
                   </button>
                 )}
                 {submissions && submissions.length > 0 && (
@@ -286,15 +286,27 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             )}
 
             {!loading && !error && showLuckyDraw && (
-              <div className="mb-6">
-                <LuckyDrawSlot
-                  names={eligibleNames}
-                  reelId={`reel-${task?.id || 'task'}`}
-                  onWinner={(name) => {
-                    console.log('Lucky winner:', name)
-                    openWinnerDetail(name)
-                  }}
-                />
+              <div className="mb-6 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 rounded-xl blur-lg opacity-20 animate-pulse"></div>
+                <div className="relative bg-white border-4 border-transparent bg-clip-padding rounded-xl shadow-2xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 p-1 rounded-xl">
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="text-center mb-4">
+                        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-full font-bold text-sm animate-bounce">
+                          🎲 เลือกผู้โชคดี 🎲
+                        </div>
+                      </div>
+                      <LuckyDrawSlot
+                        names={eligibleNames}
+                        reelId={`reel-${task?.id || 'task'}`}
+                        onWinner={(name) => {
+                          console.log('Lucky winner:', name)
+                          openWinnerDetail(name)
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
