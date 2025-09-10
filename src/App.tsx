@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
+import { QueryProvider } from './providers/QueryProvider'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { ErrorBoundary, LazyLoadErrorFallback } from './components/ErrorBoundary'
@@ -79,8 +80,9 @@ const GroupSettingsPage = createLazyComponent(
 function App() {
   return (
     <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
-      <AuthProvider>
-        <RealtimeProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <RealtimeProvider>
           <BrowserRouter future={{ v7_relativeSplatPath: true }}>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-screen">
@@ -227,8 +229,9 @@ function App() {
               </Routes>
             </Suspense>
           </BrowserRouter>
-        </RealtimeProvider>
-      </AuthProvider>
+          </RealtimeProvider>
+        </AuthProvider>
+      </QueryProvider>
     </ErrorBoundary>
   )
 }
