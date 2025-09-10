@@ -684,10 +684,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             }
           }}
         >
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col relative">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
             {/* Lucky Winner Header */}
             {luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) && (
-              <div className="absolute top-0 left-0 right-0 z-50 rounded-t-lg">
+              <div className="relative z-50 rounded-t-lg overflow-visible">
                 <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-12 text-center relative z-50 rounded-t-lg">
                   {/* Decorative background elements */}
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
@@ -749,7 +749,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             )}
             
             {/* Regular Header */}
-            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 relative z-10 ${luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) ? 'bg-gradient-to-r from-yellow-50 to-pink-50 mt-40' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
+            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 relative z-10 ${luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) ? 'bg-gradient-to-r from-yellow-50 to-pink-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">Submission Details</h2>
