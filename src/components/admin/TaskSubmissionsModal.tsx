@@ -688,7 +688,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             {/* Lucky Winner Header */}
             {luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) && (
               <div className="relative overflow-hidden rounded-t-lg">
-                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-8 text-center relative">
+                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-12 text-center relative">
                   {/* Decorative background elements */}
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
                   <div className="absolute -top-2 -left-2 w-16 h-16 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
@@ -721,11 +721,11 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </svg>
                               GROUP WINNER
                             </div>
-                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-lg mb-1 leading-tight">
+                            <div className="text-4xl md:text-5xl font-black text-white drop-shadow-2xl mb-3 leading-tight">
                               {selectedSubmissionItems.group.name}
                             </div>
-                            <div className="text-sm text-white/90 font-medium">
-                              Team Leader: {luckyWinner}
+                            <div className="text-xl text-white/95 font-semibold">
+                              Team Leader: {selectedSubmissionItems.user?.name || luckyWinner}
                             </div>
                           </div>
                         ) : (
@@ -736,8 +736,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </svg>
                               INDIVIDUAL WINNER
                             </div>
-                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-lg leading-tight">
-                              {luckyWinner}
+                            <div className="text-4xl md:text-5xl font-black text-white drop-shadow-2xl leading-tight">
+                              {selectedSubmissionItems.user?.name || luckyWinner}
                             </div>
                           </div>
                         )}
