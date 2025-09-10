@@ -4,6 +4,7 @@ import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
 import { LuckyDrawSlot } from './LuckyDrawSlot'
+import { SubmissionItemsModal } from './SubmissionItemsModal'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -18,6 +19,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   const { submissions, loading, error, refetch } = useTaskSubmissions(task?.id)
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null)
   const [selectedSubmissionDetail, setSelectedSubmissionDetail] = useState<any>(null)
+  const [selectedSubmissionItems, setSelectedSubmissionItems] = useState<any>(null)
   const [luckyWinner, setLuckyWinner] = useState<string | null>(null)
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
@@ -416,8 +418,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filtered?.map((submission) => (
-                        <tr key={submission.id} className={`hover:bg-gray-50 ${compact ? 'text-sm' : ''}`} onDoubleClick={() => setSelectedSubmissionDetail(submission)}>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        <tr key={submission.id} className={`hover:bg-gray-50 ${compact ? 'text-sm' : ''}`} onDoubleClick={() => setSelectedSubmissionItems(submission)}>
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap`}>
                             {submission.is_group_submission && submission.group ? (
                               <div>
                                 <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
@@ -444,93 +446,41 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap`}>
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(submission.status)}`}>
                               {submission.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="space-y-2">
-                              {submission.notes && (
-                                <div className="flex items-start">
-                                  <button
-                                    onClick={() => setSelectedSubmissionDetail(submission)}
-                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
-                                    title="Click to view notes"
-                                  >
-                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Notes
-                                  </button>
-                                </div>
-                              )}
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'}`}>
+                            {(() => {
+                              const itemCount = 
+                                (submission.notes ? 1 : 0) +
+                                (submission.links?.length || 0) +
+                                (submission.submission_url && !submission.links ? 1 : 0) +
+                                (submission.file_url ? 1 : 0);
                               
-                              {/* Links Section */}
-                              {Array.isArray(submission.links) && submission.links.length > 0 ? (
-                                <div className="space-y-1">
-                                  <div className="text-xs font-medium text-gray-600">Links ({submission.links.length}):</div>
-                                  <div className="flex flex-col gap-1">
-                                    {submission.links.map((u: string, i: number) => (
-                                      <a key={i}
-                                        href={u}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center px-2 py-1 text-xs text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-md transition-colors max-w-fit"
-                                        title={u}
-                                      >
-                                        <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                        <span className="truncate max-w-[200px]">
-                                          {submission.links.length > 1 ? `Link ${i + 1}` : 'Link'}
-                                        </span>
-                                      </a>
-                                    ))}
-                                  </div>
-                                </div>
-                              ) : (
-                                submission.submission_url && (
-                                  <div className="flex items-start">
-                                    <a
-                                      href={submission.submission_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center px-2 py-1 text-xs text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-md transition-colors"
-                                      title={submission.submission_url}
-                                    >
-                                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                      </svg>
-                                      Link
-                                    </a>
-                                  </div>
-                                )
-                              )}
+                              if (itemCount === 0) {
+                                return <span className="text-xs text-gray-400 italic">No content</span>;
+                              }
                               
-                              {submission.file_url && (
-                                <div className="flex items-start">
-                                  <a
-                                    href={submission.file_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center px-2 py-1 text-xs text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-md transition-colors"
-                                    title="View submitted file"
-                                  >
-                                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    File
-                                  </a>
-                                </div>
-                              )}
-                              
-                              {!submission.notes && !submission.submission_url && !Array.isArray(submission.links) && !submission.file_url && (
-                                <span className="text-xs text-gray-400 italic">No content</span>
-                              )}
-                            </div>
+                              return (
+                                <button
+                                  onClick={() => setSelectedSubmissionItems(submission)}
+                                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
+                                  title="View all submission items"
+                                >
+                                  <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                  </svg>
+                                  Items
+                                  <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full">
+                                    {itemCount}
+                                  </span>
+                                </button>
+                              );
+                            })()}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap`}>
                             <div className="text-sm text-gray-900">
                               {submission.grade || 'Not graded'}
                             </div>
@@ -540,10 +490,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap text-sm text-gray-500`}>
                             {formatDate(submission.submitted_at)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap text-sm font-medium`}>
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => setSelectedSubmissionDetail(submission)}
@@ -730,6 +680,15 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             </div>
           </div>
         </div>
+      )}
+
+      {/* Submission Items Modal */}
+      {selectedSubmissionItems && (
+        <SubmissionItemsModal
+          submission={selectedSubmissionItems}
+          task={task}
+          onClose={() => setSelectedSubmissionItems(null)}
+        />
       )}
 
       {/* Submission Detail Modal */}
