@@ -501,7 +501,7 @@ export function WorkshopManagement() {
                                 Edit
                               </button>
                               
-                              <div className="relative group">
+                              <div className="relative group" style={{ zIndex: 9999 }}>
                                 <button
                                   className="text-gray-500 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
                                   title="More actions"
@@ -511,7 +511,7 @@ export function WorkshopManagement() {
                                   </svg>
                                 </button>
                                 
-                                <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <div className="fixed z-[9999] w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" style={{ transform: 'translate(-100%, 0)', marginTop: '2rem' }}>
                                   <a
                                     href={`/workshops/${workshop.id}`}
                                     target="_blank"
