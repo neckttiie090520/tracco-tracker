@@ -306,9 +306,9 @@ export function TaskManagement() {
     <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
       
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          {/* Header */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {/* Fixed Header */}
+        <div className="p-6 bg-white border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Traco Task Management</h1>
@@ -359,7 +359,9 @@ export function TaskManagement() {
             </div>
         </div>
 
-        {/* Quick Status Tabs */}
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Quick Status Tabs */}
         {tasks.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-2 mb-4">
             {(() => {
@@ -757,6 +759,7 @@ export function TaskManagement() {
               </div>
             )}
           </div>
+        </div>
         </div>
       </div>
 
