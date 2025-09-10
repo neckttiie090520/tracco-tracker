@@ -41,7 +41,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
     if (!submissions) return [] as string[]
     const list = submissions
       .filter((s: any) => s?.status && s.status !== 'draft')
-      .map((s: any) => s?.user?.name || s?.user?.email || 'Unknown')
+      .map((s: any) => {
+        // For group submissions, use group name instead of user name
+        if (s.is_group_submission && s.group?.name) {
+          return s.group.name
+        }
+        return s?.user?.name || s?.user?.email || 'Unknown'
+      })
     return Array.from(new Set(list))
   }, [submissions])
 
@@ -80,6 +86,11 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   const openWinnerDetail = (winnerNameOrEmail: string) => {
     if (!submissions || !winnerNameOrEmail) return
     const match = submissions.find((s: any) => {
+      // Check group name for group submissions
+      if (s.is_group_submission && s.group?.name) {
+        return s.group.name === winnerNameOrEmail
+      }
+      // Check user name/email for individual submissions
       const name = s?.user?.name || ''
       const email = s?.user?.email || ''
       return name === winnerNameOrEmail || email === winnerNameOrEmail
@@ -87,7 +98,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
     if (match) {
       // Use the new card format for better UX
       setSelectedSubmissionItems(match)
-      const display = match?.user?.name || match?.user?.email || winnerNameOrEmail
+      // Set the winner display name based on submission type
+      const display = match.is_group_submission && match.group?.name 
+        ? match.group.name 
+        : (match?.user?.name || match?.user?.email || winnerNameOrEmail)
       setLuckyWinner(display)
     }
   }
