@@ -18,7 +18,7 @@ export function burstConfetti(opts: ConfettiOptions = {}) {
     width: '100vw',
     height: '100vh',
     pointerEvents: 'none',
-    zIndex: '9999'
+    zIndex: '99999'
   } as CSSStyleDeclaration)
   document.body.appendChild(canvas)
   const ctx = canvas.getContext('2d')

@@ -707,7 +707,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         >
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
             {/* Lucky Winner Header */}
-            {luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) && (
+            {luckyWinner && (
+              (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
+              (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
+            ) && (
               <div className="relative z-50 rounded-t-lg overflow-visible">
                 <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative z-50 rounded-t-lg">
                   {/* Decorative background elements */}
@@ -770,7 +773,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             )}
             
             {/* Regular Header */}
-            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 relative z-10 ${luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) ? 'bg-gradient-to-r from-yellow-50 to-pink-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
+            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 relative z-10 ${luckyWinner && (
+              (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
+              (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
+            ) ? 'bg-gradient-to-r from-yellow-50 to-pink-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">Submission Details</h2>
