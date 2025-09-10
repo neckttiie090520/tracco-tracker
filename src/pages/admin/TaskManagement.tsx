@@ -303,10 +303,10 @@ export function TaskManagement() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-6 bg-white border-b border-gray-200">
           <div className="flex justify-between items-center mb-6">
@@ -359,8 +359,8 @@ export function TaskManagement() {
             </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 p-6">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6">
           {/* Quick Status Tabs */}
         {tasks.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-2 mb-4">
