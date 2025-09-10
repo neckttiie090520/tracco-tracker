@@ -1217,7 +1217,7 @@ export function SessionManager() {
     <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-visible">
         {/* Fixed Header */}
         <div className="p-6 bg-white border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center mb-6">
