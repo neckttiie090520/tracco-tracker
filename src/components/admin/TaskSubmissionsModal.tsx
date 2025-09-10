@@ -4,7 +4,7 @@ import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
 import { LuckyDrawSlot } from './LuckyDrawSlot'
-import { SubmissionItemsModal } from './SubmissionItemsModal'
+import { SubmissionItemsModalWrapper } from './SubmissionItemsModalWrapper'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -715,7 +715,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
 
       {/* Submission Items Modal */}
       {selectedSubmissionItems && (
-        <SubmissionItemsModal
+        <SubmissionItemsModalWrapper
           submission={selectedSubmissionItems}
           task={task}
           onClose={() => setSelectedSubmissionItems(null)}
