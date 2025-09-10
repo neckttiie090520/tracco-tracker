@@ -298,116 +298,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
               </div>
             )}
 
-            {luckyWinner && (
-              <div className="mb-6 relative overflow-hidden">
-                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 rounded-2xl p-8 text-center relative">
-                  {/* Decorative background elements */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20 rounded-2xl"></div>
-                  <div className="absolute -top-4 -left-4 w-24 h-24 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
-                  <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
-                  <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
-                  
-                  {/* Content */}
-                  <div className="relative z-10">
-                    {/* Trophy and celebration icons */}
-                    <div className="flex justify-center items-center gap-4 mb-4">
-                      <div className="text-6xl animate-bounce">🎉</div>
-                      <svg className="w-16 h-16 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                      </svg>
-                      <div className="text-6xl animate-bounce delay-300">🎊</div>
-                    </div>
-
-                    {/* Winner announcement */}
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-                        🏆 LUCKY DRAW WINNER! 🏆
-                      </h2>
-                      
-                      {(() => {
-                        // Find the submission to determine if it's a group
-                        const winnerSubmission = submissions?.find((s: any) => {
-                          const name = s?.user?.name || ''
-                          const email = s?.user?.email || ''
-                          return name === luckyWinner || email === luckyWinner
-                        })
-                        
-                        const isGroupSubmission = winnerSubmission?.is_group_submission && winnerSubmission?.group
-                        
-                        return (
-                          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30">
-                            {isGroupSubmission ? (
-                              <div>
-                                <div className="inline-flex items-center px-4 py-2 bg-blue-500/80 text-white rounded-full text-sm font-medium mb-3">
-                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                  </svg>
-                                  GROUP WINNER
-                                </div>
-                                <div className="text-4xl md:text-6xl font-black text-white drop-shadow-2xl mb-2 leading-tight">
-                                  {winnerSubmission.group.name}
-                                </div>
-                                <div className="text-lg text-white/90 font-medium">
-                                  Team Leader: {luckyWinner}
-                                </div>
-                              </div>
-                            ) : (
-                              <div>
-                                <div className="inline-flex items-center px-4 py-2 bg-green-500/80 text-white rounded-full text-sm font-medium mb-3">
-                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                  </svg>
-                                  INDIVIDUAL WINNER
-                                </div>
-                                <div className="text-4xl md:text-6xl font-black text-white drop-shadow-2xl leading-tight">
-                                  {luckyWinner}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })()}
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex flex-wrap justify-center gap-3">
-                      <button
-                        onClick={() => {
-                          // Find and open the winner's submission details
-                          const winnerSubmission = submissions?.find((s: any) => {
-                            const name = s?.user?.name || ''
-                            const email = s?.user?.email || ''
-                            return name === luckyWinner || email === luckyWinner
-                          })
-                          if (winnerSubmission) {
-                            setSelectedSubmissionItems(winnerSubmission)
-                          }
-                        }}
-                        className="inline-flex items-center px-6 py-3 bg-white/90 hover:bg-white text-gray-900 font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
-                      >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        View Submission
-                      </button>
-                      <button
-                        onClick={() => {
-                          setLuckyWinner(null)
-                          setShowLuckyDraw(false)
-                        }}
-                        className="inline-flex items-center px-6 py-3 bg-red-500/80 hover:bg-red-600/90 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
-                      >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        Clear Winner
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {!loading && !error && (
               <div className="mb-4 bg-white border rounded-md p-3">
@@ -795,17 +685,73 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
           }}
         >
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
-              <div className="flex justify-between items-start">
-                <div>
-                  {luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) && (
-                    <div className="mb-3 inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-yellow-100 to-pink-100 text-pink-800 border border-pink-200">
-                      <svg className="w-4 h-4 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+            {/* Lucky Winner Header */}
+            {luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) && (
+              <div className="relative overflow-hidden rounded-t-lg">
+                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-8 text-center relative">
+                  {/* Decorative background elements */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
+                  <div className="absolute -top-2 -left-2 w-16 h-16 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
+                  <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
+                  <div className="absolute top-1/2 left-1/4 w-8 h-8 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {/* Trophy and celebration icons */}
+                    <div className="flex justify-center items-center gap-3 mb-4">
+                      <div className="text-3xl animate-bounce">🎉</div>
+                      <svg className="w-8 h-8 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                       </svg>
-                      🎉 Lucky Draw Winner!
+                      <div className="text-3xl animate-bounce delay-300">🎊</div>
                     </div>
-                  )}
+
+                    {/* Winner announcement */}
+                    <div>
+                      <h2 className="text-lg font-bold text-white mb-2 drop-shadow-lg">
+                        🏆 LUCKY DRAW WINNER! 🏆
+                      </h2>
+                      
+                      <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/30">
+                        {selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group ? (
+                          <div>
+                            <div className="inline-flex items-center px-3 py-1 bg-blue-500/80 text-white rounded-full text-xs font-medium mb-2">
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                              GROUP WINNER
+                            </div>
+                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-lg mb-1 leading-tight">
+                              {selectedSubmissionItems.group.name}
+                            </div>
+                            <div className="text-sm text-white/90 font-medium">
+                              Team Leader: {luckyWinner}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="inline-flex items-center px-3 py-1 bg-green-500/80 text-white rounded-full text-xs font-medium mb-2">
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              INDIVIDUAL WINNER
+                            </div>
+                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-lg leading-tight">
+                              {luckyWinner}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Regular Header */}
+            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 ${luckyWinner && (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner) ? 'bg-gradient-to-r from-yellow-50 to-pink-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
+              <div className="flex justify-between items-start">
+                <div>
                   <h2 className="text-xl font-semibold text-gray-900">Submission Details</h2>
                   <p className="text-sm text-gray-600 mt-1">
                     {selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group
