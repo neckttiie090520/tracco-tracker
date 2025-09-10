@@ -503,18 +503,7 @@ export function TaskManagement() {
           {/* Tasks Table */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             {/* Table Header with Refresh Button */}
-            <div className="flex items-center justify-between px-6 py-3 bg-gray-50 border-b border-gray-200">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.length === filteredTasks.length && filteredTasks.length > 0}
-                  onChange={selectedItems.length === filteredTasks.length ? handleDeselectAll : handleSelectAll}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
-                />
-                <span className="text-sm font-medium text-gray-500">
-                  Select All
-                </span>
-              </div>
+            <div className="flex items-center justify-end px-6 py-3 bg-gray-50 border-b border-gray-200">
               <button
                 onClick={refetch}
                 className="border px-3 py-1.5 rounded-md text-gray-700 hover:bg-gray-50 flex items-center text-sm"
