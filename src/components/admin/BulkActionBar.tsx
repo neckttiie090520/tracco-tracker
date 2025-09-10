@@ -10,7 +10,9 @@ interface BulkActionBarProps {
   onBulkShow?: () => void
   onBulkDelete?: () => void
   onBulkArchive?: () => void
+  onBulkRestore?: () => void
   loading?: boolean
+  isArchivedView?: boolean
 }
 
 interface ConfirmationModalProps {
@@ -103,12 +105,15 @@ export function BulkActionBar({
   onBulkShow,
   onBulkDelete,
   onBulkArchive,
-  loading = false
+  onBulkRestore,
+  loading = false,
+  isArchivedView = false
 }: BulkActionBarProps) {
   const [showHideConfirm, setShowHideConfirm] = useState(false)
   const [showShowConfirm, setShowShowConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
 
   const isAllSelected = selectedItems.length === totalItems && totalItems > 0
   const isSomeSelected = selectedItems.length > 0
@@ -131,6 +136,11 @@ export function BulkActionBar({
   const handleBulkArchive = () => {
     setShowArchiveConfirm(false)
     onBulkArchive?.()
+  }
+
+  const handleBulkRestore = () => {
+    setShowRestoreConfirm(false)
+    onBulkRestore?.()
   }
 
   return (
@@ -190,17 +200,33 @@ export function BulkActionBar({
                 </button>
               )}
 
-              {onBulkArchive && (
-                <button
-                  onClick={() => setShowArchiveConfirm(true)}
-                  disabled={loading}
-                  className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center"
-                >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8l6 6 6-6" />
-                  </svg>
-                  Archive All ({selectedItems.length})
-                </button>
+              {/* Archive/Restore Button - Context Aware */}
+              {isArchivedView ? (
+                onBulkRestore && (
+                  <button
+                    onClick={() => setShowRestoreConfirm(true)}
+                    disabled={loading}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    Restore All ({selectedItems.length})
+                  </button>
+                )
+              ) : (
+                onBulkArchive && (
+                  <button
+                    onClick={() => setShowArchiveConfirm(true)}
+                    disabled={loading}
+                    className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8l6 6 6-6" />
+                    </svg>
+                    Archive All ({selectedItems.length})
+                  </button>
+                )
               )}
 
               {onBulkDelete && (
@@ -260,6 +286,16 @@ export function BulkActionBar({
         onCancel={() => setShowDeleteConfirm(false)}
         loading={loading}
         isDangerous={true}
+      />
+
+      <ConfirmationModal
+        isOpen={showRestoreConfirm}
+        title="Restore Selected Items"
+        message={`Are you sure you want to restore ${selectedItems.length} selected ${itemType}${selectedItems.length !== 1 ? 's' : ''}? This will move them back to active state and make them visible in regular listings.`}
+        confirmText="Restore All"
+        onConfirm={handleBulkRestore}
+        onCancel={() => setShowRestoreConfirm(false)}
+        loading={loading}
       />
     </>
   )

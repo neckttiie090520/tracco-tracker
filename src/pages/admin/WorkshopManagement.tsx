@@ -210,6 +210,23 @@ export function WorkshopManagement() {
     }
   }
 
+  const handleBulkRestore = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateWorkshop(id, { is_archived: false, archived_at: null, is_active: true }))
+      )
+      setSelectedItems([])
+      refetch()
+      alert('Selected workshops have been restored successfully')
+    } catch (error) {
+      console.error('Error restoring workshops:', error)
+      alert('Failed to restore selected workshops')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   const handleItemSelect = (workshopId: string) => {
     setSelectedItems(prev => 
       prev.includes(workshopId)
@@ -374,8 +391,10 @@ export function WorkshopManagement() {
                 onBulkHide={handleBulkHide}
                 onBulkShow={handleBulkShow}
                 onBulkArchive={handleBulkArchive}
+                onBulkRestore={handleBulkRestore}
                 onBulkDelete={handleBulkDelete}
                 loading={bulkLoading}
+                isArchivedView={statusFilter === 'archived'}
               />
             )}
 

@@ -202,6 +202,23 @@ export function TaskManagement() {
     }
   }
 
+  const handleBulkRestore = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateTask(id, { is_archived: false, archived_at: null, is_active: true }))
+      )
+      setSelectedItems([])
+      refetch()
+      alert('Selected tasks have been restored successfully')
+    } catch (error) {
+      console.error('Error restoring tasks:', error)
+      alert('Failed to restore selected tasks')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   const handleItemSelect = (taskId: string) => {
     setSelectedItems(prev => 
       prev.includes(taskId)
@@ -544,7 +561,9 @@ export function TaskManagement() {
                 onBulkShow={handleBulkShow}
                 onBulkDelete={handleBulkDelete}
                 onBulkArchive={handleBulkArchive}
+                onBulkRestore={handleBulkRestore}
                 loading={bulkLoading}
+                isArchivedView={statusFilter === 'archived'}
               />
             )}
 

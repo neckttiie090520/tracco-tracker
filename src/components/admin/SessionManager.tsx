@@ -1182,6 +1182,27 @@ export function SessionManager() {
     }
   }
 
+  const handleBulkRestore = async () => {
+    setBulkLoading(true)
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ is_archived: false, archived_at: null, is_active: true })
+        .in('id', selectedItems)
+
+      if (error) throw error
+
+      await fetchSessions()
+      setSelectedItems([])
+      alert('Selected sessions have been restored successfully')
+    } catch (error) {
+      console.error('Error restoring sessions:', error)
+      alert('Failed to restore selected sessions')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   const handleItemSelect = (sessionId: string) => {
     setSelectedItems(prev => 
       prev.includes(sessionId)
@@ -1360,8 +1381,10 @@ export function SessionManager() {
                 onBulkHide={handleBulkHide}
                 onBulkShow={handleBulkShow}
                 onBulkArchive={handleBulkArchive}
+                onBulkRestore={handleBulkRestore}
                 onBulkDelete={handleBulkDelete}
                 loading={bulkLoading}
+                isArchivedView={statusFilter === 'archived'}
               />
             )}
 
