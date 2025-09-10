@@ -1484,37 +1484,64 @@ export function SessionManager() {
                           </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex flex-wrap gap-2">
-                            <button 
+                          <div className="flex items-center space-x-2">
+                            <button
                               onClick={() => {
                                 setSelectedSession(session)
                                 setShowEditModal(true)
                               }}
-                              className="text-blue-600 hover:text-blue-900 text-xs px-2 py-1 bg-blue-50 rounded"
+                              className="text-green-700 hover:text-green-900 text-xs bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-md transition-colors font-medium"
+                              title="Edit session"
                             >
                               Edit
                             </button>
-                            {session.is_archived ? (
+                            
+                            <div className="relative group">
                               <button
-                                onClick={() => restoreSession(session.id)}
-                                className="text-yellow-700 hover:text-yellow-900 text-xs px-2 py-1 bg-yellow-50 rounded"
+                                className="text-gray-500 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+                                title="More actions"
                               >
-                                Restore
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                </svg>
                               </button>
-                            ) : (
-                              <button
-                                onClick={() => archiveSession(session.id)}
-                                className="text-yellow-700 hover:text-yellow-900 text-xs px-2 py-1 bg-yellow-50 rounded"
-                              >
-                                Archive
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleDeleteSession(session.id, session.title)}
-                              className="text-red-600 hover:text-red-900 text-xs px-2 py-1 bg-red-50 rounded"
-                            >
-                              Delete
-                            </button>
+                              
+                              <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                {session.is_archived ? (
+                                  <button
+                                    onClick={() => restoreSession(session.id)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
+                                  >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                                    </svg>
+                                    Restore Session
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => archiveSession(session.id)}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
+                                  >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8l4 4m0 0l4-4m-4 4V3m-1 17v-8a4 4 0 014-4h0a4 4 0 014 4v8" />
+                                    </svg>
+                                    Archive Session
+                                  </button>
+                                )}
+                                
+                                <div className="border-t border-gray-100 my-1"></div>
+                                
+                                <button
+                                  onClick={() => handleDeleteSession(session.id, session.title)}
+                                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                  Delete Session
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </td>
                       </tr>
