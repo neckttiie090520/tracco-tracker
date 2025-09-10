@@ -431,7 +431,7 @@ export function WorkshopManagement() {
                       const taskCount = workshop.tasks?.[0]?.count || 0
                       
                       return (
-                        <tr key={workshop.id} className={`hover:bg-gray-50 ${selectedItems.includes(workshop.id) ? 'bg-blue-50' : ''}`}>
+                        <tr key={workshop.id} className={`hover:bg-gray-50 ${selectedItems.includes(workshop.id) ? 'bg-blue-50' : ''}`} style={{ position: 'relative', overflow: 'visible' }}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
                               type="checkbox"
@@ -511,7 +511,7 @@ export function WorkshopManagement() {
                                   </svg>
                                 </button>
                                 
-                                <div className="fixed z-[9999] w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" style={{ transform: 'translate(-100%, 0)', marginTop: '2rem' }}>
+                                <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                   <a
                                     href={`/workshops/${workshop.id}`}
                                     target="_blank"

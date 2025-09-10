@@ -1414,7 +1414,7 @@ export function SessionManager() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredSessions.map(({ session, participant_count, workshop_count }) => (
-                      <tr key={session.id} className={`hover:bg-gray-50 ${selectedItems.includes(session.id) ? 'bg-blue-50' : ''}`}>
+                      <tr key={session.id} className={`hover:bg-gray-50 ${selectedItems.includes(session.id) ? 'bg-blue-50' : ''}`} style={{ position: 'relative', overflow: 'visible' }}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <input
                             type="checkbox"
@@ -1506,7 +1506,7 @@ export function SessionManager() {
                                 </svg>
                               </button>
                               
-                              <div className="fixed z-[9999] w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" style={{ transform: 'translate(-100%, 0)', marginTop: '2rem' }}>
+                              <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                 {session.is_archived ? (
                                   <button
                                     onClick={() => restoreSession(session.id)}

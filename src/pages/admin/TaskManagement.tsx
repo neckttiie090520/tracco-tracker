@@ -594,7 +594,7 @@ export function TaskManagement() {
                       const isOverdue = task.due_date && new Date(task.due_date) < new Date()
                       
                       return (
-                        <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`}>
+                        <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`} style={{ position: 'relative', overflow: 'visible' }}>
                           {/* Row checkbox (aligns with first header column) */}
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
@@ -707,7 +707,7 @@ export function TaskManagement() {
                                 </button>
                                 
                                 {/* Dropdown Menu */}
-                                <div className="fixed z-[9999] w-48 py-1 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" style={{ transform: 'translate(-100%, 0)', marginTop: '2rem' }}>
+                                <div className="absolute right-0 top-8 w-48 py-1 bg-white rounded-md shadow-lg border border-gray-200 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                   {task.submission_mode === 'group' && (
                                     <button
                                       onClick={() => setViewingGroups(task)}
