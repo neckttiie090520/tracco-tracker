@@ -1196,8 +1196,7 @@ export function SessionManager() {
     <div className="flex h-screen bg-gray-50">
       <AdminNavigation />
       
-      <div className="flex-1 overflow-auto">
-      <div className="p-6">
+      <div className="flex-1 overflow-y-auto p-6" style={{maxHeight: '80vh', minHeight: '80vh'}}>
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -1503,7 +1502,6 @@ export function SessionManager() {
               </div>
             )}
           </div>
-        </div>
       </div>
 
       {/* Create Session Modal */}
