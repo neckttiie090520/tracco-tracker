@@ -186,6 +186,22 @@ export function TaskManagement() {
     }
   }
 
+  const handleBulkArchive = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateTask(id, { status: 'archived' }))
+      )
+      setSelectedItems([])
+      alert('Selected tasks have been archived successfully')
+    } catch (error) {
+      console.error('Error archiving tasks:', error)
+      alert('Failed to archive selected tasks')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   const handleItemSelect = (taskId: string) => {
     setSelectedItems(prev => 
       prev.includes(taskId)
@@ -527,6 +543,7 @@ export function TaskManagement() {
                 onBulkHide={handleBulkHide}
                 onBulkShow={handleBulkShow}
                 onBulkDelete={handleBulkDelete}
+                onBulkArchive={handleBulkArchive}
                 loading={bulkLoading}
               />
             )}

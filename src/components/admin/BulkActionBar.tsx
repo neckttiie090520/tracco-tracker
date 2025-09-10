@@ -9,6 +9,7 @@ interface BulkActionBarProps {
   onBulkHide?: () => void
   onBulkShow?: () => void
   onBulkDelete?: () => void
+  onBulkArchive?: () => void
   loading?: boolean
 }
 
@@ -101,11 +102,13 @@ export function BulkActionBar({
   onBulkHide,
   onBulkShow,
   onBulkDelete,
+  onBulkArchive,
   loading = false
 }: BulkActionBarProps) {
   const [showHideConfirm, setShowHideConfirm] = useState(false)
   const [showShowConfirm, setShowShowConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
 
   const isAllSelected = selectedItems.length === totalItems && totalItems > 0
   const isSomeSelected = selectedItems.length > 0
@@ -123,6 +126,11 @@ export function BulkActionBar({
   const handleBulkDelete = () => {
     setShowDeleteConfirm(false)
     onBulkDelete?.()
+  }
+
+  const handleBulkArchive = () => {
+    setShowArchiveConfirm(false)
+    onBulkArchive?.()
   }
 
   return (
@@ -182,6 +190,19 @@ export function BulkActionBar({
                 </button>
               )}
 
+              {onBulkArchive && (
+                <button
+                  onClick={() => setShowArchiveConfirm(true)}
+                  disabled={loading}
+                  className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8l6 6 6-6" />
+                  </svg>
+                  Archive All ({selectedItems.length})
+                </button>
+              )}
+
               {onBulkDelete && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
@@ -217,6 +238,16 @@ export function BulkActionBar({
         confirmText="Show All"
         onConfirm={handleBulkShow}
         onCancel={() => setShowShowConfirm(false)}
+        loading={loading}
+      />
+
+      <ConfirmationModal
+        isOpen={showArchiveConfirm}
+        title="Archive Selected Items"
+        message={`Are you sure you want to archive ${selectedItems.length} selected ${itemType}${selectedItems.length !== 1 ? 's' : ''}? This will move them to the archived state and hide them from active listings.`}
+        confirmText="Archive All"
+        onConfirm={handleBulkArchive}
+        onCancel={() => setShowArchiveConfirm(false)}
         loading={loading}
       />
 
