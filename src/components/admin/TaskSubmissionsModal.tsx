@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { createPortal } from 'react-dom'
 import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
@@ -226,11 +225,12 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
 
   if (!task) return null
 
-  const modalContent = (
-    <div 
-      ref={modalRef}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm"
-    >
+  return (
+    <>
+      <div 
+        ref={modalRef}
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm"
+      >
       <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-200 scale-100 opacity-100">
         <div className="p-6">
           {/* Header */}
@@ -592,6 +592,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
           )}
         </div>
       </div>
+      </div>
 
       {/* Review Modal */}
       {selectedSubmission && (
@@ -713,7 +714,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
       )}
 
       {/* Submission Items Modal - Inline to avoid Router context issues */}
-      {selectedSubmissionItems && (
+        {selectedSubmissionItems && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm"
           style={{ zIndex: 10001 }}
@@ -721,10 +722,9 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             if (e.target === e.currentTarget) setSelectedSubmissionItems(null)
           }}
         >
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">Submission Details</h2>
@@ -747,7 +747,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-6" style={{ minHeight: 0 }}>
                 {/* Student/Group Info */}
                 <div className="mb-6">
                   <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">
@@ -835,26 +835,31 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                       Links ({(selectedSubmissionItems.links?.length || 0) + (selectedSubmissionItems.submission_url && !selectedSubmissionItems.links ? 1 : 0)})
                     </h3>
                     <div className="space-y-2">
-                      {selectedSubmissionItems.links && selectedSubmissionItems.links.map((link: string, index: number) => (
-                        <div key={index} className="bg-white border border-gray-200 rounded-lg p-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <span className="text-sm font-medium text-gray-700">Link {index + 1}</span>
-                              <p className="text-sm text-blue-600 break-all mt-1">{link}</p>
+                      {selectedSubmissionItems.links && selectedSubmissionItems.links.map((link: any, index: number) => {
+                        const linkUrl = typeof link === 'string' ? link : link.url || link;
+                        const linkNote = typeof link === 'object' ? link.note : '';
+                        return (
+                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <span className="text-sm font-medium text-gray-700">Link {index + 1}</span>
+                                <p className="text-sm text-blue-600 break-all mt-1">{linkUrl}</p>
+                                {linkNote && <p className="text-xs text-gray-500 mt-1">{linkNote}</p>}
+                              </div>
+                              <a
+                                href={linkUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 p-2 text-gray-400 hover:text-blue-600 rounded"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </a>
                             </div>
-                            <a
-                              href={link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-2 p-2 text-gray-400 hover:text-blue-600 rounded"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
-                            </a>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       
                       {(!selectedSubmissionItems.links || selectedSubmissionItems.links.length === 0) && selectedSubmissionItems.submission_url && (
                         <div className="bg-white border border-gray-200 rounded-lg p-3">
@@ -946,7 +951,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex-shrink-0">
                 <div className="flex justify-end">
                   <button
                     onClick={() => setSelectedSubmissionItems(null)}
@@ -1124,10 +1129,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
           </div>
         </div>
       )}
-    </div>
+    </>
   )
-
-  return createPortal(modalContent, document.body)
 }
 
 

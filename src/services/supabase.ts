@@ -16,7 +16,7 @@ export const supabase = (() => {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: false, // Prevent multiple client issues
+        detectSessionInUrl: true, // Enable session detection from URL
       },
     })
   }
