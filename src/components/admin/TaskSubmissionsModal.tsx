@@ -239,7 +239,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         ref={modalRef}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm"
       >
-        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col transform transition-all duration-200 scale-100 opacity-100">
+        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col transform transition-all duration-200 scale-100 opacity-100">
           <div className="p-6 flex-shrink-0 border-b border-gray-200">
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -406,9 +406,9 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     <p className="text-gray-600">No items match your search or filters.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto pb-20">
+                  <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0 z-10">
+                      <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Student
@@ -708,14 +708,14 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             }
           }}
         >
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
             {/* Lucky Winner Header */}
             {luckyWinner && (
               (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
               (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
             ) && (
-              <div className="relative z-50 rounded-t-lg overflow-visible">
-                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative z-50 rounded-t-lg">
+              <div className="relative rounded-t-lg">
+                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative rounded-t-lg">
                   {/* Decorative background elements */}
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
                   <div className="absolute -top-1 -left-1 w-12 h-12 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
@@ -723,7 +723,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                   <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
                   
                   {/* Content */}
-                  <div className="relative z-50">
+                  <div className="relative">
                     {/* Trophy and celebration icons */}
                     <div className="flex justify-center items-center gap-2 mb-3">
                       <div className="text-xl animate-bounce">🎉</div>
@@ -776,7 +776,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             )}
             
             {/* Regular Header */}
-            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 relative z-10 ${luckyWinner && (
+            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 ${luckyWinner && (
               (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
               (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
             ) ? 'bg-gradient-to-r from-yellow-50 to-pink-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
@@ -804,7 +804,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
               </div>
             </div>
 
-            <div className="flex-1 overflow-hidden p-6">
+            <div className="flex-1 overflow-y-auto p-6">
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">
                   {selectedSubmissionItems.is_group_submission ? 'Group Information' : 'Student Information'}

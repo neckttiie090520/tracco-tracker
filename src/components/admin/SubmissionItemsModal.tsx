@@ -46,10 +46,10 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Submission Details</h2>
@@ -329,7 +329,7 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex-shrink-0">
             <div className="flex justify-end">
               <button
                 onClick={onClose}
