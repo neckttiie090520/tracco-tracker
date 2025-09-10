@@ -1161,6 +1161,27 @@ export function SessionManager() {
     }
   }
 
+  const handleBulkArchive = async () => {
+    setBulkLoading(true)
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ is_archived: true, is_active: false, archived_at: new Date().toISOString() })
+        .in('id', selectedItems)
+
+      if (error) throw error
+
+      await fetchSessions()
+      setSelectedItems([])
+      alert('Selected sessions have been archived successfully')
+    } catch (error) {
+      console.error('Error archiving sessions:', error)
+      alert('Failed to archive selected sessions')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   const handleItemSelect = (sessionId: string) => {
     setSelectedItems(prev => 
       prev.includes(sessionId)
@@ -1338,6 +1359,7 @@ export function SessionManager() {
                 onDeselectAll={handleDeselectAll}
                 onBulkHide={handleBulkHide}
                 onBulkShow={handleBulkShow}
+                onBulkArchive={handleBulkArchive}
                 onBulkDelete={handleBulkDelete}
                 loading={bulkLoading}
               />

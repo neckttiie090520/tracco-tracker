@@ -194,6 +194,22 @@ export function WorkshopManagement() {
     }
   }
 
+  const handleBulkArchive = async () => {
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedItems.map(id => updateWorkshop(id, { is_archived: true, is_active: false, archived_at: new Date().toISOString() }))
+      )
+      setSelectedItems([])
+      alert('Selected workshops have been archived successfully')
+    } catch (error) {
+      console.error('Error archiving workshops:', error)
+      alert('Failed to archive selected workshops')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   const handleItemSelect = (workshopId: string) => {
     setSelectedItems(prev => 
       prev.includes(workshopId)
@@ -357,6 +373,7 @@ export function WorkshopManagement() {
                 onDeselectAll={handleDeselectAll}
                 onBulkHide={handleBulkHide}
                 onBulkShow={handleBulkShow}
+                onBulkArchive={handleBulkArchive}
                 onBulkDelete={handleBulkDelete}
                 loading={bulkLoading}
               />
