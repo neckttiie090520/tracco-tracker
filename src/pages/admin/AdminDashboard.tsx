@@ -379,135 +379,180 @@ export function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-6">
-                {/* Individual Tasks Progress */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Individual Tasks</span>
-                    <span className="text-sm text-gray-500">
-{(() => {
-                        if (!selectedSession || !tasks) return '0/0 (0%)'
-                        
-                        // Get workshops linked to selected session
-                        const sessionWorkshops = workshops.filter(w => 
-                          selectedSession.workshops?.some(sw => sw.id === w.id)
-                        )
-                        
-                        // Get individual tasks in this session
-                        const individualTasks = tasks.filter(task => 
-                          task.submission_mode === 'individual' && 
-                          sessionWorkshops.some(w => w.id === task.workshop_id)
-                        )
-                        
-                        // Count submitted individual submissions
-                        const totalIndividualSubmissions = individualTasks.reduce((sum, task) => {
-                          return sum + (task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0)
-                        }, 0)
-                        
-                        const totalPossible = individualTasks.length * selectedSession.total_participants
-                        const percentage = totalPossible > 0 ? Math.round((totalIndividualSubmissions / totalPossible) * 100) : 0
-                        return `${totalIndividualSubmissions}/${totalPossible} (${percentage}%)`
-                      })()}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-1000"
-                      style={{ 
-width: `${(() => {
-                          if (!selectedSession || !tasks) return 0
+              <div className="mt-6 space-y-8">
+                {/* Individual Tasks Section */}
+                {(() => {
+                  if (!selectedSession || !tasks) return null
+                  
+                  const sessionWorkshops = workshops.filter(w => 
+                    selectedSession.workshops?.some(sw => sw.id === w.id)
+                  )
+                  
+                  const individualTasks = tasks.filter(task => 
+                    task.submission_mode === 'individual' && 
+                    sessionWorkshops.some(w => w.id === task.workshop_id)
+                  )
+                  
+                  if (individualTasks.length === 0) return null
+                  
+                  const totalIndividualSubmissions = individualTasks.reduce((sum, task) => {
+                    return sum + (task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0)
+                  }, 0)
+                  
+                  const totalPossible = individualTasks.length * selectedSession.total_participants
+                  const percentage = totalPossible > 0 ? Math.round((totalIndividualSubmissions / totalPossible) * 100) : 0
+                  
+                  return (
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-semibold text-gray-800">Individual Tasks</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
+                            </svg>
+                            เดี่ยว
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium text-blue-600">
+                          {totalIndividualSubmissions}/{totalPossible} ({percentage}%)
+                        </span>
+                      </div>
+                      
+                      <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-1000"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      
+                      {/* Individual Task Cards */}
+                      <div className="grid gap-3">
+                        {individualTasks.map(task => {
+                          const taskSubmissions = task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0
+                          const taskProgress = selectedSession.total_participants > 0 
+                            ? Math.round((taskSubmissions / selectedSession.total_participants) * 100) 
+                            : 0
+                          const workshop = workshops.find(w => w.id === task.workshop_id)
                           
-                          const sessionWorkshops = workshops.filter(w => 
-                            selectedSession.workshops?.some(sw => sw.id === w.id)
+                          return (
+                            <div key={task.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex-1">
+                                  <h4 className="text-sm font-semibold text-gray-900">{task.title}</h4>
+                                  <p className="text-xs text-gray-600 mt-1">{workshop?.title}</p>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-sm font-medium text-blue-600">
+                                    {taskSubmissions}/{selectedSession.total_participants}
+                                  </span>
+                                  <div className="text-xs text-gray-500">{taskProgress}%</div>
+                                </div>
+                              </div>
+                              <div className="w-full bg-blue-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                                  style={{ width: `${taskProgress}%` }}
+                                />
+                              </div>
+                            </div>
                           )
-                          
-                          const individualTasks = tasks.filter(task => 
-                            task.submission_mode === 'individual' && 
-                            sessionWorkshops.some(w => w.id === task.workshop_id)
-                          )
-                          
-                          const totalIndividualSubmissions = individualTasks.reduce((sum, task) => {
-                            return sum + (task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0)
-                          }, 0)
-                          
-                          const totalPossible = individualTasks.length * selectedSession.total_participants
-                          return totalPossible > 0 ? Math.round((totalIndividualSubmissions / totalPossible) * 100) : 0
-                        })()}%` 
-                      }}
-                    />
-                  </div>
-                </div>
+                        })}
+                      </div>
+                    </div>
+                  )
+                })()}
 
-                {/* Group Tasks Progress */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Group Tasks</span>
-                    <span className="text-sm text-gray-500">
-{(() => {
-                        if (!selectedSession || !tasks) return '0/0 (0%)'
-                        
-                        // Get workshops linked to selected session
-                        const sessionWorkshops = workshops.filter(w => 
-                          selectedSession.workshops?.some(sw => sw.id === w.id)
-                        )
-                        
-                        // Get group tasks in this session
-                        const groupTasks = tasks.filter(task => 
-                          task.submission_mode === 'group' && 
-                          sessionWorkshops.some(w => w.id === task.workshop_id)
-                        )
-                        
-                        // Count submitted group submissions (unique group_id)
-                        const totalGroupSubmissions = groupTasks.reduce((sum, task) => {
+                {/* Group Tasks Section */}
+                {(() => {
+                  if (!selectedSession || !tasks) return null
+                  
+                  const sessionWorkshops = workshops.filter(w => 
+                    selectedSession.workshops?.some(sw => sw.id === w.id)
+                  )
+                  
+                  const groupTasks = tasks.filter(task => 
+                    task.submission_mode === 'group' && 
+                    sessionWorkshops.some(w => w.id === task.workshop_id)
+                  )
+                  
+                  if (groupTasks.length === 0) return null
+                  
+                  const totalGroupSubmissions = groupTasks.reduce((sum, task) => {
+                    const uniqueGroupSubmissions = new Set(
+                      task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
+                    ).size
+                    return sum + uniqueGroupSubmissions
+                  }, 0)
+                  
+                  const totalGroups = groupTasks.reduce((sum, task) => {
+                    return sum + (task.task_groups?.length || 0)
+                  }, 0)
+                  
+                  const percentage = totalGroups > 0 ? Math.round((totalGroupSubmissions / totalGroups) * 100) : 0
+                  
+                  return (
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-semibold text-gray-800">Group Tasks</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                            </svg>
+                            กลุ่ม
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium text-green-600">
+                          {totalGroupSubmissions}/{totalGroups} ({percentage}%)
+                        </span>
+                      </div>
+                      
+                      <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                        <div
+                          className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-1000"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      
+                      {/* Group Task Cards */}
+                      <div className="grid gap-3">
+                        {groupTasks.map(task => {
                           const uniqueGroupSubmissions = new Set(
                             task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
                           ).size
-                          return sum + uniqueGroupSubmissions
-                        }, 0)
-                        
-                        // Total possible groups across all group tasks
-                        const totalGroups = groupTasks.reduce((sum, task) => {
-                          return sum + (task.task_groups?.length || 0)
-                        }, 0)
-                        
-                        const percentage = totalGroups > 0 ? Math.round((totalGroupSubmissions / totalGroups) * 100) : 0
-                        return `${totalGroupSubmissions}/${totalGroups} (${percentage}%)`
-                      })()}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-1000"
-                      style={{ 
-width: `${(() => {
-                          if (!selectedSession || !tasks) return 0
+                          const totalTaskGroups = task.task_groups?.length || 0
+                          const taskProgress = totalTaskGroups > 0 ? Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100) : 0
+                          const workshop = workshops.find(w => w.id === task.workshop_id)
                           
-                          const sessionWorkshops = workshops.filter(w => 
-                            selectedSession.workshops?.some(sw => sw.id === w.id)
+                          return (
+                            <div key={task.id} className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex-1">
+                                  <h4 className="text-sm font-semibold text-gray-900">{task.title}</h4>
+                                  <p className="text-xs text-gray-600 mt-1">{workshop?.title}</p>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-sm font-medium text-green-600">
+                                    {uniqueGroupSubmissions}/{totalTaskGroups}
+                                  </span>
+                                  <div className="text-xs text-gray-500">{taskProgress}%</div>
+                                </div>
+                              </div>
+                              <div className="w-full bg-green-200 rounded-full h-2">
+                                <div
+                                  className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                                  style={{ width: `${taskProgress}%` }}
+                                />
+                              </div>
+                            </div>
                           )
-                          
-                          const groupTasks = tasks.filter(task => 
-                            task.submission_mode === 'group' && 
-                            sessionWorkshops.some(w => w.id === task.workshop_id)
-                          )
-                          
-                          const totalGroupSubmissions = groupTasks.reduce((sum, task) => {
-                            const uniqueGroupSubmissions = new Set(
-                              task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
-                            ).size
-                            return sum + uniqueGroupSubmissions
-                          }, 0)
-                          
-                          const totalGroups = groupTasks.reduce((sum, task) => {
-                            return sum + (task.task_groups?.length || 0)
-                          }, 0)
-                          
-                          return totalGroups > 0 ? Math.round((totalGroupSubmissions / totalGroups) * 100) : 0
-                        })()}%` 
-                      }}
-                    />
-                  </div>
-                </div>
+                        })}
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           )}
