@@ -377,7 +377,8 @@ export const adminOperations = {
       .select(`
         *,
         workshop:workshops!tasks_workshop_id_fkey(id, title),
-        submissions:submissions(id)
+        submissions:submissions(id, user_id, group_id, status),
+        task_groups:task_groups(id, name)
       `)
       .order('created_at', { ascending: false })
 

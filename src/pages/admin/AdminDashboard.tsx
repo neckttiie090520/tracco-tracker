@@ -13,6 +13,7 @@ interface Session {
   total_submissions: number
   completion_percentage: number
   is_active: boolean
+  workshops?: { id: string }[]
 }
 
 
@@ -183,7 +184,8 @@ export function AdminDashboard() {
           total_tasks: totalTasks, // Show ALL tasks in session-workshop chain
           total_submissions: actualSubmissions,
           completion_percentage: completionPercentage,
-          is_active: session.is_active
+          is_active: session.is_active,
+          workshops: sessionWorkshops.map(sw => ({ id: sw.workshop_id })) // Add workshops data
         })
       }
 
@@ -324,12 +326,12 @@ export function AdminDashboard() {
           </div>
 
 
-          {/* Overall Progress Chart */}
+          {/* Tasks Progress Chart */}
           {selectedSession && (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Session Progress</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Tasks Progress</h3>
                   <div className="flex items-center gap-3 mt-1">
                     <select 
                       value={selectedSession.id} 
@@ -345,7 +347,7 @@ export function AdminDashboard() {
                         </option>
                       ))}
                     </select>
-                    <span className="text-sm text-gray-500">Real-time workshop completion tracking</span>
+                    <span className="text-sm text-gray-500">Real-time tasks completion tracking</span>
                   </div>
                 </div>
                 <div className="text-right">
@@ -377,17 +379,134 @@ export function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="mt-6">
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-1000"
-                    style={{ 
-                      width: `${selectedSession && selectedSession.total_tasks > 0 && selectedSession.total_participants > 0
-                        ? Math.round(((selectedSession.total_submissions || taskStats.totalSubmissions) / (selectedSession.total_tasks * selectedSession.total_participants)) * 100)
-                        : 0
-                      }%` 
-                    }}
-                  />
+              <div className="mt-6 space-y-6">
+                {/* Individual Tasks Progress */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Individual Tasks</span>
+                    <span className="text-sm text-gray-500">
+{(() => {
+                        if (!selectedSession || !tasks) return '0/0 (0%)'
+                        
+                        // Get workshops linked to selected session
+                        const sessionWorkshops = workshops.filter(w => 
+                          selectedSession.workshops?.some(sw => sw.id === w.id)
+                        )
+                        
+                        // Get individual tasks in this session
+                        const individualTasks = tasks.filter(task => 
+                          task.submission_mode === 'individual' && 
+                          sessionWorkshops.some(w => w.id === task.workshop_id)
+                        )
+                        
+                        // Count submitted individual submissions
+                        const totalIndividualSubmissions = individualTasks.reduce((sum, task) => {
+                          return sum + (task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0)
+                        }, 0)
+                        
+                        const totalPossible = individualTasks.length * selectedSession.total_participants
+                        const percentage = totalPossible > 0 ? Math.round((totalIndividualSubmissions / totalPossible) * 100) : 0
+                        return `${totalIndividualSubmissions}/${totalPossible} (${percentage}%)`
+                      })()}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-1000"
+                      style={{ 
+width: `${(() => {
+                          if (!selectedSession || !tasks) return 0
+                          
+                          const sessionWorkshops = workshops.filter(w => 
+                            selectedSession.workshops?.some(sw => sw.id === w.id)
+                          )
+                          
+                          const individualTasks = tasks.filter(task => 
+                            task.submission_mode === 'individual' && 
+                            sessionWorkshops.some(w => w.id === task.workshop_id)
+                          )
+                          
+                          const totalIndividualSubmissions = individualTasks.reduce((sum, task) => {
+                            return sum + (task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0)
+                          }, 0)
+                          
+                          const totalPossible = individualTasks.length * selectedSession.total_participants
+                          return totalPossible > 0 ? Math.round((totalIndividualSubmissions / totalPossible) * 100) : 0
+                        })()}%` 
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Group Tasks Progress */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Group Tasks</span>
+                    <span className="text-sm text-gray-500">
+{(() => {
+                        if (!selectedSession || !tasks) return '0/0 (0%)'
+                        
+                        // Get workshops linked to selected session
+                        const sessionWorkshops = workshops.filter(w => 
+                          selectedSession.workshops?.some(sw => sw.id === w.id)
+                        )
+                        
+                        // Get group tasks in this session
+                        const groupTasks = tasks.filter(task => 
+                          task.submission_mode === 'group' && 
+                          sessionWorkshops.some(w => w.id === task.workshop_id)
+                        )
+                        
+                        // Count submitted group submissions (unique group_id)
+                        const totalGroupSubmissions = groupTasks.reduce((sum, task) => {
+                          const uniqueGroupSubmissions = new Set(
+                            task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
+                          ).size
+                          return sum + uniqueGroupSubmissions
+                        }, 0)
+                        
+                        // Total possible groups across all group tasks
+                        const totalGroups = groupTasks.reduce((sum, task) => {
+                          return sum + (task.task_groups?.length || 0)
+                        }, 0)
+                        
+                        const percentage = totalGroups > 0 ? Math.round((totalGroupSubmissions / totalGroups) * 100) : 0
+                        return `${totalGroupSubmissions}/${totalGroups} (${percentage}%)`
+                      })()}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-1000"
+                      style={{ 
+width: `${(() => {
+                          if (!selectedSession || !tasks) return 0
+                          
+                          const sessionWorkshops = workshops.filter(w => 
+                            selectedSession.workshops?.some(sw => sw.id === w.id)
+                          )
+                          
+                          const groupTasks = tasks.filter(task => 
+                            task.submission_mode === 'group' && 
+                            sessionWorkshops.some(w => w.id === task.workshop_id)
+                          )
+                          
+                          const totalGroupSubmissions = groupTasks.reduce((sum, task) => {
+                            const uniqueGroupSubmissions = new Set(
+                              task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
+                            ).size
+                            return sum + uniqueGroupSubmissions
+                          }, 0)
+                          
+                          const totalGroups = groupTasks.reduce((sum, task) => {
+                            return sum + (task.task_groups?.length || 0)
+                          }, 0)
+                          
+                          return totalGroups > 0 ? Math.round((totalGroupSubmissions / totalGroups) * 100) : 0
+                        })()}%` 
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
