@@ -15,7 +15,7 @@ export function useUserProfile(authUser: User | null) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (forceRefresh = false) => {
     if (!authUser) {
       setProfile(null)
       setLoading(false)
@@ -26,8 +26,13 @@ export function useUserProfile(authUser: User | null) {
     const cached = profileCache.get(userId)
     const now = Date.now()
 
-    // Return cached data if still fresh
-    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+    // If force refresh is requested, clear the cache first
+    if (forceRefresh) {
+      profileCache.delete(userId)
+    }
+
+    // Return cached data if still fresh and not forcing refresh
+    if (!forceRefresh && cached && (now - cached.timestamp) < CACHE_DURATION) {
       setProfile(cached.data)
       setLoading(false)
       return
@@ -106,7 +111,11 @@ export function useUserProfile(authUser: User | null) {
 
     try {
       const updatedProfile = await userService.updateProfile(authUser.id, updates)
+      
+      // Clear cache and update state with fresh data
+      profileCache.delete(authUser.id)
       setProfile(updatedProfile)
+      
       return updatedProfile
     } catch (err) {
       console.error('Error updating profile:', err)
@@ -121,7 +130,7 @@ export function useUserProfile(authUser: User | null) {
   // Listen for global profile updates
   useEffect(() => {
     const unsubscribe = profileEvents.subscribe(() => {
-      fetchProfile()
+      fetchProfile(true) // Force refresh on profile events
     })
     
     return unsubscribe
@@ -132,6 +141,6 @@ export function useUserProfile(authUser: User | null) {
     loading,
     error,
     updateProfile,
-    refetch: fetchProfile
+    refetch: () => fetchProfile(true) // Force refresh when explicitly called
   }
 }
