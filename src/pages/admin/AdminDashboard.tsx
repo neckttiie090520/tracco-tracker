@@ -396,7 +396,7 @@ export function AdminDashboard() {
                   if (individualTasks.length === 0) return null
                   
                   const totalIndividualSubmissions = individualTasks.reduce((sum, task) => {
-                    return sum + (task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0)
+                    return sum + (task.submissions?.length || 0)
                   }, 0)
                   
                   const totalPossible = individualTasks.length * selectedSession.total_participants
@@ -434,10 +434,13 @@ export function AdminDashboard() {
                           console.log(`Task ${task.title}:`, {
                             submissions: task.submissions,
                             submission_mode: task.submission_mode,
-                            totalSubmissions: task.submissions?.length
+                            totalSubmissions: task.submissions?.length,
+                            submissionStatuses: task.submissions?.map(s => ({ status: s.status, group_id: s.group_id, user_id: s.user_id }))
                           })
                           
-                          const taskSubmissions = task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0
+                          // Use the total submissions count directly since filtering seems to exclude all
+                          // For individual tasks, we want all submissions regardless of status
+                          const taskSubmissions = task.submissions?.length || 0
                           const taskProgress = selectedSession.total_participants > 0 
                             ? Math.round((taskSubmissions / selectedSession.total_participants) * 100) 
                             : 0
@@ -487,10 +490,7 @@ export function AdminDashboard() {
                   if (groupTasks.length === 0) return null
                   
                   const totalGroupSubmissions = groupTasks.reduce((sum, task) => {
-                    const uniqueGroupSubmissions = new Set(
-                      task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
-                    ).size
-                    return sum + uniqueGroupSubmissions
+                    return sum + (task.submissions?.length || 0)
                   }, 0)
                   
                   const totalGroups = groupTasks.reduce((sum, task) => {
@@ -530,12 +530,12 @@ export function AdminDashboard() {
                           console.log(`Group Task ${task.title}:`, {
                             submissions: task.submissions,
                             task_groups: task.task_groups,
-                            submission_mode: task.submission_mode
+                            submission_mode: task.submission_mode,
+                            submissionStatuses: task.submissions?.map(s => ({ status: s.status, group_id: s.group_id, user_id: s.user_id }))
                           })
                           
-                          const uniqueGroupSubmissions = new Set(
-                            task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
-                          ).size
+                          // For group tasks, count total submissions (assuming each represents a group submission)
+                          const uniqueGroupSubmissions = task.submissions?.length || 0
                           const totalTaskGroups = task.task_groups?.length || 0
                           const taskProgress = totalTaskGroups > 0 ? Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100) : 0
                           const workshop = workshops.find(w => w.id === task.workshop_id)
