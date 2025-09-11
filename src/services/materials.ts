@@ -122,19 +122,37 @@ export class MaterialService {
     sessionId: string,
     items: Array<Partial<SessionMaterial> & { url: string; display_mode: any; title?: string; dimensions?: any }>
   ): Promise<void> {
-    await supabaseAdmin.client
-      .from('session_materials')
-      .delete()
-      .eq('session_id', sessionId)
+    try {
+      // First delete existing materials
+      const { error: deleteError } = await supabaseAdmin.client
+        .from('session_materials')
+        .delete()
+        .eq('session_id', sessionId)
+      
+      if (deleteError) {
+        console.error('Error deleting existing session materials:', deleteError)
+        // Continue anyway to try to insert new materials
+      }
 
-    for (const item of items) {
-      await this.createSessionMaterial({
-        session_id: sessionId,
-        url: item.url,
-        display_mode: item.display_mode,
-        title: item.title,
-        dimensions: item.dimensions
-      } as CreateSessionMaterialRequest)
+      // Then create new materials
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        try {
+          await this.createSessionMaterial({
+            session_id: sessionId,
+            url: item.url,
+            display_mode: item.display_mode || 'title',
+            title: item.title || '',
+            dimensions: item.dimensions
+          } as CreateSessionMaterialRequest)
+        } catch (createError) {
+          console.error(`Error creating session material ${i + 1}:`, createError)
+          // Continue with other materials even if one fails
+        }
+      }
+    } catch (error) {
+      console.error('Error in replaceSessionMaterials:', error)
+      throw error
     }
   }
 

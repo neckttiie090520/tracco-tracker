@@ -5,6 +5,7 @@ import { SessionMaterialsManager } from './SessionMaterialsManager'
 import { MaterialManager } from './MaterialManager'
 import { SearchAndFilter } from './SearchAndFilter'
 import { BulkActionBar } from './BulkActionBar'
+import { MaterialService } from '../../services/materials'
 import type { WorkshopMaterial } from '../../types/materials'
 
 interface Session {
@@ -913,25 +914,23 @@ export function SessionManager() {
 
       // Add materials if provided
       if (materials && materials.length > 0 && sessionResult) {
-        const materialsToInsert = materials.map((material, index) => ({
-          session_id: sessionResult.id,
-          title: material.title,
-          type: material.type,
-          url: material.url,
-          embed_url: material.embed_url,
-          display_mode: material.display_mode,
-          dimensions: material.dimensions,
-          order_index: index,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }))
-
-        const { error: materialsError } = await supabase
-          .from('session_materials')
-          .insert(materialsToInsert)
-
-        if (materialsError) {
-          console.error('Error adding materials:', materialsError)
+        try {
+          // Filter out materials with temporary IDs and prepare them for saving
+          const validMaterials = materials
+            .filter(m => m.url && m.url.trim() !== '')
+            .map((m) => ({
+              url: m.url,
+              display_mode: m.display_mode || 'title',
+              title: m.title || '',
+              dimensions: m.dimensions || null
+            }))
+          
+          if (validMaterials.length > 0) {
+            await MaterialService.replaceSessionMaterials(sessionResult.id, validMaterials)
+          }
+        } catch (materialError) {
+          console.error('Error adding session materials:', materialError)
+          // Continue even if materials fail to save
         }
       }
 
@@ -1009,14 +1008,31 @@ export function SessionManager() {
       }
 
       // Replace session materials with current list from editor
-      if (materials) {
-        const items = materials.map((m) => ({
-          url: (m as any).url,
-          display_mode: (m as any).display_mode,
-          title: (m as any).title,
-          dimensions: (m as any).dimensions
-        }))
-        await MaterialService.replaceSessionMaterials(sessionId, items as any)
+      if (materials !== undefined) {
+        try {
+          // Filter out materials with temporary IDs and prepare them for saving
+          const validMaterials = materials
+            .filter(m => m.url && m.url.trim() !== '')
+            .map((m) => ({
+              url: m.url,
+              display_mode: m.display_mode || 'title',
+              title: m.title || '',
+              dimensions: m.dimensions || null
+            }))
+          
+          if (validMaterials.length > 0) {
+            await MaterialService.replaceSessionMaterials(sessionId, validMaterials)
+          } else {
+            // If no materials, delete all existing ones
+            await supabase
+              .from('session_materials')
+              .delete()
+              .eq('session_id', sessionId)
+          }
+        } catch (materialError) {
+          console.error('Error updating session materials:', materialError)
+          // Continue with session update even if materials fail
+        }
       }
 
       await fetchSessions()

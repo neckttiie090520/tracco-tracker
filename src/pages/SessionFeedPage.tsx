@@ -401,6 +401,20 @@ export function SessionFeedPage() {
         )}
 
         {/* Additional Session Materials - Minimal style */}
+        {secondarySessionMaterials.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              📚 เอกสารประกอบเพิ่มเติม
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {secondarySessionMaterials.map((material, index) => (
+                <div key={material.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                  <WorkshopMaterialDisplay material={material} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Workshops Section - Minimal header */}
         <div className="mb-8">
