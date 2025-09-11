@@ -371,7 +371,7 @@ export function AdminDashboard() {
                 </div>
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {selectedSession.total_submissions || taskStats.totalSubmissions || 0}
+                    {(selectedSession.total_submissions && selectedSession.total_submissions > 1) ? selectedSession.total_submissions : taskStats.totalSubmissions || 0}
                   </div>
                   <div className="text-sm text-gray-600">Total Submissions</div>
                 </div>
