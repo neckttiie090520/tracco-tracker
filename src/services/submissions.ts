@@ -169,12 +169,12 @@ export const submissionService = {
       if (error) throw error
       return data
     } else {
-      // Insert new
+      // Insert new - for group submissions, use group owner as user_id to satisfy NOT NULL constraint
       const { data, error } = await supabase
         .from('submissions')
         .insert({
           task_id: submissionData.task_id,
-          user_id: submissionData.user_id,
+          user_id: submissionData.user_id, // This should be the group owner
           group_id: submissionData.group_id,
           notes: submissionData.notes ?? null,
           submission_url: submissionData.submission_url ?? null,
