@@ -327,72 +327,140 @@ export function AdminDashboard() {
           </div>
 
 
-          {/* Tasks Progress Chart */}
+          {/* Tasks Progress Dashboard */}
           {selectedSession && (
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Tasks Progress</h3>
-                  <div className="flex items-center gap-3 mt-1">
-                    <select 
-                      value={selectedSession.id} 
-                      onChange={(e) => {
-                        const session = sessions.find(s => s.id === e.target.value)
-                        if (session) setSelectedSession(session)
-                      }}
-                      className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white"
-                    >
-                      {sessions.map(session => (
-                        <option key={session.id} value={session.id}>
-                          {session.title}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="text-sm text-gray-500">Real-time tasks completion tracking</span>
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm p-6 border border-blue-100">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Tasks Progress Overview</h3>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <select 
+                        value={selectedSession.id} 
+                        onChange={(e) => {
+                          const session = sessions.find(s => s.id === e.target.value)
+                          if (session) setSelectedSession(session)
+                        }}
+                        className="text-sm border-2 border-blue-200 rounded-lg px-4 py-2 bg-white hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                      >
+                        {sessions.map(session => (
+                          <option key={session.id} value={session.id}>
+                            {session.title}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="text-sm text-blue-600 font-medium bg-white px-3 py-1 rounded-full border border-blue-200">
+                        📊 Real-time tracking
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {(() => {
-                      if (!selectedSession) return 0
-                      
-                      // Calculate overall progress from actual task submission data
-                      const sessionTasks = tasks.filter(task => {
-                        const taskWorkshop = workshops.find(w => w.id === task.workshop_id)
-                        return selectedSession.workshops?.some(sw => sw.id === taskWorkshop?.id)
-                      })
-                      
-                      const totalSubmissions = sessionTasks.reduce((sum, task) => {
-                        return sum + (task.submissions?.[0]?.count || 0)
-                      }, 0)
-                      
-                      const totalPossible = sessionTasks.length * selectedSession.total_participants
-                      
-                      return totalPossible > 0 ? Math.min(100, Math.round((totalSubmissions / totalPossible) * 100)) : 0
-                    })()}%
+                  
+                  {/* Overall Progress Card */}
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 min-w-[200px]">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600 mb-1">
+                        {(() => {
+                          if (!selectedSession) return 0
+                          
+                          // Calculate overall progress from actual task submission data
+                          const sessionTasks = tasks.filter(task => {
+                            const taskWorkshop = workshops.find(w => w.id === task.workshop_id)
+                            return selectedSession.workshops?.some(sw => sw.id === taskWorkshop?.id)
+                          })
+                          
+                          const totalSubmissions = sessionTasks.reduce((sum, task) => {
+                            return sum + (task.submissions?.[0]?.count || 0)
+                          }, 0)
+                          
+                          const totalPossible = sessionTasks.length * selectedSession.total_participants
+                          
+                          return totalPossible > 0 ? Math.min(100, Math.round((totalSubmissions / totalPossible) * 100)) : 0
+                        })()}%
+                      </div>
+                      <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Overall Progress</div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000"
+                          style={{ 
+                            width: `${(() => {
+                              if (!selectedSession) return 0
+                              const sessionTasks = tasks.filter(task => {
+                                const taskWorkshop = workshops.find(w => w.id === task.workshop_id)
+                                return selectedSession.workshops?.some(sw => sw.id === taskWorkshop?.id)
+                              })
+                              const totalSubmissions = sessionTasks.reduce((sum, task) => {
+                                return sum + (task.submissions?.[0]?.count || 0)
+                              }, 0)
+                              const totalPossible = sessionTasks.length * selectedSession.total_participants
+                              return totalPossible > 0 ? Math.min(100, Math.round((totalSubmissions / totalPossible) * 100)) : 0
+                            })()}%` 
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">Overall Progress</div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{selectedSession.total_participants}</div>
-                  <div className="text-sm text-gray-600">Total Participants</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{selectedSession.total_workshops}</div>
-                  <div className="text-sm text-gray-600">Workshops</div>
-                </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{selectedSession.total_tasks}</div>
-                  <div className="text-sm text-gray-600">Total Tasks</div>
-                </div>
-                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {(selectedSession.total_submissions && selectedSession.total_submissions > 1) ? selectedSession.total_submissions : taskStats.totalSubmissions || 0}
+              {/* Session Statistics Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-blue-600">{selectedSession.total_participants}</div>
+                      <div className="text-sm font-medium text-gray-600">Participants</div>
+                    </div>
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">Total Submissions</div>
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-green-600">{selectedSession.total_workshops}</div>
+                      <div className="text-sm font-medium text-gray-600">Workshops</div>
+                    </div>
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-purple-600">{selectedSession.total_tasks}</div>
+                      <div className="text-sm font-medium text-gray-600">Total Tasks</div>
+                    </div>
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {(selectedSession.total_submissions && selectedSession.total_submissions > 1) ? selectedSession.total_submissions : taskStats.totalSubmissions || 0}
+                      </div>
+                      <div className="text-sm font-medium text-gray-600">Submissions</div>
+                    </div>
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -426,8 +494,7 @@ export function AdminDashboard() {
                           <span className="text-lg font-semibold text-gray-800">Individual Tasks</span>
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/>
+                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
                             </svg>
                             เดี่ยว
                           </span>
