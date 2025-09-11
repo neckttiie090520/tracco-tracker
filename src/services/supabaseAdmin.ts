@@ -372,12 +372,12 @@ export const adminOperations = {
   },
 
   async getAllTasks() {
+    // First get basic task data
     const { data, error } = await adminClient
       .from('tasks')
       .select(`
         *,
         workshop:workshops!tasks_workshop_id_fkey(id, title),
-        submissions:submissions(id, user_id, group_id, status),
         task_groups:task_groups(id, name)
       `)
       .order('created_at', { ascending: false })
@@ -387,32 +387,61 @@ export const adminOperations = {
       throw error
     }
 
+    if (!data || data.length === 0) {
+      return []
+    }
+
+    // Get all submissions for all tasks in a separate query to avoid nested query limits
+    const taskIds = data.map(task => task.id)
+    const { data: allSubmissions, error: submissionsError } = await adminClient
+      .from('submissions')
+      .select('id, task_id, user_id, group_id, status, submitted_at')
+      .in('task_id', taskIds)
+
+    if (submissionsError) {
+      console.error('Admin get submissions error:', submissionsError)
+      throw submissionsError
+    }
+
+    console.log('Total submissions fetched:', allSubmissions?.length || 0)
+    console.log('Sample submissions:', allSubmissions?.slice(0, 5))
+
+    // Group submissions by task_id
+    const submissionsByTask = (allSubmissions || []).reduce((acc, submission) => {
+      if (!acc[submission.task_id]) {
+        acc[submission.task_id] = []
+      }
+      acc[submission.task_id].push(submission)
+      return acc
+    }, {} as Record<string, any[]>)
+
     // Transform data to include submission count
-    const tasksWithCounts = data?.map(task => ({
+    const tasksWithCounts = data.map(task => ({
       ...task,
       submissions: [{
         // default: individual submission count
-        count: task.submissions?.length || 0
+        count: submissionsByTask[task.id]?.length || 0
       }]
-    })) || []
+    }))
 
     // Adjust counts for group-mode tasks: count actual group submissions instead of total groups
     for (const task of tasksWithCounts) {
       if ((task as any).submission_mode === 'group') {
-        try {
-          // Count distinct group submissions that have actually been submitted
-          // Use group_id to identify group submissions (not is_group_submission field)
-          const { count } = await adminClient
-            .from('submissions')
-            .select('group_id', { count: 'exact', head: true })
-            .eq('task_id', task.id)
-            .not('group_id', 'is', null)  // group_id is not null means it's a group submission
-            .neq('status', 'draft')
-          task.submissions = [{ count: count || 0 }]
-        } catch (e) {
-          console.warn('Failed to count group submissions for task', task.id, e)
-          task.submissions = [{ count: 0 }]
-        }
+        // Use the submissions we already fetched to count group submissions
+        const taskSubmissions = submissionsByTask[task.id] || []
+        const groupSubmissions = taskSubmissions.filter(sub => 
+          sub.group_id && sub.status !== 'draft'
+        )
+        
+        // Count unique groups that have submitted
+        const uniqueGroups = new Set(groupSubmissions.map(sub => sub.group_id))
+        task.submissions = [{ count: uniqueGroups.size }]
+        
+        console.log(`Group task ${task.title}: ${taskSubmissions.length} total submissions, ${groupSubmissions.length} group submissions, ${uniqueGroups.size} unique groups`)
+      } else {
+        // For individual tasks, log the count for debugging
+        const taskSubmissions = submissionsByTask[task.id] || []
+        console.log(`Individual task ${task.title}: ${taskSubmissions.length} submissions`)
       }
     }
 
