@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useAlert } from '../contexts/AlertContext'
-import { useDocumentVisibility } from '../hooks/useDocumentVisibility'
-import { useDataCache } from '../hooks/useDataCache'
-import { useProgressiveLoading, ProgressiveLoadingIndicator } from '../hooks/useProgressiveLoading'
 import { supabase } from '../services/supabase'
 import { adminOperations } from '../services/supabaseAdmin'
 import { useDebouncedCallback } from '../utils/debounce'
@@ -61,18 +57,7 @@ interface TaskSubmission {
 export function WorkshopFeedPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
-  const { showError, showSuccess, showConfirm } = useAlert()
   const navigate = useNavigate()
-
-  // Document visibility management for auto-refresh
-  const { isVisible, registerRefreshCallback } = useDocumentVisibility({
-    refreshThreshold: 60000, // Auto refresh if tab was hidden for 1 minute
-    enableAutoRefresh: true,
-    onVisible: () => console.log('Workshop feed tab is now visible'),
-    onHidden: () => console.log('Workshop feed tab is now hidden')
-  })
-
-  // States
   const [workshop, setWorkshop] = useState<Workshop | null>(null)
   const [materials, setMaterials] = useState<WorkshopMaterial[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
@@ -99,125 +84,6 @@ export function WorkshopFeedPage() {
   const [showGroupManagementFor, setShowGroupManagementFor] = useState<string | null>(null)
   const [success, setSuccess] = useState('')
 
-  // Progressive data loading with caching
-  const progressiveLoading = useProgressiveLoading([
-    {
-      key: 'workshop',
-      priority: 1, // Load first
-      loader: async () => {
-        if (!id) throw new Error('No workshop ID')
-        const { data, error } = await supabase.from('workshops').select('*').eq('id', id).single()
-        if (error) throw error
-        return data
-      }
-    },
-    {
-      key: 'tasks',
-      priority: 2, // Load second
-      loader: async () => {
-        if (!id) return []
-        const tasksData = await adminOperations.getWorkshopTasks(id)
-        return (tasksData || []).filter((t: any) => !t.is_archived)
-      }
-    },
-    {
-      key: 'materials',
-      priority: 3, // Load third
-      loader: async () => {
-        if (!id) return []
-        return await MaterialService.getWorkshopMaterials(id) || []
-      }
-    },
-    {
-      key: 'submissions',
-      priority: 4, // Load after tasks
-      loader: async () => {
-        if (!user?.id || !tasks.length) return []
-        const taskIds = tasks.map(t => t.id).filter(Boolean)
-        if (taskIds.length === 0) return []
-        
-        const { data, error } = await supabase
-          .from('submissions')
-          .select('id, task_id, user_id, submission_url, links, notes, status, submitted_at')
-          .eq('user_id', user.id)
-          .in('task_id', taskIds)
-        
-        if (error) throw error
-        return data || []
-      }
-    },
-    {
-      key: 'instructor',
-      priority: 5, // Load last (least critical)
-      loader: async () => {
-        if (!workshop?.instructor) return null
-        
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workshop.instructor)
-        if (!isUUID) return null
-
-        const { data: userData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', workshop.instructor)
-          .maybeSingle()
-
-        if (userData) {
-          return {
-            name: userData.name || userData.email?.split('@')[0] || 'ไม่ระบุชื่อ',
-            email: userData.email,
-            avatar_seed: userData.avatar_seed,
-            avatar_saturation: userData.avatar_saturation,
-            avatar_lightness: userData.avatar_lightness
-          }
-        } else {
-          return {
-            name: `User ${workshop.instructor.slice(0, 8)}...`,
-            email: null,
-            avatar_seed: workshop.instructor,
-            avatar_saturation: 50,
-            avatar_lightness: 50
-          }
-        }
-      }
-    }
-  ], {
-    enableParallelLoading: false, // Load sequentially for better UX
-    staggerDelay: 150, // 150ms delay between stages
-    onStageComplete: (stageKey, data) => {
-      console.log(`Loaded ${stageKey}:`, data)
-      // Update individual states as data becomes available
-      switch (stageKey) {
-        case 'workshop':
-          setWorkshop(data)
-          break
-        case 'tasks':
-          setTasks(data)
-          break
-        case 'materials':
-          setMaterials(data)
-          break
-        case 'submissions':
-          setSubmissions(data)
-          break
-        case 'instructor':
-          setInstructorProfile(data)
-          break
-      }
-    },
-    onAllStagesComplete: () => {
-      setLoading(false)
-      console.log('All workshop data loaded')
-    }
-  })
-
-  // Register auto-refresh callback
-  useEffect(() => {
-    return registerRefreshCallback(() => {
-      console.log('Auto-refreshing workshop data due to tab visibility change')
-      progressiveLoading.retryAll()
-    })
-  }, [registerRefreshCallback, progressiveLoading.retryAll])
-
   const normalizeLinkObjects = (raw: any): { url: string; note?: string }[] => {
     if (!raw) return []
     const arr = Array.isArray(raw) ? raw : []
@@ -236,10 +102,9 @@ export function WorkshopFeedPage() {
     setTimeout(() => setSuccess(''), 3000)
   }
 
-  // Refetch data when workshop depends on user
   useEffect(() => {
     if (id && user) {
-      progressiveLoading.retryAll()
+      fetchWorkshopData()
     }
   }, [id, user])
 
@@ -512,7 +377,7 @@ export function WorkshopFeedPage() {
 
     } catch (error) {
       console.error('Error fetching workshop data:', error)
-      showError('เกิดข้อผิดพลาดในการโหลดข้อมูล Workshop')
+      alert('Error: ' + JSON.stringify(error))
     } finally {
       setLoading(false)
     }
@@ -544,7 +409,7 @@ export function WorkshopFeedPage() {
       if ((currentTask as any)?.submission_mode === 'group') {
         const g = taskGroups[taskId]
         if (!g) {
-          showError('กรุณาสร้างหรือเข้าร่วมกลุ่มก่อนส่งงาน')
+          alert('กรุณาสร้างหรือเข้าร่วมกลุ่มก่อนส่งงาน')
           return
         }
         const saved = await submissionService.upsertGroupSubmission({
@@ -588,59 +453,27 @@ export function WorkshopFeedPage() {
       }
 
       // Refresh submissions
-      progressiveLoading.retryStage('submissions')
+      await fetchWorkshopData()
       setSubmissionUrl('')
       setSubmissionNotes('')
       setDraftLinks(prev => ({ ...prev, [taskId]: [] }))
       setEditingTaskId(null)
-      showSuccess('ส่งงานเรียบร้อยแล้ว!')
+      alert('ส่งงานเรียบร้อยแล้ว!')
       
     } catch (error) {
       console.error('Error submitting task:', error)
-      showError(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
+      alert(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
     }
   }
 
-  // Show progressive loading if no main data loaded yet
-  if (loading && !workshop) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <UserNavigation />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <div className="text-center mb-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">กำลังโหลด Workshop</h2>
-              
-              {/* Progressive loading indicator */}
-              <div className="max-w-md mx-auto">
-                <ProgressiveLoadingIndicator 
-                  progress={progressiveLoading.progress}
-                  showPercentage={true}
-                  showDetails={true}
-                />
-              </div>
-              
-              {/* Show what's currently loading */}
-              <div className="mt-4 space-y-2 text-sm text-gray-600">
-                {Object.entries(progressiveLoading.stages).map(([key, stage]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <span className="capitalize">
-                      {key === 'workshop' ? '📋 ข้อมูล Workshop' :
-                       key === 'tasks' ? '📝 งานที่ได้รับมอบหมาย' :
-                       key === 'materials' ? '📚 เอกสารประกอบ' :
-                       key === 'submissions' ? '✅ งานที่ส่งแล้ว' :
-                       key === 'instructor' ? '👨‍🏫 ข้อมูลผู้สอน' : key}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      {stage.loaded && <span className="text-green-500">✓</span>}
-                      {stage.loading && <div className="w-3 h-3 border border-blue-500 border-t-transparent rounded-full animate-spin"></div>}
-                      {stage.error && <span className="text-red-500">✗</span>}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">กำลังโหลดข้อมูล...</p>
           </div>
         </div>
       </div>
@@ -1146,8 +979,8 @@ export function WorkshopFeedPage() {
                                 <button
                                   onClick={async () => {
                                     if (!user) return
-                                    const confirmed = await showConfirm('ยืนยันการยกเลิก/ลบงานที่ส่ง?')
-                                    if (!confirmed) return
+                                    const ok = confirm('ยืนยันการยกเลิก/ลบงานที่ส่ง?')
+                                    if (!ok) return
                                     try {
                                       if ((task as any).submission_mode === 'group') {
                                         const g = taskGroups[task.id]
@@ -1418,7 +1251,7 @@ export function WorkshopFeedPage() {
                                                 setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
                                               } else if (effective?.id) {
                                                 await supabase.from('submissions').update({ links: newLinks, status: 'submitted', updated_at: new Date().toISOString() }).eq('id', effective.id)
-                                                progressiveLoading.retryStage('submissions')
+                                                await fetchWorkshopData()
                                               }
                                               setAddLinkInput(prev => ({ ...prev, [task.id]: '' }))
                                               setAddLinkNoteInput(prev => ({ ...prev, [task.id]: '' }))
@@ -1499,20 +1332,18 @@ export function WorkshopFeedPage() {
                                                 <button 
                                                   className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700" 
                                                   onClick={async ()=>{
-                                                    const confirmDelete = await showConfirm(`ลบลิงก์ "${getDomainName(item.url)}" นี้?`)
-                                                    if(!confirmDelete) return; 
+                                                    if(!confirm(`ลบลิงก์ "${getDomainName(item.url)}" นี้?`)) return; 
                                                     const newLinks = linkObjs.filter((_,i)=>i!==idx);
                                                     try {
                                                       if (newLinks.length === 0) {
-                                                        const confirmDeleteAll = await showConfirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')
-                                                        if (!confirmDeleteAll) return;
+                                                        if (!confirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')) return;
                                                         if ((task as any).submission_mode==='group' && g) {
                                                           await submissionService.deleteGroupTaskSubmission(task.id, g.id)
                                                           setGroupSubmissions(prev => ({ ...prev, [g.id]: null }))
                                                         } else if (effective?.id) {
                                                           await submissionService.deleteUserTaskSubmission(user!.id, task.id)
                                                         }
-                                                        progressiveLoading.retryStage('submissions')
+                                                        await fetchWorkshopData()
                                                       } else {
                                                         if ((task as any).submission_mode==='group' && g) {
                                                           await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
@@ -1520,7 +1351,7 @@ export function WorkshopFeedPage() {
                                                           setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed }))
                                                         } else if (effective?.id) {
                                                           await supabase.from('submissions').update({ links:newLinks, updated_at:new Date().toISOString() }).eq('id', effective.id)
-                                                          progressiveLoading.retryStage('submissions')
+                                                          await fetchWorkshopData()
                                                         }
                                                       }
                                                     } catch(e){ console.error('remove link failed', e) }
@@ -1583,7 +1414,7 @@ export function WorkshopFeedPage() {
                   if ((task as any).submission_mode==='group' && g){ await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user.id, group_id: g.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any) }
                   else { await supabase.from('submissions').upsert({ task_id: task.id, user_id: user!.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any, { onConflict: 'task_id,user_id' }) }
                 }
-                progressiveLoading.retryStage('submissions'); setEditingTaskId(null)
+                await fetchWorkshopData(); setEditingTaskId(null)
               }catch(e){ console.error('save links failed', e)}
             }}>
               ส่งงาน {(() => {
