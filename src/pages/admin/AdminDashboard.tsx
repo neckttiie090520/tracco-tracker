@@ -10,6 +10,7 @@ interface Session {
   total_participants: number
   total_workshops: number
   total_tasks: number
+  total_submissions: number
   completion_percentage: number
   is_active: boolean
 }
@@ -108,36 +109,61 @@ export function AdminDashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('session_id', session.id)
 
-        // Get total tasks
-        const { data: workshopsWithTasks } = await supabase
+        // Get total tasks - alternative approach
+        let totalTasks = 0
+        
+        // First get workshop IDs for this session
+        const { data: sessionWorkshops } = await supabase
           .from('session_workshops')
-          .select(`
-            workshop_id,
-            workshops!inner(
-              tasks(id)
-            )
-          `)
+          .select('workshop_id')
           .eq('session_id', session.id)
+        
+        if (sessionWorkshops && sessionWorkshops.length > 0) {
+          const workshopIds = sessionWorkshops.map(sw => sw.workshop_id)
+          
+          // Then count tasks for these workshops
+          const { count: tasksCount } = await supabase
+            .from('tasks')
+            .select('*', { count: 'exact', head: true })
+            .in('workshop_id', workshopIds)
+            .eq('is_archived', false)
+          
+          totalTasks = tasksCount || 0
+        }
 
-        const totalTasks = workshopsWithTasks?.reduce((sum, sw) => {
-          return sum + (sw.workshops?.tasks?.length || 0)
-        }, 0) || 0
+        console.log('Total tasks for session', session.title, ':', totalTasks)
 
         // Calculate completion percentage
         let completionPercentage = 0
+        let actualSubmissions = 0
+        
         if (totalTasks > 0 && participantCount > 0) {
-          const totalPossibleSubmissions = totalTasks * participantCount
+          // Get workshop IDs again for submissions query  
+          const workshopIds = sessionWorkshops?.map(sw => sw.workshop_id) || []
           
-          const { count: completedSubmissions } = await supabase
-            .from('task_submissions')
-            .select('*', { count: 'exact', head: true })
-            .eq('session_id', session.id)
-            .eq('status', 'completed')
-
-          completionPercentage = totalPossibleSubmissions > 0 
-            ? Math.round((completedSubmissions || 0) / totalPossibleSubmissions * 100) 
-            : 0
+          if (workshopIds.length > 0) {
+            // Count all submissions for tasks in this session's workshops
+            const { count: submissionsCount } = await supabase
+              .from('submissions')
+              .select('task_id, tasks!inner(workshop_id)', { count: 'exact', head: true })
+              .in('tasks.workshop_id', workshopIds)
+            
+            actualSubmissions = submissionsCount || 0
+            
+            const totalPossibleSubmissions = totalTasks * participantCount
+            completionPercentage = totalPossibleSubmissions > 0 
+              ? Math.min(100, Math.round(actualSubmissions / totalPossibleSubmissions * 100))
+              : 0
+          }
         }
+
+        console.log('Session stats for', session.title, ':', {
+          participants: participantCount,
+          workshops: workshopCount, 
+          tasks: totalTasks,
+          submissions: actualSubmissions,
+          completion: completionPercentage
+        })
 
         sessionsWithStats.push({
           id: session.id,
@@ -146,6 +172,7 @@ export function AdminDashboard() {
           total_participants: participantCount || 0,
           total_workshops: workshopCount || 0,
           total_tasks: totalTasks,
+          total_submissions: actualSubmissions,
           completion_percentage: completionPercentage,
           is_active: session.is_active
         })
@@ -335,10 +362,7 @@ export function AdminDashboard() {
                 </div>
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {selectedSession.total_participants > 0 && selectedSession.total_tasks > 0 
-                      ? Math.round((selectedSession.completion_percentage * selectedSession.total_participants * selectedSession.total_tasks) / 100)
-                      : 0
-                    }
+                    {selectedSession.total_submissions || 0}
                   </div>
                   <div className="text-sm text-gray-600">Total Submissions</div>
                 </div>
