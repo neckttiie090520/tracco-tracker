@@ -90,6 +90,20 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
     return list
   }, [submissions, search, statusFilter, sortBy, contentOnly, task.submission_mode])
 
+  // Compute eligible names for Lucky Draw after filtered is defined
+  const eligibleNames = useMemo(() => {
+    if (!filtered) return [] as string[]
+    const list = filtered
+      .filter((s: any) => s?.status && s.status !== 'draft')
+      .map((s: any) => {
+        if (s.is_group_submission && s.group?.name) {
+          return s.group.name
+        }
+        return s?.user?.name || s?.user?.email || 'Unknown'
+      })
+    return Array.from(new Set(list))
+  }, [filtered])
+
 
   const openWinnerDetail = (winnerNameOrEmail: string) => {
     if (!submissions || !winnerNameOrEmail) return
