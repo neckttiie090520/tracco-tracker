@@ -83,8 +83,7 @@ function App() {
     <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
       <QueryProvider>
         <AuthProvider>
-          <AlertProvider>
-            <RealtimeProvider>
+          <RealtimeProvider>
           <BrowserRouter future={{ v7_relativeSplatPath: true }}>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-screen">
@@ -100,7 +99,9 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <DashboardPage />
+                <AlertProvider>
+                  <DashboardPage />
+                </AlertProvider>
               </ProtectedRoute>
             }
           />
@@ -108,7 +109,9 @@ function App() {
             path="/workshops/:id"
             element={
               <ProtectedRoute>
-                <WorkshopFeedPage />
+                <AlertProvider>
+                  <WorkshopFeedPage />
+                </AlertProvider>
               </ProtectedRoute>
             }
           />
@@ -116,7 +119,9 @@ function App() {
             path="/sessions"
             element={
               <ProtectedRoute>
-                <SessionsPage />
+                <AlertProvider>
+                  <SessionsPage />
+                </AlertProvider>
               </ProtectedRoute>
             }
           />
@@ -124,7 +129,9 @@ function App() {
             path="/sessions/:sessionId/feed"
             element={
               <ProtectedRoute>
-                <SessionFeedPage />
+                <AlertProvider>
+                  <SessionFeedPage />
+                </AlertProvider>
               </ProtectedRoute>
             }
           />
@@ -206,7 +213,9 @@ function App() {
             path="/group-settings/:groupId"
             element={
               <ProtectedRoute>
-                <GroupSettingsPage />
+                <AlertProvider>
+                  <GroupSettingsPage />
+                </AlertProvider>
               </ProtectedRoute>
             }
           />
@@ -216,7 +225,9 @@ function App() {
             path="/materials-test"
             element={
               <ProtectedRoute>
-                <MaterialsTest />
+                <AlertProvider>
+                  <MaterialsTest />
+                </AlertProvider>
               </ProtectedRoute>
             }
           />
@@ -231,8 +242,7 @@ function App() {
               </Routes>
             </Suspense>
           </BrowserRouter>
-            </RealtimeProvider>
-          </AlertProvider>
+          </RealtimeProvider>
         </AuthProvider>
       </QueryProvider>
     </ErrorBoundary>
