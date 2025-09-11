@@ -11,6 +11,7 @@ import { WorkshopMaterialsList, WorkshopMaterialDisplay } from '../components/ma
 import TaskMaterialDisplay from '../components/tasks/TaskMaterialDisplay'
 import { MaterialService } from '../services/materials'
 import { Avatar } from '../components/common/Avatar'
+import { StandardizedMemberAvatar } from '../components/common/StandardizedAvatar'
 import type { WorkshopMaterial } from '../types/materials'
 import { groupService } from '../services/groups'
 import { submissionService } from '../services/submissions'
@@ -1038,26 +1039,22 @@ export function WorkshopFeedPage() {
                           return (
                             <div className="px-3 py-2 bg-purple-50 border-t border-purple-100" data-testid="group-card">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs text-purple-700 font-medium">สมาชิกในกลุ่ม:</span>
-                                  <div className="flex items-center gap-1">
+                                <div>
+                                  <span className="text-sm text-purple-700 font-medium mb-2 block">สมาชิกในกลุ่ม:</span>
+                                  <div className="space-y-2">
                                     {displayMembers.map((member, idx) => (
-                                      <div key={member.user_id} className="flex items-center">
-                                        <Avatar
-                                          username={member.user?.email}
-                                          name={member.user?.name}
-                                          avatarSeed={member.user?.avatar_seed}
+                                      <div key={member.user_id} className="flex items-center justify-between">
+                                        <StandardizedMemberAvatar
+                                          member={member}
                                           size={24}
-                                          saturation={member.user?.avatar_saturation}
-                                          lightness={member.user?.avatar_lightness}
                                         />
                                         {member.role === 'owner' && (
-                                          <span className="text-xs text-purple-600 ml-1">👑</span>
+                                          <span className="text-sm text-purple-600 font-medium">Owner 👑</span>
                                         )}
                                       </div>
                                     ))}
                                     {remainingCount > 0 && (
-                                      <span className="text-xs text-purple-600 ml-1">+{remainingCount}</span>
+                                      <span className="text-sm text-purple-600 font-medium">และอีก {remainingCount} คน</span>
                                     )}
                                   </div>
                                 </div>
