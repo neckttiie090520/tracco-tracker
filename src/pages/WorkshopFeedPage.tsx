@@ -1043,9 +1043,14 @@ export function WorkshopFeedPage() {
                                   <div className="flex items-center gap-1">
                                     {displayMembers.map((member, idx) => (
                                       <div key={member.user_id} className="flex items-center">
-                                        <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center text-xs font-medium text-purple-800">
-                                          {member.user?.name?.charAt(0) || member.user_id.charAt(0).toUpperCase()}
-                                        </div>
+                                        <Avatar
+                                          username={member.user?.email}
+                                          name={member.user?.name}
+                                          avatarSeed={member.user?.avatar_seed}
+                                          size={24}
+                                          saturation={member.user?.avatar_saturation}
+                                          lightness={member.user?.avatar_lightness}
+                                        />
                                         {member.role === 'owner' && (
                                           <span className="text-xs text-purple-600 ml-1">👑</span>
                                         )}
