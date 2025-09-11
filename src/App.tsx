@@ -4,6 +4,7 @@ import { AlertProvider } from './contexts/AlertContext'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { QueryProvider } from './providers/QueryProvider'
+import { AlertProvider } from './contexts/AlertContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { ErrorBoundary, LazyLoadErrorFallback } from './components/ErrorBoundary'
@@ -80,163 +81,43 @@ const GroupSettingsPage = createLazyComponent(
 
 function App() {
   return (
-    <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
+    <ErrorBoundary message="????????????????????? ???????????????????????????">
       <QueryProvider>
         <AuthProvider>
           <AlertProvider>
-          <RealtimeProvider>
-            
+            <RealtimeProvider>
               <Suspense fallback={
                 <div className="flex items-center justify-center min-h-screen">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                    <p className="text-gray-600">กำลังโหลด...</p>
+                    <p className="text-gray-600">?????????...</p>
                   </div>
                 </div>
               }>
               <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/workshops/:id"
-            element={
-              <ProtectedRoute>
-                <WorkshopFeedPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sessions"
-            element={
-              <ProtectedRoute>
-                <SessionsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sessions/:sessionId/feed"
-            element={
-              <ProtectedRoute>
-                <SessionFeedPage />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/workshops"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <WorkshopManagement />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/participants"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <ParticipantManagement />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/batch-operations"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <BatchOperationsDashboard />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/tasks"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <TaskManagement />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/sessions"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <SessionManager />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/randomizer"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <RandomizerPage />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Group Settings Route */}
-          <Route
-            path="/group-settings/:groupId"
-            element={
-              <ProtectedRoute>
-                <GroupSettingsPage />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Test Route for Materials System */}
-          <Route
-            path="/materials-test"
-            element={
-              <ProtectedRoute>
-                <MaterialsTest />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Error pages */}
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* 404 - Must be last */}
-          <Route path="*" element={<NotFoundPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                <Route path="/workshops/:id" element={<ProtectedRoute><WorkshopFeedPage /></ProtectedRoute>} />
+                <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
+                <Route path="/sessions/:sessionId/feed" element={<ProtectedRoute><SessionFeedPage /></ProtectedRoute>} />
+                <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminDashboard /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/workshops" element={<ProtectedRoute><AdminRoute><WorkshopManagement /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/participants" element={<ProtectedRoute><AdminRoute><ParticipantManagement /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/batch-operations" element={<ProtectedRoute><AdminRoute><BatchOperationsDashboard /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/tasks" element={<ProtectedRoute><AdminRoute><TaskManagement /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/sessions" element={<ProtectedRoute><AdminRoute><SessionManager /></AdminRoute></ProtectedRoute>} />
+                <Route path="/admin/randomizer" element={<ProtectedRoute><AdminRoute><RandomizerPage /></AdminRoute></ProtectedRoute>} />
+                <Route path="/group-settings/:groupId" element={<ProtectedRoute><GroupSettingsPage /></ProtectedRoute>} />
+                <Route path="/materials-test" element={<ProtectedRoute><MaterialsTest /></ProtectedRoute>} />
+                <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
-          
           </RealtimeProvider>
           </AlertProvider>
         </AuthProvider>
       </QueryProvider>
     </ErrorBoundary>
   )
-}
-
-export default App
+}export default App

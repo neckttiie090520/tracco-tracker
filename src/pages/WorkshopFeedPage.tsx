@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useAlert } from '../contexts/AlertContext'
 import { supabase } from '../services/supabase'
 import { adminOperations } from '../services/supabaseAdmin'
 import { useDebouncedCallback } from '../utils/debounce'
@@ -57,6 +58,7 @@ interface TaskSubmission {
 export function WorkshopFeedPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
+  const { showError, showSuccess, showConfirm } = useAlert()
   const navigate = useNavigate()
   const [workshop, setWorkshop] = useState<Workshop | null>(null)
   const [materials, setMaterials] = useState<WorkshopMaterial[]>([])
@@ -377,7 +379,7 @@ export function WorkshopFeedPage() {
 
     } catch (error) {
       console.error('Error fetching workshop data:', error)
-      alert('Error: ' + JSON.stringify(error))
+      showError('เกิดข้อผิดพลาดในการโหลดข้อมูล Workshop')
     } finally {
       setLoading(false)
     }
@@ -409,7 +411,7 @@ export function WorkshopFeedPage() {
       if ((currentTask as any)?.submission_mode === 'group') {
         const g = taskGroups[taskId]
         if (!g) {
-          alert('กรุณาสร้างหรือเข้าร่วมกลุ่มก่อนส่งงาน')
+          showError('กรุณาสร้างหรือเข้าร่วมกลุ่มก่อนส่งงาน')
           return
         }
         const saved = await submissionService.upsertGroupSubmission({
@@ -458,11 +460,11 @@ export function WorkshopFeedPage() {
       setSubmissionNotes('')
       setDraftLinks(prev => ({ ...prev, [taskId]: [] }))
       setEditingTaskId(null)
-      alert('ส่งงานเรียบร้อยแล้ว!')
+      showSuccess('ส่งงานเรียบร้อยแล้ว!')
       
     } catch (error) {
       console.error('Error submitting task:', error)
-      alert(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
+      showError(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
     }
   }
 
@@ -979,8 +981,8 @@ export function WorkshopFeedPage() {
                                 <button
                                   onClick={async () => {
                                     if (!user) return
-                                    const ok = confirm('ยืนยันการยกเลิก/ลบงานที่ส่ง?')
-                                    if (!ok) return
+                                    const confirmed = await showConfirm('ยืนยันการยกเลิก/ลบงานที่ส่ง?')
+                                    if (!confirmed) return
                                     try {
                                       if ((task as any).submission_mode === 'group') {
                                         const g = taskGroups[task.id]
@@ -1332,11 +1334,13 @@ export function WorkshopFeedPage() {
                                                 <button 
                                                   className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700" 
                                                   onClick={async ()=>{
-                                                    if(!confirm(`ลบลิงก์ "${getDomainName(item.url)}" นี้?`)) return; 
+                                                    const confirmDelete = await showConfirm(`ลบลิงก์ "${getDomainName(item.url)}" นี้?`)
+                                                    if(!confirmDelete) return; 
                                                     const newLinks = linkObjs.filter((_,i)=>i!==idx);
                                                     try {
                                                       if (newLinks.length === 0) {
-                                                        if (!confirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')) return;
+                                                        const confirmDeleteAll = await showConfirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')
+                                                        if (!confirmDeleteAll) return;
                                                         if ((task as any).submission_mode==='group' && g) {
                                                           await submissionService.deleteGroupTaskSubmission(task.id, g.id)
                                                           setGroupSubmissions(prev => ({ ...prev, [g.id]: null }))

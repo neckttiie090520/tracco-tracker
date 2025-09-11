@@ -38,6 +38,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   const [contentOnly, setContentOnly] = useState(false)
   const [refreshingList, setRefreshingList] = useState(false)
 
+
   const quickStats = useMemo(() => {
     // Use all submissions for raw stats, but filter by submission mode for accurate counts
     const relevantSubmissions = (submissions || []).filter((s: any) => {
@@ -89,20 +90,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
     return list
   }, [submissions, search, statusFilter, sortBy, contentOnly, task.submission_mode])
 
-  // Must be defined after `filtered` to avoid TDZ errors
-  const eligibleNames = useMemo(() => {
-    if (!filtered) return [] as string[]
-    const list = filtered
-      .filter((s: any) => s?.status && s.status !== 'draft')
-      .map((s: any) => {
-        // For group submissions, use group name instead of user name
-        if (s.is_group_submission && s.group?.name) {
-          return s.group.name
-        }
-        return s?.user?.name || s?.user?.email || 'Unknown'
-      })
-    return Array.from(new Set(list))
-  }, [filtered])
 
   const openWinnerDetail = (winnerNameOrEmail: string) => {
     if (!submissions || !winnerNameOrEmail) return
