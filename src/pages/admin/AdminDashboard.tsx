@@ -367,7 +367,7 @@ export function AdminDashboard() {
                       
                       const totalPossible = sessionTasks.length * selectedSession.total_participants
                       
-                      return totalPossible > 0 ? Math.round((totalSubmissions / totalPossible) * 100) : 0
+                      return totalPossible > 0 ? Math.min(100, Math.round((totalSubmissions / totalPossible) * 100)) : 0
                     })()}%
                   </div>
                   <div className="text-xs text-gray-500">Overall Progress</div>
@@ -416,7 +416,7 @@ export function AdminDashboard() {
                   }, 0)
                   
                   const totalPossible = individualTasks.length * selectedSession.total_participants
-                  const percentage = totalPossible > 0 ? Math.round((totalIndividualSubmissions / totalPossible) * 100) : 0
+                  const percentage = totalPossible > 0 ? Math.min(100, Math.round((totalIndividualSubmissions / totalPossible) * 100)) : 0
                   
                   return (
                     <div>
@@ -451,7 +451,7 @@ export function AdminDashboard() {
                           // For individual tasks, we want all submissions regardless of status
                           const taskSubmissions = task.submissions?.[0]?.count || 0
                           const taskProgress = selectedSession.total_participants > 0 
-                            ? Math.round((taskSubmissions / selectedSession.total_participants) * 100) 
+                            ? Math.min(100, Math.round((taskSubmissions / selectedSession.total_participants) * 100))
                             : 0
                           const workshop = workshops.find(w => w.id === task.workshop_id)
                           
@@ -506,7 +506,7 @@ export function AdminDashboard() {
                     return sum + (task.task_groups?.length || 0)
                   }, 0)
                   
-                  const percentage = totalGroups > 0 ? Math.round((totalGroupSubmissions / totalGroups) * 100) : 0
+                  const percentage = totalGroups > 0 ? Math.min(100, Math.round((totalGroupSubmissions / totalGroups) * 100)) : 0
                   
                   return (
                     <div>
@@ -539,7 +539,7 @@ export function AdminDashboard() {
                           // For group tasks, count total submissions (assuming each represents a group submission)
                           const uniqueGroupSubmissions = task.submissions?.[0]?.count || 0
                           const totalTaskGroups = task.task_groups?.length || 0
-                          const taskProgress = totalTaskGroups > 0 ? Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100) : 0
+                          const taskProgress = totalTaskGroups > 0 ? Math.min(100, Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100)) : 0
                           const workshop = workshops.find(w => w.id === task.workshop_id)
                           
                           return (
