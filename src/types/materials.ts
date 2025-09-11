@@ -2,10 +2,13 @@ export interface WorkshopMaterial {
   id: string;
   workshop_id: string;
   title: string;
-  type: 'google_doc' | 'google_slide' | 'google_sheet' | 'canva_embed' | 'canva_link' | 'drive_file' | 'drive_folder' | 'youtube' | 'generic';
+  type: 'google_doc' | 'google_slide' | 'google_sheet' | 'canva_embed' | 'canva_link' | 'drive_file' | 'drive_folder' | 'youtube' | 'generic' | 'rich_text';
   url: string;
   embed_url?: string; // Converted URL for embedding
-  display_mode: 'title' | 'link' | 'embed';
+  display_mode: 'title' | 'link' | 'embed' | 'content';
+  content_type?: 'url' | 'rich_text';
+  rich_content?: any; // Quill.js Delta format
+  description?: string;
   dimensions?: {
     width: string;    // e.g., '100%'
     height: string;   // e.g., '600px', or calculated from aspect ratio
@@ -38,6 +41,9 @@ export interface CreateMaterialRequest {
   title?: string;
   url: string;
   display_mode: DisplayMode;
+  content_type?: 'url' | 'rich_text';
+  rich_content?: any; // Quill.js Delta format
+  description?: string;
   dimensions?: {
     width: string;
     height: string;
@@ -59,10 +65,13 @@ export interface TaskMaterial {
   id: string;
   task_id: string;
   title: string;
-  type: 'google_doc' | 'google_slide' | 'google_sheet' | 'canva_embed' | 'canva_link' | 'drive_file' | 'drive_folder' | 'youtube' | 'generic';
+  type: 'google_doc' | 'google_slide' | 'google_sheet' | 'canva_embed' | 'canva_link' | 'drive_file' | 'drive_folder' | 'youtube' | 'generic' | 'rich_text';
   url: string;
   embed_url?: string; // Converted URL for embedding
-  display_mode: 'title' | 'link' | 'embed';
+  display_mode: 'title' | 'link' | 'embed' | 'content';
+  content_type?: 'url' | 'rich_text';
+  rich_content?: any; // Quill.js Delta format
+  description?: string;
   dimensions?: {
     width: string;    // e.g., '100%'
     height: string;   // e.g., '600px', or calculated from aspect ratio
@@ -83,6 +92,9 @@ export interface CreateTaskMaterialRequest {
   title?: string;
   url: string;
   display_mode: DisplayMode;
+  content_type?: 'url' | 'rich_text';
+  rich_content?: any; // Quill.js Delta format
+  description?: string;
   dimensions?: {
     width: string;
     height: string;
@@ -94,10 +106,13 @@ export interface SessionMaterial {
   id: string;
   session_id: string;
   title: string;
-  type: 'google_doc' | 'google_slide' | 'google_sheet' | 'canva_embed' | 'canva_link' | 'drive_file' | 'drive_folder' | 'youtube' | 'generic';
+  type: 'google_doc' | 'google_slide' | 'google_sheet' | 'canva_embed' | 'canva_link' | 'drive_file' | 'drive_folder' | 'youtube' | 'generic' | 'rich_text';
   url: string;
   embed_url?: string; // Converted URL for embedding
-  display_mode: 'title' | 'link' | 'embed';
+  display_mode: 'title' | 'link' | 'embed' | 'content';
+  content_type?: 'url' | 'rich_text';
+  rich_content?: any; // Quill.js Delta format
+  description?: string;
   dimensions?: {
     width: string;    // e.g., '100%'
     height: string;   // e.g., '600px', or calculated from aspect ratio
@@ -119,6 +134,9 @@ export interface CreateSessionMaterialRequest {
   title?: string;
   url: string;
   display_mode: DisplayMode;
+  content_type?: 'url' | 'rich_text';
+  rich_content?: any; // Quill.js Delta format
+  description?: string;
   dimensions?: {
     width: string;
     height: string;

@@ -4,6 +4,7 @@ import type { WorkshopMaterial, CreateMaterialRequest, DisplayMode } from '../..
 import { detectMaterialType, convertToEmbedUrl, canEmbed, getDefaultDimensions, getFaviconUrl } from '../../utils/materialUtils';
 import { fetchUrlMetadata } from '../../services/materialMetadata';
 import { WorkshopMaterialDisplay } from '../materials/WorkshopMaterialDisplay';
+import RichTextMaterialModal from './RichTextMaterialModal';
 
 interface MaterialManagerProps {
   workshopId: string;
@@ -317,6 +318,8 @@ function AddMaterialModal({ isOpen, onClose, onAdd, isLoading }: AddMaterialModa
 
 export function MaterialManager({ workshopId, materials, onMaterialsChange, className = '' }: MaterialManagerProps) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showRichTextModal, setShowRichTextModal] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<WorkshopMaterial | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddMaterial = async (materialRequest: CreateMaterialRequest) => {
@@ -349,6 +352,70 @@ export function MaterialManager({ workshopId, materials, onMaterialsChange, clas
     }
   };
 
+  const handleSaveRichTextMaterial = async (materialData: {
+    title: string;
+    content_type: 'rich_text';
+    rich_content: any;
+    description?: string;
+    display_mode: DisplayMode;
+  }) => {
+    setIsLoading(true);
+    try {
+      if (editingMaterial) {
+        // Update existing material
+        const updatedMaterial: WorkshopMaterial = {
+          ...editingMaterial,
+          title: materialData.title,
+          type: 'rich_text',
+          content_type: 'rich_text',
+          rich_content: materialData.rich_content,
+          description: materialData.description,
+          display_mode: materialData.display_mode,
+          url: '', // Rich text materials don't have URLs
+          updated_at: new Date().toISOString()
+        };
+
+        onMaterialsChange(materials.map(m => m.id === editingMaterial.id ? updatedMaterial : m));
+        setEditingMaterial(null);
+      } else {
+        // Create new rich text material
+        const newMaterial: WorkshopMaterial = {
+          id: `temp-${Date.now()}`,
+          workshop_id: workshopId,
+          title: materialData.title,
+          type: 'rich_text',
+          url: '', // Rich text materials don't have URLs
+          content_type: 'rich_text',
+          rich_content: materialData.rich_content,
+          description: materialData.description,
+          display_mode: materialData.display_mode,
+          order_index: materials.length,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        onMaterialsChange([...materials, newMaterial]);
+      }
+      
+      setShowRichTextModal(false);
+    } catch (error) {
+      console.error('Error saving rich text material:', error);
+      // Handle error (show toast notification, etc.)
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditMaterial = (material: WorkshopMaterial) => {
+    if (material.type === 'rich_text' || material.content_type === 'rich_text') {
+      setEditingMaterial(material);
+      setShowRichTextModal(true);
+    } else {
+      // For URL-based materials, you could open a different edit modal
+      console.log('Editing URL-based material:', material);
+    }
+  };
+
   const handleDeleteMaterial = (materialId: string) => {
     onMaterialsChange(materials.filter(m => m.id !== materialId));
   };
@@ -371,15 +438,26 @@ export function MaterialManager({ workshopId, materials, onMaterialsChange, clas
     <div className={className}>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium text-gray-900">Workshop Materials</h3>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Material
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowRichTextModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            สร้างเอกสาร
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            เพิ่มลิงก์
+          </button>
+        </div>
       </div>
 
       {materials.length === 0 ? (
@@ -433,6 +511,16 @@ export function MaterialManager({ workshopId, materials, onMaterialsChange, clas
                   </button>
                   
                   <button
+                    onClick={() => handleEditMaterial(material)}
+                    className="p-1 text-indigo-400 hover:text-indigo-600"
+                    title="Edit material"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  
+                  <button
                     onClick={() => handleDeleteMaterial(material.id)}
                     className="p-1 text-red-400 hover:text-red-600"
                     title="Delete material"
@@ -458,6 +546,17 @@ export function MaterialManager({ workshopId, materials, onMaterialsChange, clas
         onClose={() => setShowAddModal(false)}
         onAdd={handleAddMaterial}
         isLoading={isLoading}
+      />
+
+      <RichTextMaterialModal
+        isOpen={showRichTextModal}
+        onClose={() => {
+          setShowRichTextModal(false);
+          setEditingMaterial(null);
+        }}
+        onSave={handleSaveRichTextMaterial}
+        existingMaterial={editingMaterial}
+        loading={isLoading}
       />
     </div>
   );

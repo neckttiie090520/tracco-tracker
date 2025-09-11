@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { WorkshopMaterial } from '../../types/materials';
 import { getDomainName, getFaviconUrl } from '../../utils/materialUtils';
+import QuillViewer from '../editor/QuillViewer';
 
 interface WorkshopMaterialDisplayProps {
   material: WorkshopMaterial;
@@ -21,6 +22,23 @@ export function WorkshopMaterialDisplay({ material, className = '' }: WorkshopMa
   };
 
   const renderTitle = () => {
+    // Handle rich text materials differently
+    if (material.type === 'rich_text') {
+      return (
+        <div className={`inline-flex items-center space-x-3 p-3 border rounded-lg bg-indigo-50 border-indigo-200 text-indigo-700 ${className}`}>
+          <div className="flex items-center space-x-2 flex-1">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm truncate">{material.title}</div>
+              <div className="text-xs opacity-75">เอกสารเนื้อหา</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const favicon = material.metadata?.favicon || getFaviconUrl(material.url);
     const title = material.title || material.metadata?.title || getDomainName(material.url);
     const domain = getDomainName(material.url);
@@ -41,6 +59,8 @@ export function WorkshopMaterialDisplay({ material, className = '' }: WorkshopMa
           return 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100';
         case 'youtube':
           return 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100';
+        case 'rich_text':
+          return 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100';
         default:
           return 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100';
       }
@@ -210,6 +230,59 @@ export function WorkshopMaterialDisplay({ material, className = '' }: WorkshopMa
     );
   };
 
+  const renderContent = () => {
+    if (material.type !== 'rich_text' || !material.rich_content) {
+      return (
+        <div className="text-gray-500 italic p-4 text-center">
+          ไม่มีเนื้อหาที่จะแสดง
+        </div>
+      );
+    }
+
+    return (
+      <div className={`rich-text-material ${className}`}>
+        {material.title && (
+          <div className="mb-4 pb-2 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">{material.title}</h3>
+            {material.description && (
+              <p className="text-sm text-gray-600 mt-1">{material.description}</p>
+            )}
+          </div>
+        )}
+        <QuillViewer 
+          content={material.rich_content}
+          className="rich-text-content"
+        />
+      </div>
+    );
+  };
+
+  // Handle rich text materials
+  if (material.type === 'rich_text') {
+    switch (material.display_mode) {
+      case 'title':
+        return (
+          <div className={`rich-text-title-mode ${className}`}>
+            <div className="inline-flex items-center space-x-3 p-3 border rounded-lg bg-indigo-50 border-indigo-200 text-indigo-700">
+              <div className="flex items-center space-x-2 flex-1">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm truncate">{material.title}</div>
+                  <div className="text-xs opacity-75">เอกสารเนื้อหา</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'content':
+      default:
+        return renderContent();
+    }
+  }
+
+  // Handle URL-based materials
   switch (material.display_mode) {
     case 'title':
       return renderTitle();
