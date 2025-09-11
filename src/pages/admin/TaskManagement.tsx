@@ -32,6 +32,14 @@ export function TaskManagement() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [bulkLoading, setBulkLoading] = useState(false)
 
+  // View and Pagination State
+  const [taskViewMode, setTaskViewMode] = useState<'individual' | 'group' | 'table'>('table')
+  const [individualViewType, setIndividualViewType] = useState<'cards' | 'table'>('cards')
+  const [groupViewType, setGroupViewType] = useState<'cards' | 'table'>('cards')
+  const [currentIndividualPage, setCurrentIndividualPage] = useState(1)
+  const [currentGroupPage, setCurrentGroupPage] = useState(1)
+  const [itemsPerPage] = useState(12) // 12 items per page for cards, 20 for table
+
   const handleCreateTask = async (taskData: any) => {
     try {
       console.log('Creating task with data:', taskData)
@@ -128,6 +136,33 @@ export function TaskManagement() {
 
     return filtered
   }, [tasks, selectedWorkshop, searchTerm, statusFilter, workshopFilter])
+
+  // Separate individual and group tasks
+  const individualTasks = useMemo(() => {
+    return filteredTasks.filter(task => task.submission_mode !== 'group')
+  }, [filteredTasks])
+
+  const groupTasks = useMemo(() => {
+    return filteredTasks.filter(task => task.submission_mode === 'group')
+  }, [filteredTasks])
+
+  // Pagination logic for individual tasks
+  const paginatedIndividualTasks = useMemo(() => {
+    const startIndex = (currentIndividualPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return individualTasks.slice(startIndex, endIndex)
+  }, [individualTasks, currentIndividualPage, itemsPerPage])
+
+  // Pagination logic for group tasks
+  const paginatedGroupTasks = useMemo(() => {
+    const startIndex = (currentGroupPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return groupTasks.slice(startIndex, endIndex)
+  }, [groupTasks, currentGroupPage, itemsPerPage])
+
+  // Calculate total pages
+  const totalIndividualPages = Math.ceil(individualTasks.length / itemsPerPage)
+  const totalGroupPages = Math.ceil(groupTasks.length / itemsPerPage)
 
   // Bulk Actions
   const handleSelectAll = () => {
@@ -238,6 +273,177 @@ export function TaskManagement() {
   }
 
   const hasActiveFilters = searchTerm || statusFilter !== 'current' || workshopFilter !== 'all'
+
+  // Task Card Component - Square format for better space efficiency
+  const TaskCard = ({ task }: { task: any }) => {
+    const submissionCount = task.submissions?.[0]?.count || 0
+    const isOverdue = task.due_date && new Date(task.due_date) < new Date()
+    
+    return (
+      <div className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 aspect-square flex flex-col justify-between ${selectedItems.includes(task.id) ? 'ring-2 ring-blue-500' : ''}`}>
+        {/* Header with checkbox and task type */}
+        <div className="flex items-start justify-between mb-2">
+          <input
+            type="checkbox"
+            checked={selectedItems.includes(task.id)}
+            onChange={() => handleItemSelect(task.id)}
+            className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          {task.submission_mode === 'group' ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+              <svg className="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+              </svg>
+              กลุ่ม
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+              <svg className="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+              </svg>
+              เดี่ยว
+            </span>
+          )}
+        </div>
+
+        {/* Task title - centered */}
+        <div className="flex-1 flex items-center justify-center text-center">
+          <h3 className="font-semibold text-gray-900 text-sm line-clamp-3 leading-tight">{task.title}</h3>
+        </div>
+
+        {/* Bottom section with key info */}
+        <div className="space-y-1.5">
+          {/* Workshop */}
+          {task.workshop && (
+            <p className="text-xs text-gray-500 truncate">
+              {task.workshop.title}
+            </p>
+          )}
+          
+          {/* Due date */}
+          {task.due_date && (
+            <p className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+              {new Date(task.due_date).toLocaleDateString('th-TH')}
+              {isOverdue && <span className="ml-1">(เลย)</span>}
+            </p>
+          )}
+
+          {/* Submissions count */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">
+              งาน: <span className="font-medium">{submissionCount}</span>
+            </span>
+            {!task.is_active && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                ซ่อน
+              </span>
+            )}
+          </div>
+
+          {/* Actions - compact */}
+          <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setViewingSubmissions(task)}
+                className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded"
+                title="ดูงานที่ส่ง"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setEditingTask(task)}
+                className="text-indigo-600 hover:text-indigo-800 p-1 hover:bg-indigo-50 rounded"
+                title="แก้ไข"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              {task.submission_mode === 'group' && (
+                <button
+                  onClick={() => setViewingGroups(task)}
+                  className="text-purple-600 hover:text-purple-800 p-1 hover:bg-purple-50 rounded"
+                  title="จัดการกลุ่ม"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setDeleteConfirm({ task, show: true })}
+              className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded"
+              title="ลบ"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Pagination Component
+  const Pagination = ({ 
+    currentPage, 
+    totalPages, 
+    onPageChange, 
+    itemCount, 
+    itemType 
+  }: { 
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+    itemCount: number
+    itemType: string
+  }) => {
+    if (totalPages <= 1) return null
+
+    return (
+      <div className="flex items-center justify-between py-4">
+        <div className="text-sm text-gray-500">
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, itemCount)} of {itemCount} {itemType}
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => onPageChange(page)}
+                className={`px-3 py-1 text-sm rounded-md ${
+                  page === currentPage
+                    ? 'bg-blue-600 text-white'
+                    : 'border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const createSampleTasks = async (workshopId: string) => {
     const sampleTasks = [
@@ -594,197 +800,502 @@ export function TaskManagement() {
               </div>
             ) : (
               <div>
-                <table className="min-w-full divide-y divide-gray-200" style={{ overflow: 'visible' }}>
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {/* Checkbox header now in top bar */}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Task / Workshop
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Submissions
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredTasks.map((task) => {
-                      const submissionCount = task.submissions?.[0]?.count || 0
-                      const isOverdue = task.due_date && new Date(task.due_date) < new Date()
-                      
-                      return (
-                        <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`} style={{ position: 'relative', overflow: 'visible' }}>
-                          {/* Row checkbox (aligns with first header column) */}
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <input
-                              type="checkbox"
-                              checked={selectedItems.includes(task.id)}
-                              onChange={() => handleItemSelect(task.id)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                          </td>
-                          {/* Task / Workshop first, submissions column follows below */}
+                {/* Task View Mode Selection */}
+                <div className="border-b border-gray-200 mb-6">
+                  <nav className="flex space-x-8">
+                    <button
+                      onClick={() => setTaskViewMode('table')}
+                      className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                        taskViewMode === 'table'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      All Tasks ({filteredTasks.length})
+                    </button>
+                    <button
+                      onClick={() => setTaskViewMode('individual')}
+                      className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                        taskViewMode === 'individual'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Individual ({individualTasks.length})
+                    </button>
+                    <button
+                      onClick={() => setTaskViewMode('group')}
+                      className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                        taskViewMode === 'group'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Group ({groupTasks.length})
+                    </button>
+                  </nav>
+                </div>
 
-                          {/* Task / Workshop with due date + status toggle */}
-                          <td className="px-6 py-4 align-top">
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <div className="text-sm font-semibold text-gray-900">
-                                  {task.title}
-                                </div>
-                                {/* Task Type Badge */}
-                                {task.submission_mode === 'group' ? (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
-                                    </svg>
-                                    กลุ่ม
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
-                                    </svg>
-                                    เดี่ยว
-                                  </span>
-                                )}
-                              </div>
-                              {task.description && (
-                                <div className="text-xs text-gray-600 truncate max-w-md">
-                                  {task.description.length > 80 ? `${task.description.substring(0, 80)}...` : task.description}
-                                </div>
-                              )}
-                              <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-                                <div className="flex items-center flex-wrap gap-2">
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700">Order {task.order_index}</span>
-                                  {task.workshop?.title && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">{task.workshop.title}</span>
-                                  )}
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded ${isOverdue ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
-                                    {formatDate(task.due_date)}{isOverdue && <span className="ml-1">(Overdue)</span>}
-                                  </span>
-                                </div>
-                                <div className="ml-3">
-                                  <button
-                                    onClick={() => handleUpdateTask(task.id, { is_active: !task.is_active })}
-                                    aria-pressed={task.is_active}
-                                    title={task.is_active ? 'Click to hide this task' : 'Click to show this task'}
-                                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full transition-colors shadow-sm border ${task.is_active ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'}`}
-                                  >
-                                    {task.is_active ? (
-                                      <>
-                                        <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/></svg>
-                                        Show
-                                      </>
-                                    ) : (
-                                      <>
-                                        <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd"/><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/></svg>
-                                        Hide
-                                      </>
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          {/* Submissions cell (after Task/Workshop) */}
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => setViewingSubmissions(task)}
-                                className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
-                                title="View all submissions"
-                              >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                  <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z" />
-                                </svg>
-                                <span>View</span>
-                                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200">{submissionCount}</span>
-                              </button>
-                              {/* Lucky Draw quick action removed per request */}
-                            </div>
-                          </td>
+                {/* Table View (All Tasks) */}
+                {taskViewMode === 'table' && (
+                  <table className="min-w-full divide-y divide-gray-200" style={{ overflow: 'visible' }}>
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {/* Checkbox header now in top bar */}
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Task / Workshop
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Submissions
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredTasks.map((task) => {
+                        const submissionCount = task.submissions?.[0]?.count || 0
+                        const isOverdue = task.due_date && new Date(task.due_date) < new Date()
+                        
+                        return (
+                          <tr key={task.id} className={`hover:bg-gray-50 ${selectedItems.includes(task.id) ? 'bg-blue-50' : ''}`} style={{ position: 'relative', overflow: 'visible' }}>
+                            {/* Row checkbox (aligns with first header column) */}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                checked={selectedItems.includes(task.id)}
+                                onChange={() => handleItemSelect(task.id)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                            </td>
+                            {/* Task / Workshop first, submissions column follows below */}
 
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => setEditingTask(task)}
-                                className="text-green-700 hover:text-green-900 text-xs bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-md transition-colors font-medium"
-                                title="Edit task"
-                              >
-                                Edit
-                              </button>
-                              
-                              <div className="relative group" style={{ zIndex: 9999 }}>
-                                <button
-                                  className="text-gray-500 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
-                                  title="More actions"
-                                >
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
-                                  </svg>
-                                </button>
-                                
-                                {/* Dropdown Menu */}
-                                <div className="absolute right-0 top-full mt-1 w-48 py-1 bg-white rounded-md shadow-lg border border-gray-200 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:opacity-100 hover:visible transition-all duration-200">
-                                  {task.submission_mode === 'group' && (
-                                    <button
-                                      onClick={() => setViewingGroups(task)}
-                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 transition-colors"
-                                    >
-                                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            {/* Task / Workshop with due date + status toggle */}
+                            <td className="px-6 py-4 align-top">
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-semibold text-gray-900">
+                                    {task.title}
+                                  </div>
+                                  {/* Task Type Badge */}
+                                  {task.submission_mode === 'group' ? (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
                                       </svg>
-                                      Manage Groups
-                                    </button>
-                                  )}
-                                  
-                                  {task.is_archived ? (
-                                    <button
-                                      onClick={() => handleRestoreTask(task)}
-                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
-                                    >
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                      </svg>
-                                      Restore Task
-                                    </button>
+                                      กลุ่ม
+                                    </span>
                                   ) : (
-                                    <button
-                                      onClick={() => handleArchiveTask(task)}
-                                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
-                                    >
-                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8l4 4m0 0l4-4m-4 4V3m-1 17v-8a4 4 0 014-4h0a4 4 0 014 4v8" />
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
                                       </svg>
-                                      Archive Task
-                                    </button>
+                                      เดี่ยว
+                                    </span>
                                   )}
-                                  
-                                  <div className="border-t border-gray-100 my-1"></div>
-                                  
-                                  <button
-                                    onClick={() => handleDeleteTask(task)}
-                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors"
-                                  >
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    Delete Task
-                                  </button>
+                                </div>
+                                {task.description && (
+                                  <div className="text-xs text-gray-600 truncate max-w-md">
+                                    {task.description.length > 80 ? `${task.description.substring(0, 80)}...` : task.description}
+                                  </div>
+                                )}
+                                <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                                  <div className="flex items-center flex-wrap gap-2">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700">Order {task.order_index}</span>
+                                    {task.workshop?.title && (
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700">{task.workshop.title}</span>
+                                    )}
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded ${isOverdue ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                                      {formatDate(task.due_date)}{isOverdue && <span className="ml-1">(Overdue)</span>}
+                                    </span>
+                                  </div>
+                                  <div className="ml-3">
+                                    <button
+                                      onClick={() => handleUpdateTask(task.id, { is_active: !task.is_active })}
+                                      aria-pressed={task.is_active}
+                                      title={task.is_active ? 'Click to hide this task' : 'Click to show this task'}
+                                      className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full transition-colors shadow-sm border ${task.is_active ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'}`}
+                                    >
+                                      {task.is_active ? (
+                                        <>
+                                          <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"/></svg>
+                                          Show
+                                        </>
+                                      ) : (
+                                        <>
+                                          <svg className="w-3.5 h-3.5 mr-1.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd"/><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/></svg>
+                                          Hide
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                            </td>
+                            {/* Submissions cell (after Task/Workshop) */}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setViewingSubmissions(task)}
+                                  className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
+                                  title="View all submissions"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V9l-5-6H4z" />
+                                  </svg>
+                                  <span>View</span>
+                                  <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded bg-white text-blue-700 border border-blue-200">{submissionCount}</span>
+                                </button>
+                                {/* Lucky Draw quick action removed per request */}
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => setEditingTask(task)}
+                                  className="text-green-700 hover:text-green-900 text-xs bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-md transition-colors font-medium"
+                                  title="Edit task"
+                                >
+                                  Edit
+                                </button>
+                                
+                                <div className="relative group" style={{ zIndex: 9999 }}>
+                                  <button
+                                    className="text-gray-500 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+                                    title="More actions"
+                                  >
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                    </svg>
+                                  </button>
+                                  
+                                  {/* Dropdown Menu */}
+                                  <div className="absolute right-0 top-full mt-1 w-48 py-1 bg-white rounded-md shadow-lg border border-gray-200 z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:opacity-100 hover:visible transition-all duration-200">
+                                    {task.submission_mode === 'group' && (
+                                      <button
+                                        onClick={() => setViewingGroups(task)}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-900 transition-colors"
+                                      >
+                                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                                        </svg>
+                                        Manage Groups
+                                      </button>
+                                    )}
+                                    
+                                    {task.is_archived ? (
+                                      <button
+                                        onClick={() => handleRestoreTask(task)}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
+                                      >
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Restore Task
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleArchiveTask(task)}
+                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 transition-colors"
+                                      >
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8l4 4m0 0l4-4m-4 4V3m-1 17v-8a4 4 0 014-4h0a4 4 0 014 4v8" />
+                                        </svg>
+                                        Archive Task
+                                      </button>
+                                    )}
+                                    
+                                    <div className="border-t border-gray-100 my-1"></div>
+                                    
+                                    <button
+                                      onClick={() => handleDeleteTask(task)}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors"
+                                    >
+                                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                      Delete Task
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                )}
+
+                {/* Individual Tasks View */}
+                {taskViewMode === 'individual' && (
+                  <div>
+                    {/* View Type Toggle for Individual Tasks */}
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Individual Tasks ({individualTasks.length})</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">View:</span>
+                        <button
+                          onClick={() => setIndividualViewType('cards')}
+                          className={`px-3 py-1.5 text-sm rounded-md ${
+                            individualViewType === 'cards'
+                              ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                              : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          Cards
+                        </button>
+                        <button
+                          onClick={() => setIndividualViewType('table')}
+                          className={`px-3 py-1.5 text-sm rounded-md ${
+                            individualViewType === 'table'
+                              ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                              : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          Table
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {individualTasks.length === 0 ? (
+                      <div className="text-center py-12">
+                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Individual Tasks Found</h3>
+                        <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+                      </div>
+                    ) : (
+                      <>
+                        {individualViewType === 'cards' ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {paginatedIndividualTasks.map((task) => (
+                              <TaskCard key={task.id} task={task} />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submissions</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {paginatedIndividualTasks.map((task) => {
+                                  const submissionCount = task.submissions?.[0]?.count || 0
+                                  const isOverdue = task.due_date && new Date(task.due_date) < new Date()
+                                  
+                                  return (
+                                    <tr key={task.id} className="hover:bg-gray-50">
+                                      <td className="px-6 py-4">
+                                        <div className="flex items-center">
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedItems.includes(task.id)}
+                                            onChange={() => handleItemSelect(task.id)}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+                                          />
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                                            {task.description && (
+                                              <div className="text-sm text-gray-500 truncate max-w-xs">
+                                                {task.description.length > 60 ? `${task.description.substring(0, 60)}...` : task.description}
+                                              </div>
+                                            )}
+                                            <div className="text-xs text-gray-400 mt-1">
+                                              {task.workshop?.title} • {formatDate(task.due_date)}
+                                              {isOverdue && <span className="text-red-600 ml-1">(Overdue)</span>}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap">
+                                        <button
+                                          onClick={() => setViewingSubmissions(task)}
+                                          className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
+                                        >
+                                          View ({submissionCount})
+                                        </button>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className="flex items-center space-x-2">
+                                          <button
+                                            onClick={() => setEditingTask(task)}
+                                            className="text-green-700 hover:text-green-900 text-xs bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-md transition-colors font-medium"
+                                          >
+                                            Edit
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirm({ task, show: true })}
+                                            className="text-red-600 hover:text-red-800 text-xs font-medium"
+                                          >
+                                            Delete
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                        
+                        <Pagination
+                          currentPage={currentIndividualPage}
+                          totalPages={totalIndividualPages}
+                          onPageChange={setCurrentIndividualPage}
+                          itemCount={individualTasks.length}
+                          itemType="individual tasks"
+                        />
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Group Tasks View */}
+                {taskViewMode === 'group' && (
+                  <div>
+                    {/* View Type Toggle for Group Tasks */}
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Group Tasks ({groupTasks.length})</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">View:</span>
+                        <button
+                          onClick={() => setGroupViewType('cards')}
+                          className={`px-3 py-1.5 text-sm rounded-md ${
+                            groupViewType === 'cards'
+                              ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                              : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          Cards
+                        </button>
+                        <button
+                          onClick={() => setGroupViewType('table')}
+                          className={`px-3 py-1.5 text-sm rounded-md ${
+                            groupViewType === 'table'
+                              ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                              : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                          }`}
+                        >
+                          Table
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {groupTasks.length === 0 ? (
+                      <div className="text-center py-12">
+                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 009.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Group Tasks Found</h3>
+                        <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+                      </div>
+                    ) : (
+                      <>
+                        {groupViewType === 'cards' ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {paginatedGroupTasks.map((task) => (
+                              <TaskCard key={task.id} task={task} />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submissions</th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {paginatedGroupTasks.map((task) => {
+                                  const submissionCount = task.submissions?.[0]?.count || 0
+                                  const isOverdue = task.due_date && new Date(task.due_date) < new Date()
+                                  
+                                  return (
+                                    <tr key={task.id} className="hover:bg-gray-50">
+                                      <td className="px-6 py-4">
+                                        <div className="flex items-center">
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedItems.includes(task.id)}
+                                            onChange={() => handleItemSelect(task.id)}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+                                          />
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                                            {task.description && (
+                                              <div className="text-sm text-gray-500 truncate max-w-xs">
+                                                {task.description.length > 60 ? `${task.description.substring(0, 60)}...` : task.description}
+                                              </div>
+                                            )}
+                                            <div className="text-xs text-gray-400 mt-1">
+                                              {task.workshop?.title} • {formatDate(task.due_date)}
+                                              {isOverdue && <span className="text-red-600 ml-1">(Overdue)</span>}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap">
+                                        <button
+                                          onClick={() => setViewingSubmissions(task)}
+                                          className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md border border-blue-200 transition-colors"
+                                        >
+                                          View ({submissionCount})
+                                        </button>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className="flex items-center space-x-2">
+                                          <button
+                                            onClick={() => setEditingTask(task)}
+                                            className="text-green-700 hover:text-green-900 text-xs bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-md transition-colors font-medium"
+                                          >
+                                            Edit
+                                          </button>
+                                          <button
+                                            onClick={() => setViewingGroups(task)}
+                                            className="text-purple-600 hover:text-purple-800 text-xs font-medium"
+                                          >
+                                            Groups
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirm({ task, show: true })}
+                                            className="text-red-600 hover:text-red-800 text-xs font-medium"
+                                          >
+                                            Delete
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                        
+                        <Pagination
+                          currentPage={currentGroupPage}
+                          totalPages={totalGroupPages}
+                          onPageChange={setCurrentGroupPage}
+                          itemCount={groupTasks.length}
+                          itemType="group tasks"
+                        />
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
