@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { QueryProvider } from './providers/QueryProvider'
-import { AlertProvider } from './contexts/AlertContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { ErrorBoundary, LazyLoadErrorFallback } from './components/ErrorBoundary'
@@ -81,10 +80,10 @@ const GroupSettingsPage = createLazyComponent(
 function App() {
   return (
     <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
-      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
-        <QueryProvider>
-          <AuthProvider>
-            <RealtimeProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <RealtimeProvider>
+            <BrowserRouter future={{ v7_relativeSplatPath: true }}>
               <Suspense fallback={
                 <div className="flex items-center justify-center min-h-screen">
                   <div className="text-center">
@@ -99,9 +98,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <AlertProvider>
-                  <DashboardPage />
-                </AlertProvider>
+                <DashboardPage />
               </ProtectedRoute>
             }
           />
@@ -109,9 +106,7 @@ function App() {
             path="/workshops/:id"
             element={
               <ProtectedRoute>
-                <AlertProvider>
-                  <WorkshopFeedPage />
-                </AlertProvider>
+                <WorkshopFeedPage />
               </ProtectedRoute>
             }
           />
@@ -119,9 +114,7 @@ function App() {
             path="/sessions"
             element={
               <ProtectedRoute>
-                <AlertProvider>
-                  <SessionsPage />
-                </AlertProvider>
+                <SessionsPage />
               </ProtectedRoute>
             }
           />
@@ -129,9 +122,7 @@ function App() {
             path="/sessions/:sessionId/feed"
             element={
               <ProtectedRoute>
-                <AlertProvider>
-                  <SessionFeedPage />
-                </AlertProvider>
+                <SessionFeedPage />
               </ProtectedRoute>
             }
           />
@@ -213,9 +204,7 @@ function App() {
             path="/group-settings/:groupId"
             element={
               <ProtectedRoute>
-                <AlertProvider>
-                  <GroupSettingsPage />
-                </AlertProvider>
+                <GroupSettingsPage />
               </ProtectedRoute>
             }
           />
@@ -225,9 +214,7 @@ function App() {
             path="/materials-test"
             element={
               <ProtectedRoute>
-                <AlertProvider>
-                  <MaterialsTest />
-                </AlertProvider>
+                <MaterialsTest />
               </ProtectedRoute>
             }
           />
@@ -241,10 +228,10 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
-            </RealtimeProvider>
-          </AuthProvider>
-        </QueryProvider>
-      </BrowserRouter>
+            </BrowserRouter>
+          </RealtimeProvider>
+        </AuthProvider>
+      </QueryProvider>
     </ErrorBoundary>
   )
 }
