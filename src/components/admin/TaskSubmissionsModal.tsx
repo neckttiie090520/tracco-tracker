@@ -473,7 +473,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                             <Avatar
                                               username={member.email}
                                               name={member.name}
+                                              avatarSeed={member.avatar_seed}
                                               size={16}
+                                              saturation={member.avatar_saturation}
+                                              lightness={member.avatar_lightness}
                                             />
                                             <span className={member.email === submission.user?.email ? 'font-semibold text-green-700' : ''}>
                                               {member.name}
@@ -900,7 +903,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                   <Avatar
                                     username={member?.email}
                                     name={member?.name}
+                                    avatarSeed={member?.avatar_seed}
                                     size={24}
+                                    saturation={member?.avatar_saturation}
+                                    lightness={member?.avatar_lightness}
                                   />
                                   <span className={isSubmitter ? 'font-semibold text-green-800' : 'text-gray-700'}>
                                     {member?.name || 'Unknown'}
