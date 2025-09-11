@@ -131,56 +131,83 @@ export const submissionService = {
   },
 
   // Upsert a submission for a group (one per group per task)
-  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string, links?: string[] }) {
-    // First, delete any existing submissions for this task_id and group_id to avoid conflicts
-    const { error: deleteError } = await supabase
+  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string, user_id: string, links?: string[] }) {
+    // First, check if there's an existing group submission
+    const { data: existing, error: findError } = await supabase
       .from('submissions')
-      .delete()
+      .select('id')
       .eq('task_id', submissionData.task_id)
       .eq('group_id', submissionData.group_id)
+      .maybeSingle()
 
-    if (deleteError) {
-      console.error('Error cleaning up existing group submission:', deleteError)
-      // Don't throw here, just log - we can continue with insert
+    if (findError && (findError as any).code !== 'PGRST116') {
+      console.error('Error checking existing group submission:', findError)
+      throw findError
     }
 
-    // Now insert the new group submission
-    // For group submissions, create a deterministic UUID-like string based on group_id and task_id
-    // Simple approach: use parts of group_id and task_id to create a valid UUID format
-    const groupId = submissionData.group_id.replace(/-/g, '')
-    const taskId = submissionData.task_id.replace(/-/g, '')
-    // Create a pseudo-UUID by mixing group and task IDs: take first 16 chars of group + first 16 of task
-    const mixed = (groupId + taskId).substring(0, 32)
-    const groupUserId = `${mixed.substring(0,8)}-${mixed.substring(8,12)}-${mixed.substring(12,16)}-${mixed.substring(16,20)}-${mixed.substring(20,32)}`
-    
-    const { data, error } = await supabase
-      .from('submissions')
-      .insert({
-        task_id: submissionData.task_id,
-        user_id: groupUserId, // Use unique group-based user_id to avoid constraint conflicts
-        group_id: submissionData.group_id,
-        notes: submissionData.notes ?? null,
-        submission_url: submissionData.submission_url ?? null,
-        links: submissionData.links ?? null,
-        file_url: submissionData.file_url ?? null,
-        status: submissionData.status ?? 'submitted',
-        submitted_at: submissionData.submitted_at ?? new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select(`
-        *,
-        task:tasks!submissions_task_id_fkey(
-          id, title, description, due_date, order_index,
-          workshop:workshops!tasks_workshop_id_fkey(id, title)
-        )
-      `)
-      .single()
-    
-    if (error) {
-      console.error('Error inserting group submission:', error)
-      throw error
+    if (existing?.id) {
+      // Update existing group submission
+      const { data, error } = await supabase
+        .from('submissions')
+        .update({
+          notes: submissionData.notes ?? null,
+          submission_url: submissionData.submission_url ?? null,
+          links: submissionData.links ?? null,
+          file_url: submissionData.file_url ?? null,
+          status: submissionData.status ?? 'submitted',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+        .select(`
+          *,
+          task:tasks!submissions_task_id_fkey(
+            id, title, description, due_date, order_index,
+            workshop:workshops!tasks_workshop_id_fkey(id, title)
+          )
+        `)
+        .single()
+      
+      if (error) throw error
+      return data
+    } else {
+      // For new submissions, first delete any individual user submission for this task to avoid conflicts
+      await supabase
+        .from('submissions')
+        .delete()
+        .eq('task_id', submissionData.task_id)
+        .eq('user_id', submissionData.user_id)
+        .is('group_id', null) // Only delete individual submissions, not group ones
+
+      // Now insert new group submission
+      const { data, error } = await supabase
+        .from('submissions')
+        .insert({
+          task_id: submissionData.task_id,
+          user_id: submissionData.user_id, // Use the actual user_id (group owner)
+          group_id: submissionData.group_id,
+          notes: submissionData.notes ?? null,
+          submission_url: submissionData.submission_url ?? null,
+          links: submissionData.links ?? null,
+          file_url: submissionData.file_url ?? null,
+          status: submissionData.status ?? 'submitted',
+          submitted_at: submissionData.submitted_at ?? new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select(`
+          *,
+          task:tasks!submissions_task_id_fkey(
+            id, title, description, due_date, order_index,
+            workshop:workshops!tasks_workshop_id_fkey(id, title)
+          )
+        `)
+        .single()
+      
+      if (error) {
+        console.error('Error inserting group submission:', error)
+        throw error
+      }
+      return data
     }
-    return data
   },
 
   // Update submission with review (admin only)
