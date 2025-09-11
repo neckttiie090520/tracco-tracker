@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Users, Plus, X, Edit2, Trash2, Copy, HelpCircle } from 'lucide-react'
 import { groupService } from '../../services/groups'
 import { useAuth } from '../../hooks/useAuth'
+import { StandardizedAvatar } from '../common/StandardizedAvatar'
 
 interface GroupManagementCardProps {
   group?: any
@@ -355,9 +356,12 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
               <div className="flex flex-wrap gap-2">
                 {members.slice(0, 4).map((member) => (
                   <div key={member.user_id} className="flex items-center gap-2 bg-white px-3 py-2 rounded-md border">
-                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-800">
-                      {member.user?.name?.charAt(0) || member.user_id.charAt(0).toUpperCase()}
-                    </div>
+                    <StandardizedAvatar
+                      user={member.user}
+                      size={24}
+                      showName={false}
+                      showEmail={false}
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium text-gray-900 truncate">{member.user.name}</div>
                       {member.role === 'owner' && (
@@ -393,29 +397,30 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
                   <div className="mt-2 space-y-2">
                     {members.slice(4).map((member) => (
                       <div key={member.user_id} className="flex items-center justify-between p-2 bg-white rounded border">
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-800">
-                            {member.user?.name?.charAt(0) || member.user_id.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="text-xs font-medium text-gray-900">{member.user.name}</div>
-                            <div className="text-xs text-gray-500">{member.user.email}</div>
-                            {member.role === 'owner' && (
-                              <span className="text-xs text-blue-600">👑 เจ้าของกลุ่ม</span>
-                            )}
-                          </div>
-                        </div>
+                        <StandardizedAvatar
+                          user={member.user}
+                          size={20}
+                          showName={true}
+                          showEmail={true}
+                          nameClassName="text-xs font-medium text-gray-900"
+                          emailClassName="text-xs text-gray-500"
+                        />
                         
-                        {(isOwner || member.user_id === user?.id) && member.role !== 'owner' && (
-                          <button
-                            onClick={() => handleRemoveMember(member.user_id)}
-                            disabled={loading}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                            title={member.user_id === user?.id ? 'ออกจากกลุ่ม' : 'ลบสมาชิก'}
-                          >
-                            <i className="bx bx-x text-sm"></i>
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {member.role === 'owner' && (
+                            <span className="text-xs text-blue-600">👑 เจ้าของกลุ่ม</span>
+                          )}
+                          {(isOwner || member.user_id === user?.id) && member.role !== 'owner' && (
+                            <button
+                              onClick={() => handleRemoveMember(member.user_id)}
+                              disabled={loading}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                              title={member.user_id === user?.id ? 'ออกจากกลุ่ม' : 'ลบสมาชิก'}
+                            >
+                              <i className="bx bx-x text-sm"></i>
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

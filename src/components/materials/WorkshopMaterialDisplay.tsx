@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { WorkshopMaterial } from '../../types/materials';
 import { getDomainName, getFaviconUrl } from '../../utils/materialUtils';
-import QuillViewer from '../editor/QuillViewer';
+import SimpleTextViewer from '../editor/SimpleTextViewer';
 
 interface WorkshopMaterialDisplayProps {
   material: WorkshopMaterial;
@@ -249,7 +249,7 @@ export function WorkshopMaterialDisplay({ material, className = '' }: WorkshopMa
             )}
           </div>
         )}
-        <QuillViewer 
+        <SimpleTextViewer 
           content={material.rich_content}
           className="rich-text-content"
         />

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import QuillEditor, { QuillEditorRef } from '../editor/QuillEditor'
+import SimpleTextEditor, { SimpleTextEditorRef } from '../editor/SimpleTextEditor'
 import type { WorkshopMaterial, TaskMaterial, SessionMaterial, DisplayMode } from '../../types/materials'
 
 interface RichTextMaterialModalProps {
@@ -25,11 +25,11 @@ export default function RichTextMaterialModal({
   title = 'สร้างเอกสารเนื้อหาใหม่',
   loading = false
 }: RichTextMaterialModalProps) {
-  const editorRef = useRef<QuillEditorRef>(null)
+  const editorRef = useRef<SimpleTextEditorRef>(null)
   const [materialTitle, setMaterialTitle] = useState('')
   const [description, setDescription] = useState('')
   const [displayMode, setDisplayMode] = useState<DisplayMode>('content')
-  const [editorContent, setEditorContent] = useState<any>(null)
+  const [editorContent, setEditorContent] = useState<string>('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -55,7 +55,7 @@ export default function RichTextMaterialModal({
         setMaterialTitle('')
         setDescription('')
         setDisplayMode('content')
-        setEditorContent(null)
+        setEditorContent('')
         setTimeout(() => {
           if (editorRef.current) {
             editorRef.current.setContent('')
@@ -78,7 +78,7 @@ export default function RichTextMaterialModal({
     }
 
     const content = editorRef.current.getContent()
-    if (!content || (content.ops && content.ops.length === 1 && !content.ops[0].insert.trim())) {
+    if (!content || !content.trim()) {
       setError('กรุณาเพิ่มเนื้อหา')
       return
     }
@@ -103,16 +103,16 @@ export default function RichTextMaterialModal({
     }
   }
 
-  const handleEditorChange = (content: any, delta: any, source: string, editor: any) => {
+  const handleEditorChange = (content: string) => {
     setEditorContent(content)
     if (error) setError('') // Clear error when user starts typing
   }
 
-  const handleEditorReady = (editor: any) => {
+  const handleEditorReady = () => {
     // Focus editor after it's ready for better UX
     setTimeout(() => {
-      if (!existingMaterial) {
-        editor.focus()
+      if (!existingMaterial && editorRef.current) {
+        editorRef.current.focus()
       }
     }, 100)
   }
@@ -209,17 +209,16 @@ export default function RichTextMaterialModal({
                 เนื้อหาเอกสาร <span className="text-red-500">*</span>
               </label>
               <div className="border border-gray-300 rounded-lg overflow-hidden">
-                <QuillEditor
+                <SimpleTextEditor
                   ref={editorRef}
                   value={editorContent}
                   onChange={handleEditorChange}
-                  placeholder="เขียนเนื้อหาของเอกสารที่นี่... สามารถใช้เครื่องมือจัดรูปแบบข้างต้นได้"
+                  placeholder="เขียนเนื้อหาของเอกสารที่นี่..."
                   height="400px"
-                  onReady={handleEditorReady}
                 />
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                💡 เคล็ดลับ: สามารถแทรกรูปภาพ, วิดีโอ, ลิงก์ และจัดรูปแบบข้อความได้อย่างอิสระ
+                💡 เคล็ดลับ: เขียนข้อความธรรมดาได้ การขึ้นบรรทัดใหม่จะแสดงผลตามที่พิมพ์
               </p>
             </div>
           </div>

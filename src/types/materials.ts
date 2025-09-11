@@ -7,7 +7,7 @@ export interface WorkshopMaterial {
   embed_url?: string; // Converted URL for embedding
   display_mode: 'title' | 'link' | 'embed' | 'content';
   content_type?: 'url' | 'rich_text';
-  rich_content?: any; // Quill.js Delta format
+  rich_content?: string; // Plain text content
   description?: string;
   dimensions?: {
     width: string;    // e.g., '100%'
@@ -42,7 +42,7 @@ export interface CreateMaterialRequest {
   url: string;
   display_mode: DisplayMode;
   content_type?: 'url' | 'rich_text';
-  rich_content?: any; // Quill.js Delta format
+  rich_content?: string; // Plain text content
   description?: string;
   dimensions?: {
     width: string;
@@ -70,7 +70,7 @@ export interface TaskMaterial {
   embed_url?: string; // Converted URL for embedding
   display_mode: 'title' | 'link' | 'embed' | 'content';
   content_type?: 'url' | 'rich_text';
-  rich_content?: any; // Quill.js Delta format
+  rich_content?: string; // Plain text content
   description?: string;
   dimensions?: {
     width: string;    // e.g., '100%'
@@ -93,7 +93,7 @@ export interface CreateTaskMaterialRequest {
   url: string;
   display_mode: DisplayMode;
   content_type?: 'url' | 'rich_text';
-  rich_content?: any; // Quill.js Delta format
+  rich_content?: string; // Plain text content
   description?: string;
   dimensions?: {
     width: string;
@@ -111,7 +111,7 @@ export interface SessionMaterial {
   embed_url?: string; // Converted URL for embedding
   display_mode: 'title' | 'link' | 'embed' | 'content';
   content_type?: 'url' | 'rich_text';
-  rich_content?: any; // Quill.js Delta format
+  rich_content?: string; // Plain text content
   description?: string;
   dimensions?: {
     width: string;    // e.g., '100%'
@@ -135,7 +135,7 @@ export interface CreateSessionMaterialRequest {
   url: string;
   display_mode: DisplayMode;
   content_type?: 'url' | 'rich_text';
-  rich_content?: any; // Quill.js Delta format
+  rich_content?: string; // Plain text content
   description?: string;
   dimensions?: {
     width: string;
