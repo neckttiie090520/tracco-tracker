@@ -333,7 +333,11 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
     <div className="mb-6">
       {sessions.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <div className="text-4xl mb-3">📅</div>
+          <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             ยังไม่มีงานสัมมนา
           </h3>
@@ -489,7 +493,7 @@ export function ParticipantDashboard() {
             className="text-center"
           >
             <h1 className="text-4xl font-bold mb-4">
-              {showSessionRegistration ? 'ยินดีต้อนรับ! 🎉' : `สวัสดี, ${user?.email?.split('@')[0]} 👋`}
+              {showSessionRegistration ? 'ยินดีต้อนรับสู่ระบบ!' : `สวัสดี, ${user?.email?.split('@')[0]}`}
             </h1>
             {showSessionRegistration ? (
               <div className="text-blue-100 text-lg space-y-2">
@@ -734,9 +738,19 @@ export function ParticipantDashboard() {
                             </div>
                             <div className="flex items-center gap-2">
                               {task.isSubmitted ? (
-                                <span className="text-green-600 text-xs">✅ ส่งแล้ว</span>
+                                <div className="flex items-center gap-1 text-green-600 text-xs">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  ส่งแล้ว
+                                </div>
                               ) : (
-                                <span className="text-gray-400 text-xs">⏳ ยังไม่ส่ง</span>
+                                <div className="flex items-center gap-1 text-gray-400 text-xs">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  ยังไม่ส่ง
+                                </div>
                               )}
                               <svg
                                 className="w-4 h-4 text-gray-400"
@@ -784,7 +798,9 @@ export function ParticipantDashboard() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <span>⏰</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 งานที่ใกล้ครบกำหนด
               </h2>
               <button
@@ -873,7 +889,11 @@ export function ParticipantDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-2">🎉</div>
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                   <p className="text-gray-600">ไม่มีงานที่ใกล้ครบกำหนด</p>
                 </div>
               )}

@@ -150,13 +150,13 @@ export function SessionsPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
           <div className="flex flex-wrap gap-4 text-sm">
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 text-gray-700 rounded-full">
-              📊 ทั้งหมด {sessions.length}
+              ทั้งหมด {sessions.length}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full">
-              ✅ ลงทะเบียนแล้ว {sessions.filter(s => s.isRegistered).length}
+              ลงทะเบียนแล้ว {sessions.filter(s => s.isRegistered).length}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
-              📝 เปิดรับสมัคร {sessions.filter(s => !s.isRegistered).length}
+              เปิดรับสมัคร {sessions.filter(s => !s.isRegistered).length}
             </span>
           </div>
         </div>
@@ -164,7 +164,11 @@ export function SessionsPage() {
         {/* Sessions List */}
         {sessions.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <div className="text-4xl mb-3">📅</div>
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               ยังไม่มีงานสัมมนา
             </h3>
@@ -214,7 +218,10 @@ export function SessionsPage() {
                       
                       {session.isRegistered && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs">
-                          ✅ ลงทะเบียนแล้ว
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          ลงทะเบียนแล้ว
                         </span>
                       )}
                     </div>
@@ -241,7 +248,10 @@ export function SessionsPage() {
                     {/* Session Meta Info */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
-                        👥 {session.max_participants} คน
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {session.max_participants} คน
                       </span>
                       {!session.isRegistered && (
                         <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full">

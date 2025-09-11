@@ -321,7 +321,10 @@ export function SessionFeedPage() {
               {/* Session Meta Info - Minimal badges */}
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
-                  📅 {new Date(session.start_date).toLocaleDateString('th-TH', {
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {new Date(session.start_date).toLocaleDateString('th-TH', {
                     day: 'numeric',
                     month: 'short'
                   })} - {new Date(session.end_date).toLocaleDateString('th-TH', {
@@ -331,7 +334,10 @@ export function SessionFeedPage() {
                 </span>
                 
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs">
-                  👥 {session.max_participants} คน
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {session.max_participants} คน
                 </span>
               </div>
               
@@ -385,14 +391,14 @@ export function SessionFeedPage() {
               
               <div className="flex flex-wrap gap-6 text-sm">
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                  <span className="text-white/80">📅 วันที่:</span>
+                  <span className="text-white/80">วันที่:</span>
                   <span className="font-semibold ml-2">
                     {new Date(session.start_date).toLocaleDateString('th-TH')} - {new Date(session.end_date).toLocaleDateString('th-TH')}
                   </span>
                 </div>
                 
                 <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
-                  <span className="text-white/80">👥 ผู้เข้าร่วม:</span>
+                  <span className="text-white/80">ผู้เข้าร่วม:</span>
                   <span className="font-semibold ml-2">{session.max_participants} คน</span>
                 </div>
               </div>
@@ -404,7 +410,7 @@ export function SessionFeedPage() {
         {secondarySessionMaterials.length > 0 && (
           <div className="mb-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              📚 เอกสารประกอบเพิ่มเติม
+              เอกสารประกอบเพิ่มเติม
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {secondarySessionMaterials.map((material, index) => (
@@ -420,7 +426,7 @@ export function SessionFeedPage() {
         <div className="mb-8">
           <div className="mb-6">
             <h2 className="text-lg font-medium text-gray-900 mb-1">
-              🏫 Workshops ในงานสัมมนานี้
+              Workshops ในงานสัมมนานี้
             </h2>
             <p className="text-sm text-gray-600">
               กิจกรรมและการเรียนรู้ที่จัดขึ้นในงานสัมมนาครั้งนี้
@@ -429,7 +435,11 @@ export function SessionFeedPage() {
 
           {workshops.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-              <div className="text-4xl mb-3">🏫</div>
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 ยังไม่มี Workshops
               </h3>
