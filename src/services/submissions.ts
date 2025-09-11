@@ -145,8 +145,13 @@ export const submissionService = {
     }
 
     // Now insert the new group submission
-    // For group submissions, use a special user_id pattern to avoid conflicts with individual submissions
-    const groupUserId = `group-${submissionData.group_id}-${submissionData.task_id}`
+    // For group submissions, create a deterministic UUID-like string based on group_id and task_id
+    // Simple approach: use parts of group_id and task_id to create a valid UUID format
+    const groupId = submissionData.group_id.replace(/-/g, '')
+    const taskId = submissionData.task_id.replace(/-/g, '')
+    // Create a pseudo-UUID by mixing group and task IDs: take first 16 chars of group + first 16 of task
+    const mixed = (groupId + taskId).substring(0, 32)
+    const groupUserId = `${mixed.substring(0,8)}-${mixed.substring(8,12)}-${mixed.substring(12,16)}-${mixed.substring(16,20)}-${mixed.substring(20,32)}`
     
     const { data, error } = await supabase
       .from('submissions')
