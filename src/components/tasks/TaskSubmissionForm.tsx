@@ -91,6 +91,8 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
         } else {
           await submitTask(formData)
         }
+        // Force refetch for individual submissions
+        await refetch()
       }
       
       // Reset file input and URL
@@ -102,6 +104,11 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
       
       // Close modal on success
       setShowModal(false)
+      
+      // Force page refresh for group tasks to update UI
+      if (isGroupTask) {
+        window.location.reload()
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit task')
@@ -392,7 +399,10 @@ function CreateGroupInline({ taskId, onCreated }: { taskId: string; onCreated: (
             setLoading(true)
             setError(null)
             await groupService.createGroup(taskId, name.trim() || 'My Group', user.id)
+            setName('') // Clear form
             await onCreated()
+            // Force page refresh to update UI
+            setTimeout(() => window.location.reload(), 500)
           } catch (e: any) {
             setError(e?.message || 'Failed to create group')
           } finally {
@@ -431,7 +441,10 @@ function JoinGroupInline({ onJoined }: { onJoined: () => void }) {
             setLoading(true)
             setError(null)
             await groupService.joinByCode(code.trim(), user.id)
+            setCode('') // Clear form
             await onJoined()
+            // Force page refresh to update UI
+            setTimeout(() => window.location.reload(), 500)
           } catch (e: any) {
             setError(e?.message || 'Invalid code')
           } finally {
