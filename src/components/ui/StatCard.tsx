@@ -1,10 +1,12 @@
 import React from 'react'
+import { BiBarChartAlt2, BiCheckCircle, BiClock, BiAlarmExclamation, BiBuilding } from 'react-icons/bi'
+import { FaChartLine, FaTasks, FaUsers, FaClock, FaExclamationTriangle } from 'react-icons/fa'
 
 interface StatCardProps {
   title: string
   value: string | number
   subtitle?: string
-  icon?: string
+  icon?: string | React.ComponentType<any>
   trend?: {
     value: number
     isPositive: boolean
@@ -19,14 +21,31 @@ const colorClasses = {
   error: 'from-red-500 to-pink-600'
 }
 
+const getDefaultIcon = (color: string) => {
+  switch (color) {
+    case 'success': return FaTasks
+    case 'warning': return FaClock
+    case 'error': return FaExclamationTriangle
+    default: return BiBarChartAlt2
+  }
+}
+
 export function StatCard({ 
   title, 
   value, 
   subtitle, 
-  icon = '📊',
+  icon,
   trend,
   color = 'primary' 
 }: StatCardProps) {
+  const IconComponent = icon && typeof icon !== 'string' ? icon : getDefaultIcon(color)
+  const iconColorClass = {
+    primary: 'text-blue-600',
+    success: 'text-green-600',
+    warning: 'text-amber-600',
+    error: 'text-red-600'
+  }[color]
+
   return (
     <div className="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover-lift">
       {/* Gradient Background */}
@@ -52,7 +71,15 @@ export function StatCard({
             )}
           </div>
           
-          <div className="text-4xl ml-4">{icon}</div>
+          <div className={`ml-4 ${iconColorClass}`}>
+            {typeof icon === 'string' ? (
+              <span className="text-4xl">{icon}</span>
+            ) : (
+              <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-xl">
+                <IconComponent className="w-6 h-6" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

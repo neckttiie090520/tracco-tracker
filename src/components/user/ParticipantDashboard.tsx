@@ -10,6 +10,8 @@ import { StatusBadge } from '../ui/StatusBadge'
 import { ProfileModal } from '../profile/ProfileModal'
 import { motion, stagger, useAnimation } from 'framer-motion'
 import { TypewriterText } from '../ui/TypewriterText'
+import { BiBuilding, BiCheckCircle, BiAlarmExclamation, BiTask, BiUserPlus } from 'react-icons/bi'
+import { FaTasks, FaClipboardCheck, FaClock } from 'react-icons/fa'
 
 interface Session {
   id: string
@@ -555,7 +557,7 @@ export function ParticipantDashboard() {
               <StatCard
                 title="Workshops ที่เข้าร่วม"
                 value={stats.totalWorkshops}
-                icon="🏫"
+                icon={BiBuilding}
                 color="primary"
                 subtitle="กิจกรรมทั้งหมด"
               />
@@ -568,7 +570,7 @@ export function ParticipantDashboard() {
               <StatCard
                 title="งานที่ส่งแล้ว"
                 value={`${stats.completedTasks}/${stats.totalTasks}`}
-                icon="✅"
+                icon={FaClipboardCheck}
                 color="success"
                 subtitle="งานทั้งหมด"
               />
@@ -585,7 +587,7 @@ export function ParticipantDashboard() {
                 <StatCard
                   title="ใกล้ครบกำหนด"
                   value={stats.upcomingDeadlines}
-                  icon="⏰"
+                  icon={FaClock}
                   color="warning"
                   subtitle={stats.upcomingDeadlines > 0 ? "ภายใน 7 วัน • คลิกดูรายละเอียด" : "ภายใน 7 วัน"}
                 />
