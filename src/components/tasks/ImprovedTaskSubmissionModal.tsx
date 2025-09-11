@@ -220,23 +220,36 @@ export function ImprovedTaskSubmissionModal({
                 </span>
               </label>
               
-              {/* Primary URL Input */}
+              {/* Primary URL Input with Note */}
               <div className="space-y-3">
-                <div className="relative">
+                <div className="space-y-2 p-4 bg-gray-50 rounded-xl border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">ลิงก์หลัก</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      id="submission_url"
+                      value={formData.submission_url}
+                      onChange={(e) => setFormData(prev => ({ ...prev, submission_url: e.target.value }))}
+                      className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
+                      disabled={uploading}
+                    />
+                    {formData.submission_url && (
+                      <div className="absolute right-3 top-3">
+                        <StatusBadge status="completed" size="sm" showIcon={false} />
+                      </div>
+                    )}
+                  </div>
                   <input
-                    type="url"
-                    id="submission_url"
-                    value={formData.submission_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, submission_url: e.target.value }))}
-                    className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
+                    type="text"
+                    value={formData.submission_note || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, submission_note: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+                    placeholder="หมายเหตุสำหรับลิงก์หลัก เช่น 'ไฟล์นำเสนอ', 'ผลงานหลัก'"
                     disabled={uploading}
                   />
-                  {formData.submission_url && (
-                    <div className="absolute right-3 top-3">
-                      <StatusBadge status="completed" size="sm" showIcon={false} />
-                    </div>
-                  )}
                 </div>
 
                 {/* Additional URLs with individual notes */}
@@ -308,42 +321,21 @@ export function ImprovedTaskSubmissionModal({
                   เพิ่มลิงก์อื่นๆ
                 </button>
 
-                {/* Helper Text with specific examples */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                {/* Compact Helper Text */}
+                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                  <div className="text-sm text-blue-800">
+                    <p className="font-semibold mb-2 flex items-center gap-2">
                       <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
+                      ตัวอย่างลิงก์ที่น่าส่ง:
+                    </p>
+                    <div className="text-xs text-blue-700 leading-relaxed">
+                      <strong>📄 เอกสาร:</strong> Google Docs/Slides, Canva, Figma &nbsp;|&nbsp; 
+                      <strong>🔗 อื่นๆ:</strong> GitHub, ChatGPT Share, YouTube, Google Drive
                     </div>
-                    <div className="text-sm text-blue-800">
-                      <p className="font-semibold mb-2">💡 ตัวอย่างลิงก์ที่น่าส่ง:</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div className="space-y-1">
-                          <p className="font-medium text-blue-900">📄 เอกสาร & นำเสนอ:</p>
-                          <ul className="space-y-0.5 text-blue-700">
-                            <li>• Google Docs (เอกสาร)</li>
-                            <li>• Google Slides (สไลด์)</li>
-                            <li>• Canva (ดีไซน์)</li>
-                            <li>• Figma (UI/UX)</li>
-                          </ul>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="font-medium text-blue-900">🔗 ลิงก์อื่นๆ:</p>
-                          <ul className="space-y-0.5 text-blue-700">
-                            <li>• GitHub (โค้ด)</li>
-                            <li>• ChatGPT Share Link</li>
-                            <li>• YouTube (วิดีโอ)</li>
-                            <li>• Google Drive (ไฟล์)</li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="mt-3 p-2 bg-white/50 rounded border border-blue-200">
-                        <p className="text-xs text-blue-700">
-                          <strong>เคล็ดลับ:</strong> ใส่หมายเหตุแต่ละลิงก์ เช่น "ไฟล์นำเสนอ", "โค้ดหลัก", "ผลงานเสร็จ" 
-                          เพื่อให้ผู้ตรวจสามารถเข้าใจงานของคุณได้ง่ายขึ้น
-                        </p>
-                      </div>
+                    <div className="mt-2 p-2 bg-blue-100 rounded text-xs">
+                      <strong>💡 เคล็ดลับ:</strong> ใส่หมายเหตุแต่ละลิงก์ เพื่อให้ผู้ตรวจเข้าใจงานได้ง่ายขึ้น
                     </div>
                   </div>
                 </div>

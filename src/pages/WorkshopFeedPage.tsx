@@ -1502,13 +1502,23 @@ export function WorkshopFeedPage() {
                                   </div>
                                 )}
 
-                                {/* Main URL input */}
-                                <div className="space-y-2">
+                                {/* Main URL input with note */}
+                                <div className="space-y-2 p-3 bg-gray-50 rounded-lg border">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-700">ลิงก์หลัก</span>
+                                  </div>
                                   <input
                                     type="url"
                                     value={submissionUrl}
                                     onChange={(e) => setSubmissionUrl(e.target.value)}
                                     placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={submissionNotes}
+                                    onChange={(e) => setSubmissionNotes(e.target.value)}
+                                    placeholder="หมายเหตุสำหรับลิงก์หลัก เช่น 'ไฟล์นำเสนอ', 'ผลงานหลัก'"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
                                   />
                                   
@@ -1520,9 +1530,10 @@ export function WorkshopFeedPage() {
                                         const currentLinks = draftLinks[task.id] || []
                                         setDraftLinks(prev => ({ 
                                           ...prev, 
-                                          [task.id]: [...currentLinks, { url: submissionUrl.trim(), note: '' }] 
+                                          [task.id]: [...currentLinks, { url: submissionUrl.trim(), note: submissionNotes.trim() }] 
                                         }))
                                         setSubmissionUrl('')
+                                        setSubmissionNotes('')
                                       }
                                     }}
                                     className="w-full py-2 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all flex items-center justify-center gap-2 text-sm font-medium"
@@ -1534,40 +1545,20 @@ export function WorkshopFeedPage() {
                                   </button>
                                 </div>
 
-                                {/* Helper text with specific examples */}
-                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
-                                  <div className="flex items-start gap-2">
-                                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                {/* Compact Helper text */}
+                                <div className="bg-blue-50 rounded-lg p-2 border border-blue-200">
+                                  <div className="text-xs text-blue-800">
+                                    <p className="font-semibold mb-1 flex items-center gap-1">
                                       <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                       </svg>
-                                    </div>
-                                    <div className="text-xs text-blue-800">
-                                      <p className="font-semibold mb-1">💡 ตัวอย่างลิงก์ที่น่าส่ง:</p>
-                                      <div className="grid grid-cols-2 gap-2 text-xs">
-                                        <div>
-                                          <p className="font-medium text-blue-900 mb-0.5">📄 เอกสาร:</p>
-                                          <p className="text-blue-700">• Google Docs/Slides<br/>• Canva Design<br/>• Figma Project</p>
-                                        </div>
-                                        <div>
-                                          <p className="font-medium text-blue-900 mb-0.5">🔗 อื่นๆ:</p>
-                                          <p className="text-blue-700">• GitHub Repo<br/>• ChatGPT Share<br/>• YouTube Video</p>
-                                        </div>
-                                      </div>
-                                      <div className="mt-2 p-2 bg-white/60 rounded text-xs">
-                                        <strong>เคล็ดลับ:</strong> ใส่หมายเหตุแต่ละลิงก์ เพื่อให้ผู้ตรวจเข้าใจงานของคุณง่ายขึ้น
-                                      </div>
+                                      ตัวอย่าง:
+                                    </p>
+                                    <div className="text-xs text-blue-700">
+                                      <strong>📄 เอกสาร:</strong> Google Docs/Slides, Canva, Figma &nbsp;|&nbsp; <strong>🔗 อื่นๆ:</strong> GitHub, ChatGPT Share, YouTube
                                     </div>
                                   </div>
                                 </div>
-                                
-                                <textarea
-                                  value={submissionNotes}
-                                  onChange={(e) => setSubmissionNotes(e.target.value)}
-                                  rows={2}
-                                  placeholder="หมายเหตุ..."
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm resize-none"
-                                />
                                 
                                 <div className="flex gap-2">
                                   <button
