@@ -81,9 +81,10 @@ export function AdminDashboard() {
     if (!loading && tasks.length >= 0) {
       fetchSessions()
     }
-  }, [loading, tasks])
+  }, [loading, tasks, tasks?.length]) // Added tasks.length as dependency
 
   const fetchSessions = async () => {
+    console.log('🔄 fetchSessions called, tasks:', tasks?.length)
     try {
       const { data: sessionsData } = await supabase
         .from('sessions')
@@ -161,6 +162,7 @@ export function AdminDashboard() {
                 .in('task_id', allTaskIds)
               
               actualSubmissions = submissionsCount || 0
+              console.log(`📊 Session ${session.title}: ${actualSubmissions} submissions from ${allTaskIds.length} tasks`)
             }
             
             // Calculate completion based on all tasks in session
