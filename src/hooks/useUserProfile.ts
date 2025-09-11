@@ -61,13 +61,27 @@ export function useUserProfile(authUser: User | null) {
       
       const profileData = await profilePromise
       
+      // Generate avatar_seed if not exists (for better avatar consistency)
+      let finalProfile = profileData
+      if (profileData && !profileData.avatar_seed) {
+        try {
+          const generatedSeed = await userService.generateAvatarSeedIfNeeded(userId)
+          if (generatedSeed) {
+            finalProfile = { ...profileData, avatar_seed: generatedSeed }
+          }
+        } catch (seedError) {
+          console.warn('Could not generate avatar seed:', seedError)
+          // Continue with profile without seed
+        }
+      }
+      
       // Update cache with result
       profileCache.set(userId, {
-        data: profileData,
+        data: finalProfile,
         timestamp: now
       })
       
-      setProfile(profileData)
+      setProfile(finalProfile)
     } catch (err) {
       console.error('Error fetching user profile:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch profile')

@@ -65,10 +65,37 @@ export const userService = {
     faculty?: string
     department?: string
     bio?: string
+    avatar_seed?: string
     avatar_saturation?: number
     avatar_lightness?: number
   }) {
     return this.updateUserProfile(userId, profileData)
+  },
+
+  // Generate avatar seed for user if not exists
+  async generateAvatarSeedIfNeeded(userId: string) {
+    try {
+      const user = await this.getUserProfile(userId)
+      
+      // If user already has avatar_seed, don't generate new one
+      if (user.avatar_seed) {
+        return user.avatar_seed
+      }
+      
+      // Generate new avatar_seed based on user data
+      const seed = `${user.email || 'user'}_${Date.now()}`
+      
+      // Update user with new avatar_seed
+      await this.updateUserProfile(userId, {
+        avatar_seed: seed
+      })
+      
+      console.log('✅ Generated avatar_seed for user:', userId)
+      return seed
+    } catch (error) {
+      console.error('Error generating avatar seed:', error)
+      return null
+    }
   },
 
   // Check if user is admin
