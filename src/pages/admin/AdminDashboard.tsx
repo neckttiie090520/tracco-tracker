@@ -28,9 +28,8 @@ export function AdminDashboard() {
   const [currentGroupPage, setCurrentGroupPage] = useState(1)
   const [tasksPerPage] = useState(24) // Show more tasks per page for compact overview
   
-  // Separate view modes for Individual and Group tasks
-  const [individualViewMode, setIndividualViewMode] = useState<'card' | 'table'>('card')
-  const [groupViewMode, setGroupViewMode] = useState<'card' | 'table'>('card')
+  // Shared view mode for both Individual and Group tasks
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('table')
 
   // Calculate task statistics
   const taskStats = React.useMemo(() => {
@@ -411,6 +410,39 @@ export function AdminDashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* Global View Controls */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-800">Task View Controls</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">View Mode:</span>
+                    <button
+                      onClick={() => setViewMode('card')}
+                      className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                        viewMode === 'card' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Cards
+                    </button>
+                    <button
+                      onClick={() => setViewMode('table')}
+                      className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                        viewMode === 'table' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Table
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  This view mode applies to both Individual Tasks and Group Tasks sections below
+                </p>
+              </div>
               
               {/* Session Statistics Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -520,35 +552,6 @@ export function AdminDashboard() {
                         />
                       </div>
                       
-                      {/* View Mode Toggle for Individual Tasks */}
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-700">View:</span>
-                          <button
-                            onClick={() => setIndividualViewMode('card')}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                              individualViewMode === 'card' 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            Cards
-                          </button>
-                          <button
-                            onClick={() => setIndividualViewMode('table')}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                              individualViewMode === 'table' 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            Table
-                          </button>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {individualTasks.length} total tasks
-                        </div>
-                      </div>
 
                       {/* Task Display */}
                       {(() => {
@@ -558,7 +561,7 @@ export function AdminDashboard() {
                         const paginatedTasks = individualTasks.slice(startIndex, endIndex)
                         const totalPages = Math.ceil(individualTasks.length / tasksPerPage)
 
-                        if (individualViewMode === 'table') {
+                        if (viewMode === 'table') {
                           return (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
@@ -759,35 +762,6 @@ export function AdminDashboard() {
                         />
                       </div>
                       
-                      {/* View Mode Toggle for Group Tasks */}
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-700">View:</span>
-                          <button
-                            onClick={() => setGroupViewMode('card')}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                              groupViewMode === 'card' 
-                                ? 'bg-green-600 text-white' 
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            Cards
-                          </button>
-                          <button
-                            onClick={() => setGroupViewMode('table')}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                              groupViewMode === 'table' 
-                                ? 'bg-green-600 text-white' 
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            Table
-                          </button>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {groupTasks.length} total tasks
-                        </div>
-                      </div>
 
                       {/* Task Display */}
                       {(() => {
@@ -797,7 +771,7 @@ export function AdminDashboard() {
                         const paginatedTasks = groupTasks.slice(startIndex, endIndex)
                         const totalPages = Math.ceil(groupTasks.length / tasksPerPage)
 
-                        if (groupViewMode === 'table') {
+                        if (viewMode === 'table') {
                           return (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
