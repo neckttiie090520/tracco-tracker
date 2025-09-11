@@ -207,38 +207,120 @@ export function ImprovedTaskSubmissionModal({
               </p>
             </div>
 
-            {/* URL Field */}
+            {/* URL Field - Enhanced for multiple links */}
             <div className="group">
-              <label htmlFor="submission_url" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                <span className="text-xl mr-2">🔗</span>
-                <span>URL ส่งงาน</span>
-                <span className="ml-2 text-xs text-gray-500 font-normal">(ไม่บังคับ)</span>
+              <label htmlFor="submission_url" className="flex items-center justify-between text-sm font-semibold text-gray-700 mb-3">
+                <div className="flex items-center">
+                  <span className="text-xl mr-2">🔗</span>
+                  <span>URL ส่งงาน</span>
+                  <span className="ml-2 text-xs text-gray-500 font-normal">(สามารถส่งได้หลายลิงก์)</span>
+                </div>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                  รองรับหลาย URL
+                </span>
               </label>
-              <div className="relative">
-                <input
-                  type="url"
-                  id="submission_url"
-                  value={formData.submission_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, submission_url: e.target.value }))}
-                  className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  placeholder="https://www.canva.com/design/... หรือ https://docs.google.com/..."
-                  disabled={uploading}
-                />
-                {formData.submission_url && (
-                  <div className="absolute right-3 top-3">
-                    <StatusBadge status="completed" size="sm" showIcon={false} />
+              
+              {/* Primary URL Input */}
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="url"
+                    id="submission_url"
+                    value={formData.submission_url}
+                    onChange={(e) => setFormData(prev => ({ ...prev, submission_url: e.target.value }))}
+                    className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
+                    disabled={uploading}
+                  />
+                  {formData.submission_url && (
+                    <div className="absolute right-3 top-3">
+                      <StatusBadge status="completed" size="sm" showIcon={false} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional URLs */}
+                {(formData.additionalUrls || []).map((url: string, index: number) => (
+                  <div key={index} className="flex items-center gap-2 animate-slideIn">
+                    <input
+                      type="url"
+                      value={url}
+                      onChange={(e) => {
+                        const newUrls = [...(formData.additionalUrls || [])]
+                        newUrls[index] = e.target.value
+                        setFormData(prev => ({ ...prev, additionalUrls: newUrls }))
+                      }}
+                      className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      placeholder={`ลิงก์เพิ่มเติม ${index + 2} (ไม่บังคับ)`}
+                      disabled={uploading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newUrls = (formData.additionalUrls || []).filter((_: any, i: number) => i !== index)
+                        setFormData(prev => ({ ...prev, additionalUrls: newUrls }))
+                      }}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="ลบลิงก์นี้"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
-                )}
+                ))}
+
+                {/* Add More Links Button - Always visible */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentUrls = formData.additionalUrls || []
+                    setFormData(prev => ({ ...prev, additionalUrls: [...currentUrls, ''] }))
+                  }}
+                  className="w-full py-3 border-2 border-dashed border-blue-300 rounded-xl text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all flex items-center justify-center gap-2 font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  เพิ่มลิงก์อื่นๆ (Google Drive, Canva, GitHub, etc.)
+                </button>
+
+                {/* Helper Text */}
+                <div className="bg-blue-50 rounded-lg p-3 flex items-start gap-2">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="text-xs text-blue-700">
+                    <p className="font-semibold mb-1">💡 คุณสามารถส่งลิงก์ได้หลายลิงก์</p>
+                    <p>เหมาะสำหรับงานที่มีหลายส่วน เช่น:</p>
+                    <ul className="mt-1 space-y-0.5 ml-3">
+                      <li>• Presentation + Source Code</li>
+                      <li>• Design File + Documentation</li>
+                      <li>• Main Project + Supporting Materials</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               
-              {/* URL Preview */}
-              {formData.submission_url && formData.submission_url.startsWith('http') && (
+              {/* URL Preview - Updated to show all URLs */}
+              {(formData.submission_url || (formData.additionalUrls && formData.additionalUrls.length > 0)) && (
                 <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border-2 border-orange-200">
                   <p className="text-sm text-orange-700 mb-3 font-semibold flex items-center">
                     <span className="text-lg mr-2">👀</span>
-                    ตัวอย่างงานที่จะส่ง
+                    ตัวอย่างลิงก์ที่จะส่ง ({1 + (formData.additionalUrls?.filter((u: string) => u).length || 0)} ลิงก์)
                   </p>
-                  <UrlSubmissionDisplay url={formData.submission_url} isSubmitted={false} />
+                  <div className="space-y-2">
+                    {formData.submission_url && formData.submission_url.startsWith('http') && (
+                      <div className="p-2 bg-white rounded-lg border border-orange-200">
+                        <UrlSubmissionDisplay url={formData.submission_url} isSubmitted={false} />
+                      </div>
+                    )}
+                    {(formData.additionalUrls || []).filter((u: string) => u && u.startsWith('http')).map((url: string, i: number) => (
+                      <div key={i} className="p-2 bg-white rounded-lg border border-orange-200">
+                        <UrlSubmissionDisplay url={url} isSubmitted={false} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -296,7 +378,7 @@ export function ImprovedTaskSubmissionModal({
             </div>
 
             {/* Submission Summary */}
-            {(formData.notes.trim() || formData.submission_url.trim() || formData.file) && (
+            {(formData.notes.trim() || formData.submission_url.trim() || (formData.additionalUrls && formData.additionalUrls.some((u: string) => u.trim())) || formData.file) && (
               <div className="bg-blue-50 rounded-xl p-4 space-y-2">
                 <p className="font-semibold text-blue-900 flex items-center">
                   <span className="text-lg mr-2">📋</span>
@@ -308,10 +390,15 @@ export function ImprovedTaskSubmissionModal({
                     <span>มีหมายเหตุแนบ</span>
                   </p>
                 )}
-                {formData.submission_url.trim() && (
+                {(formData.submission_url.trim() || (formData.additionalUrls && formData.additionalUrls.some((u: string) => u.trim()))) && (
                   <p className="text-sm text-blue-700 flex items-start">
                     <span className="mr-2">•</span>
-                    <span>มี URL งาน</span>
+                    <span>
+                      มี URL งาน ({
+                        (formData.submission_url.trim() ? 1 : 0) + 
+                        (formData.additionalUrls?.filter((u: string) => u.trim()).length || 0)
+                      } ลิงก์)
+                    </span>
                   </p>
                 )}
                 {formData.file && (
