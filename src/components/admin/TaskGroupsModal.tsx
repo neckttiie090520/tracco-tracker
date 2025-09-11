@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Settings } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 import { groupService } from '../../services/groups'
+import { useAuth } from '../../hooks/useAuth'
 
 interface TaskGroupsModalProps {
   task: any
@@ -10,7 +10,7 @@ interface TaskGroupsModalProps {
 }
 
 export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const [groups, setGroups] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -19,6 +19,9 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [addingForGroup, setAddingForGroup] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [newGroupName, setNewGroupName] = useState('')
+  const [creating, setCreating] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -84,6 +87,47 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
     }
   }
 
+  const deleteGroup = async (groupId: string, groupName: string) => {
+    if (!confirm(`ยืนยันการลบกลุ่ม "${groupName}"? การกระทำนี้ไม่สามารถยกเลิกได้`)) {
+      return
+    }
+    
+    try {
+      await groupService.deleteGroup(groupId)
+      // Refresh data to update UI
+      await fetchData()
+    } catch (e) {
+      console.error('Failed to delete group', e)
+      alert('Failed to delete group')
+    }
+  }
+
+  const createGroup = async () => {
+    if (!newGroupName.trim()) {
+      alert('กรุณาใส่ชื่อกลุ่ม')
+      return
+    }
+    
+    if (!user?.id) {
+      alert('ไม่พบข้อมูลผู้ใช้')
+      return
+    }
+    
+    try {
+      setCreating(true)
+      await groupService.createGroup(task.id, newGroupName.trim(), user.id)
+      setNewGroupName('')
+      setShowCreateForm(false)
+      // Refresh data to update UI
+      await fetchData()
+    } catch (e) {
+      console.error('Failed to create group', e)
+      alert('Failed to create group')
+    } finally {
+      setCreating(false)
+    }
+  }
+
   if (!task) return null
 
   const modal = (
@@ -94,10 +138,51 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
             <h2 className="text-lg font-semibold">Manage Groups for: {task.title}</h2>
             <p className="text-sm text-gray-600">Submission mode: group</p>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+            >
+              + New Group
+            </button>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+          </div>
         </div>
 
         <div className="p-4">
+          {/* Create Group Form */}
+          {showCreateForm && (
+            <div className="mb-4 p-4 border rounded-lg bg-blue-50">
+              <h3 className="font-medium mb-3">Create New Group</h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder="Group name"
+                  className="flex-1 border px-3 py-2 rounded"
+                  onKeyDown={(e) => e.key === 'Enter' && createGroup()}
+                />
+                <button
+                  onClick={createGroup}
+                  disabled={creating || !newGroupName.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {creating ? 'Creating...' : 'Create'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCreateForm(false)
+                    setNewGroupName('')
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {loading ? (
             <div className="flex items-center gap-2 text-gray-600">
               <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin inline-block" />
@@ -119,11 +204,11 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
-                        className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                        onClick={() => navigate(`/group-settings/${g.id}`)}
-                        title="การตั้งค่ากลุ่ม"
+                        className="p-2.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        onClick={() => deleteGroup(g.id, g.name)}
+                        title="ลบกลุ่ม"
                       >
-                        <Settings className="h-5 w-5" />
+                        <Trash2 className="h-5 w-5" />
                       </button>
                       <button className="text-sm text-blue-600 hover:text-blue-800 px-3 py-1 rounded border border-blue-200 hover:border-blue-300" onClick={() => setExpandedGroup(expandedGroup === g.id ? null : g.id)}>
                         {expandedGroup === g.id ? 'Hide' : 'Manage'}
