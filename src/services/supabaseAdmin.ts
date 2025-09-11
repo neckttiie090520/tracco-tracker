@@ -481,10 +481,10 @@ export const adminOperations = {
       const userIds = [...new Set(data.map(s => s.user_id))]
       const groupIds = [...new Set(data.filter(s => s.group_id).map(s => s.group_id))]
 
-      // Fetch users
+      // Fetch users with complete avatar data
       const { data: users } = await adminClient
         .from('users')
-        .select('id, name, email')
+        .select('id, name, email, avatar_seed, avatar_saturation, avatar_lightness, faculty, department')
         .in('id', userIds)
 
       console.log('Admin users fetched:', users)
@@ -510,7 +510,7 @@ export const adminOperations = {
             user_id,
             role,
             joined_at,
-            user:users(id, name, email)
+            user:users(id, name, email, avatar_seed, avatar_saturation, avatar_lightness, faculty, department)
           `)
           .in('task_group_id', groupIds)
 
