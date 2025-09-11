@@ -81,18 +81,18 @@ const GroupSettingsPage = createLazyComponent(
 function App() {
   return (
     <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
-      <QueryProvider>
-        <AuthProvider>
-          <RealtimeProvider>
-          <BrowserRouter future={{ v7_relativeSplatPath: true }}>
-            <Suspense fallback={
-              <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                  <p className="text-gray-600">กำลังโหลด...</p>
+      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
+        <QueryProvider>
+          <AuthProvider>
+            <RealtimeProvider>
+              <Suspense fallback={
+                <div className="flex items-center justify-center min-h-screen">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                    <p className="text-gray-600">กำลังโหลด...</p>
+                  </div>
                 </div>
-              </div>
-            }>
+              }>
               <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
@@ -241,10 +241,10 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
-          </RealtimeProvider>
-        </AuthProvider>
-      </QueryProvider>
+            </RealtimeProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   )
 }
