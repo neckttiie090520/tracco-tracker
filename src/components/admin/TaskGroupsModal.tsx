@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Trash2 } from 'lucide-react'
 import { groupService } from '../../services/groups'
 import { useAuth } from '../../hooks/useAuth'
+import { useAlert } from '../../contexts/AlertContext'
 
 interface TaskGroupsModalProps {
   task: any
@@ -11,6 +12,7 @@ interface TaskGroupsModalProps {
 
 export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
   const { user } = useAuth()
+  const { showAlert, showError, showConfirm } = useAlert()
   const [groups, setGroups] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -68,7 +70,7 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
       setMembers(prev => ({ ...prev, [groupId]: mem || [] }))
     } catch (e) {
       console.error('Failed to add member', e)
-      alert('Failed to add member')
+      showError('เกิดข้อผิดพลาดในการเพิ่มสมาชิก')
     } finally {
       setAddingForGroup(null)
       setSearchQuery('')
@@ -83,12 +85,13 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
       setMembers(prev => ({ ...prev, [groupId]: mem || [] }))
     } catch (e) {
       console.error('Failed to remove member', e)
-      alert('Failed to remove member')
+      showError('เกิดข้อผิดพลาดในการลบสมาชิก')
     }
   }
 
   const deleteGroup = async (groupId: string, groupName: string) => {
-    if (!confirm(`ยืนยันการลบกลุ่ม "${groupName}"? การกระทำนี้ไม่สามารถยกเลิกได้`)) {
+    const confirmed = await showConfirm(`ยืนยันการลบกลุ่ม "${groupName}"? การกระทำนี้ไม่สามารถยกเลิกได้`)
+    if (!confirmed) {
       return
     }
     
@@ -98,18 +101,18 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
       await fetchData()
     } catch (e) {
       console.error('Failed to delete group', e)
-      alert('Failed to delete group')
+      showError('เกิดข้อผิดพลาดในการลบกลุ่ม')
     }
   }
 
   const createGroup = async () => {
     if (!newGroupName.trim()) {
-      alert('กรุณาใส่ชื่อกลุ่ม')
+      showError('กรุณาใส่ชื่อกลุ่ม')
       return
     }
     
     if (!user?.id) {
-      alert('ไม่พบข้อมูลผู้ใช้')
+      showError('ไม่พบข้อมูลผู้ใช้')
       return
     }
     
@@ -122,7 +125,7 @@ export function TaskGroupsModal({ task, onClose }: TaskGroupsModalProps) {
       await fetchData()
     } catch (e) {
       console.error('Failed to create group', e)
-      alert('Failed to create group')
+      showError('เกิดข้อผิดพลาดในการสร้างกลุ่ม')
     } finally {
       setCreating(false)
     }

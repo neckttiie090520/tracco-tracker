@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { QueryProvider } from './providers/QueryProvider'
+import { AlertProvider } from './contexts/AlertContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { ErrorBoundary, LazyLoadErrorFallback } from './components/ErrorBoundary'
@@ -82,7 +83,8 @@ function App() {
     <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
       <QueryProvider>
         <AuthProvider>
-          <RealtimeProvider>
+          <AlertProvider>
+            <RealtimeProvider>
           <BrowserRouter future={{ v7_relativeSplatPath: true }}>
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-screen">
@@ -229,7 +231,8 @@ function App() {
               </Routes>
             </Suspense>
           </BrowserRouter>
-          </RealtimeProvider>
+            </RealtimeProvider>
+          </AlertProvider>
         </AuthProvider>
       </QueryProvider>
     </ErrorBoundary>

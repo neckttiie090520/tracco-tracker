@@ -39,8 +39,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   const [refreshingList, setRefreshingList] = useState(false)
 
   const eligibleNames = useMemo(() => {
-    if (!submissions) return [] as string[]
-    const list = submissions
+    if (!filtered) return [] as string[]
+    const list = filtered
       .filter((s: any) => s?.status && s.status !== 'draft')
       .map((s: any) => {
         // For group submissions, use group name instead of user name
@@ -50,20 +50,39 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         return s?.user?.name || s?.user?.email || 'Unknown'
       })
     return Array.from(new Set(list))
-  }, [submissions])
+  }, [filtered])
 
   const quickStats = useMemo(() => {
-    const counts = { total: submissions?.length || 0, submitted: 0, reviewed: 0, draft: 0 }
-    ;(submissions || []).forEach((s: any) => {
+    // Use all submissions for raw stats, but filter by submission mode for accurate counts
+    const relevantSubmissions = (submissions || []).filter((s: any) => {
+      if (task.submission_mode === 'group') {
+        return s.group_id // Only group submissions
+      } else {
+        return !s.group_id // Only individual submissions  
+      }
+    })
+    
+    const counts = { total: relevantSubmissions.length, submitted: 0, reviewed: 0, draft: 0 }
+    relevantSubmissions.forEach((s: any) => {
       if (s.status === 'submitted') counts.submitted += 1
       else if (s.status === 'reviewed') counts.reviewed += 1
       else counts.draft += 1
     })
     return counts
-  }, [submissions])
+  }, [submissions, task.submission_mode])
 
   const filtered = useMemo(() => {
     let list = submissions || []
+    
+    // Filter by submission mode - only show submissions that match the task's submission mode
+    if (task.submission_mode === 'group') {
+      // For group tasks, only show group submissions (submissions with group_id)
+      list = list.filter((s: any) => s.group_id)
+    } else {
+      // For individual tasks, only show individual submissions (submissions without group_id)
+      list = list.filter((s: any) => !s.group_id)
+    }
+    
     if (contentOnly) list = list.filter((s: any) => s.notes || s.submission_url || s.file_url)
     if (statusFilter !== 'all') list = list.filter((s: any) => s.status === statusFilter)
     if (search.trim()) {
@@ -82,7 +101,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
       list = [...list].sort((a: any, b: any) => new Date(b.submitted_at || 0).getTime() - new Date(a.submitted_at || 0).getTime())
     }
     return list
-  }, [submissions, search, statusFilter, sortBy, contentOnly])
+  }, [submissions, search, statusFilter, sortBy, contentOnly, task.submission_mode])
 
   const openWinnerDetail = (winnerNameOrEmail: string) => {
     if (!submissions || !winnerNameOrEmail) return

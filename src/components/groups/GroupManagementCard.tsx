@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Users, Plus, X, Edit2, Trash2, Copy, HelpCircle } from 'lucide-react'
 import { groupService } from '../../services/groups'
 import { useAuth } from '../../hooks/useAuth'
+import { useAlert } from '../../contexts/AlertContext'
 import { Avatar } from '../common/Avatar'
 
 interface GroupManagementCardProps {
@@ -13,6 +14,7 @@ interface GroupManagementCardProps {
 
 export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDeleted }: GroupManagementCardProps) {
   const { user } = useAuth()
+  const { showConfirm } = useAlert()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -140,7 +142,8 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
       ? 'คุณแน่ใจหรือไม่ที่จะออกจากกลุ่ม?' 
       : 'คุณแน่ใจหรือไม่ที่จะลบสมาชิกคนนี้?'
     
-    if (!window.confirm(confirmMessage)) return
+    const confirmed = await showConfirm(confirmMessage)
+    if (!confirmed) return
     
     try {
       setLoading(true)
@@ -171,7 +174,8 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
   const handleDeleteGroup = async () => {
     if (!group || !isOwner) return
     
-    if (!window.confirm('คุณแน่ใจหรือไม่ที่จะลบกลุ่มนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')) return
+    const confirmed = await showConfirm('คุณแน่ใจหรือไม่ที่จะลบกลุ่มนี้? การกระทำนี้ไม่สามารถย้อนกลับได้')
+    if (!confirmed) return
     
     try {
       setLoading(true)
