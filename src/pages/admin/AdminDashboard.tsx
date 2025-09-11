@@ -22,6 +22,12 @@ export function AdminDashboard() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(true)
+  
+  // Pagination state
+  const [currentIndividualPage, setCurrentIndividualPage] = useState(1)
+  const [currentGroupPage, setCurrentGroupPage] = useState(1)
+  const [tasksPerPage] = useState(5) // Show 5 tasks per page
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
 
   // Calculate task statistics
   const taskStats = React.useMemo(() => {
@@ -511,42 +517,186 @@ export function AdminDashboard() {
                         />
                       </div>
                       
-                      {/* Individual Task Cards */}
-                      <div className="grid gap-3">
-                        {individualTasks.map(task => {
-                          
-                          // Use the total submissions count directly since filtering seems to exclude all
-                          // For individual tasks, we want all submissions regardless of status
-                          const taskSubmissions = task.submissions?.[0]?.count || 0
-                          const taskProgress = selectedSession.total_participants > 0 
-                            ? Math.min(100, Math.round((taskSubmissions / selectedSession.total_participants) * 100))
-                            : 0
-                          const workshop = workshops.find(w => w.id === task.workshop_id)
-                          
+                      {/* View Mode Toggle */}
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-700">View:</span>
+                          <button
+                            onClick={() => setViewMode('card')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                              viewMode === 'card' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Cards
+                          </button>
+                          <button
+                            onClick={() => setViewMode('table')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                              viewMode === 'table' 
+                                ? 'bg-blue-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Table
+                          </button>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {individualTasks.length} total tasks
+                        </div>
+                      </div>
+
+                      {/* Task Display */}
+                      {(() => {
+                        // Calculate pagination
+                        const startIndex = (currentIndividualPage - 1) * tasksPerPage
+                        const endIndex = startIndex + tasksPerPage
+                        const paginatedTasks = individualTasks.slice(startIndex, endIndex)
+                        const totalPages = Math.ceil(individualTasks.length / tasksPerPage)
+
+                        if (viewMode === 'table') {
                           return (
-                            <div key={task.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                              <div className="flex justify-between items-start mb-3">
-                                <div className="flex-1">
-                                  <h4 className="text-sm font-semibold text-gray-900">{task.title}</h4>
-                                  <p className="text-xs text-gray-600 mt-1">{workshop?.title}</p>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-sm font-medium text-blue-600">
-                                    {taskSubmissions}/{selectedSession.total_participants}
-                                  </span>
-                                  <div className="text-xs text-gray-500">{taskProgress}%</div>
-                                </div>
-                              </div>
-                              <div className="w-full bg-blue-200 rounded-full h-2">
-                                <div
-                                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                                  style={{ width: `${taskProgress}%` }}
-                                />
-                              </div>
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Task
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Workshop
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Progress
+                                    </th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Submissions
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {paginatedTasks.map(task => {
+                                    const taskSubmissions = task.submissions?.[0]?.count || 0
+                                    const taskProgress = selectedSession.total_participants > 0 
+                                      ? Math.min(100, Math.round((taskSubmissions / selectedSession.total_participants) * 100))
+                                      : 0
+                                    const workshop = workshops.find(w => w.id === task.workshop_id)
+                                    
+                                    return (
+                                      <tr key={task.id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-4 whitespace-nowrap">
+                                          <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                                        </td>
+                                        <td className="px-4 py-4 whitespace-nowrap">
+                                          <div className="text-sm text-gray-600">{workshop?.title}</div>
+                                        </td>
+                                        <td className="px-4 py-4 whitespace-nowrap">
+                                          <div className="flex items-center">
+                                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-3">
+                                              <div
+                                                className="bg-blue-600 h-2 rounded-full"
+                                                style={{ width: `${taskProgress}%` }}
+                                              />
+                                            </div>
+                                            <span className="text-sm text-gray-900">{taskProgress}%</span>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                          <span className="text-blue-600">
+                                            {taskSubmissions}/{selectedSession.total_participants}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
                           )
-                        })}
-                      </div>
+                        } else {
+                          return (
+                            <div className="grid gap-3">
+                              {paginatedTasks.map(task => {
+                                const taskSubmissions = task.submissions?.[0]?.count || 0
+                                const taskProgress = selectedSession.total_participants > 0 
+                                  ? Math.min(100, Math.round((taskSubmissions / selectedSession.total_participants) * 100))
+                                  : 0
+                                const workshop = workshops.find(w => w.id === task.workshop_id)
+                                
+                                return (
+                                  <div key={task.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                                    <div className="flex justify-between items-start mb-3">
+                                      <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-gray-900">{task.title}</h4>
+                                        <p className="text-xs text-gray-600 mt-1">{workshop?.title}</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className="text-sm font-medium text-blue-600">
+                                          {taskSubmissions}/{selectedSession.total_participants}
+                                        </span>
+                                        <div className="text-xs text-gray-500">{taskProgress}%</div>
+                                      </div>
+                                    </div>
+                                    <div className="w-full bg-blue-200 rounded-full h-2">
+                                      <div
+                                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                                        style={{ width: `${taskProgress}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )
+                        }
+                      })()}
+
+                      {/* Pagination */}
+                      {(() => {
+                        const totalPages = Math.ceil(individualTasks.length / tasksPerPage)
+                        if (totalPages <= 1) return null
+                        
+                        return (
+                          <div className="flex items-center justify-between mt-6">
+                            <div className="text-sm text-gray-700">
+                              Showing {Math.min((currentIndividualPage - 1) * tasksPerPage + 1, individualTasks.length)} to {Math.min(currentIndividualPage * tasksPerPage, individualTasks.length)} of {individualTasks.length} tasks
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setCurrentIndividualPage(Math.max(1, currentIndividualPage - 1))}
+                                disabled={currentIndividualPage === 1}
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Previous
+                              </button>
+                              
+                              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button
+                                  key={page}
+                                  onClick={() => setCurrentIndividualPage(page)}
+                                  className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                    currentIndividualPage === page
+                                      ? 'bg-blue-600 text-white'
+                                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              ))}
+                              
+                              <button
+                                onClick={() => setCurrentIndividualPage(Math.min(totalPages, currentIndividualPage + 1))}
+                                disabled={currentIndividualPage === totalPages}
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Next
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })()}
                     </div>
                   )
                 })()}
@@ -600,40 +750,184 @@ export function AdminDashboard() {
                         />
                       </div>
                       
-                      {/* Group Task Cards */}
-                      <div className="grid gap-3">
-                        {groupTasks.map(task => {
-                          
-                          // For group tasks, count total submissions (assuming each represents a group submission)
-                          const uniqueGroupSubmissions = task.submissions?.[0]?.count || 0
-                          const totalTaskGroups = task.task_groups?.length || 0
-                          const taskProgress = totalTaskGroups > 0 ? Math.min(100, Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100)) : 0
-                          const workshop = workshops.find(w => w.id === task.workshop_id)
-                          
+                      {/* View Mode Toggle */}
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-700">View:</span>
+                          <button
+                            onClick={() => setViewMode('card')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                              viewMode === 'card' 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Cards
+                          </button>
+                          <button
+                            onClick={() => setViewMode('table')}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                              viewMode === 'table' 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            Table
+                          </button>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {groupTasks.length} total tasks
+                        </div>
+                      </div>
+
+                      {/* Task Display */}
+                      {(() => {
+                        // Calculate pagination
+                        const startIndex = (currentGroupPage - 1) * tasksPerPage
+                        const endIndex = startIndex + tasksPerPage
+                        const paginatedTasks = groupTasks.slice(startIndex, endIndex)
+                        const totalPages = Math.ceil(groupTasks.length / tasksPerPage)
+
+                        if (viewMode === 'table') {
                           return (
-                            <div key={task.id} className="bg-green-50 border border-green-200 rounded-lg p-4">
-                              <div className="flex justify-between items-start mb-3">
-                                <div className="flex-1">
-                                  <h4 className="text-sm font-semibold text-gray-900">{task.title}</h4>
-                                  <p className="text-xs text-gray-600 mt-1">{workshop?.title}</p>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-sm font-medium text-green-600">
-                                    {uniqueGroupSubmissions}/{totalTaskGroups}
-                                  </span>
-                                  <div className="text-xs text-gray-500">{taskProgress}%</div>
-                                </div>
-                              </div>
-                              <div className="w-full bg-green-200 rounded-full h-2">
-                                <div
-                                  className="bg-green-600 h-2 rounded-full transition-all duration-500"
-                                  style={{ width: `${taskProgress}%` }}
-                                />
-                              </div>
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Task
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Workshop
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Progress
+                                    </th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      Groups
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {paginatedTasks.map(task => {
+                                    const uniqueGroupSubmissions = task.submissions?.[0]?.count || 0
+                                    const totalTaskGroups = task.task_groups?.length || 0
+                                    const taskProgress = totalTaskGroups > 0 ? Math.min(100, Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100)) : 0
+                                    const workshop = workshops.find(w => w.id === task.workshop_id)
+                                    
+                                    return (
+                                      <tr key={task.id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-4 whitespace-nowrap">
+                                          <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                                        </td>
+                                        <td className="px-4 py-4 whitespace-nowrap">
+                                          <div className="text-sm text-gray-600">{workshop?.title}</div>
+                                        </td>
+                                        <td className="px-4 py-4 whitespace-nowrap">
+                                          <div className="flex items-center">
+                                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-3">
+                                              <div
+                                                className="bg-green-600 h-2 rounded-full"
+                                                style={{ width: `${taskProgress}%` }}
+                                              />
+                                            </div>
+                                            <span className="text-sm text-gray-900">{taskProgress}%</span>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                          <span className="text-green-600">
+                                            {uniqueGroupSubmissions}/{totalTaskGroups}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
                           )
-                        })}
-                      </div>
+                        } else {
+                          return (
+                            <div className="grid gap-3">
+                              {paginatedTasks.map(task => {
+                                const uniqueGroupSubmissions = task.submissions?.[0]?.count || 0
+                                const totalTaskGroups = task.task_groups?.length || 0
+                                const taskProgress = totalTaskGroups > 0 ? Math.min(100, Math.round((uniqueGroupSubmissions / totalTaskGroups) * 100)) : 0
+                                const workshop = workshops.find(w => w.id === task.workshop_id)
+                                
+                                return (
+                                  <div key={task.id} className="bg-green-50 border border-green-200 rounded-lg p-4 hover:bg-green-100 transition-colors">
+                                    <div className="flex justify-between items-start mb-3">
+                                      <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-gray-900">{task.title}</h4>
+                                        <p className="text-xs text-gray-600 mt-1">{workshop?.title}</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className="text-sm font-medium text-green-600">
+                                          {uniqueGroupSubmissions}/{totalTaskGroups}
+                                        </span>
+                                        <div className="text-xs text-gray-500">{taskProgress}%</div>
+                                      </div>
+                                    </div>
+                                    <div className="w-full bg-green-200 rounded-full h-2">
+                                      <div
+                                        className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                                        style={{ width: `${taskProgress}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )
+                        }
+                      })()}
+
+                      {/* Pagination */}
+                      {(() => {
+                        const totalPages = Math.ceil(groupTasks.length / tasksPerPage)
+                        if (totalPages <= 1) return null
+                        
+                        return (
+                          <div className="flex items-center justify-between mt-6">
+                            <div className="text-sm text-gray-700">
+                              Showing {Math.min((currentGroupPage - 1) * tasksPerPage + 1, groupTasks.length)} to {Math.min(currentGroupPage * tasksPerPage, groupTasks.length)} of {groupTasks.length} tasks
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setCurrentGroupPage(Math.max(1, currentGroupPage - 1))}
+                                disabled={currentGroupPage === 1}
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Previous
+                              </button>
+                              
+                              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button
+                                  key={page}
+                                  onClick={() => setCurrentGroupPage(page)}
+                                  className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                    currentGroupPage === page
+                                      ? 'bg-green-600 text-white'
+                                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {page}
+                                </button>
+                              ))}
+                              
+                              <button
+                                onClick={() => setCurrentGroupPage(Math.min(totalPages, currentGroupPage + 1))}
+                                disabled={currentGroupPage === totalPages}
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Next
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })()}
                     </div>
                   )
                 })()}
