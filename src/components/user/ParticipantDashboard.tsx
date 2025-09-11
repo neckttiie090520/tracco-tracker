@@ -79,10 +79,27 @@ function RegisteredSessionsSection() {
     return (
       <div className="mb-8">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="h-7 bg-gray-200 rounded-lg w-56 mb-6"></div>
+          <div className="grid gap-6 md:grid-cols-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-gray-200 rounded-lg h-48"></div>
+              <div key={i} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                    <div className="flex-1">
+                      <div className="h-5 bg-gray-200 rounded-lg w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded-lg w-1/2"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+                      <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                    </div>
+                    <div className="h-10 bg-gray-200 rounded-lg"></div>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -99,13 +116,17 @@ function RegisteredSessionsSection() {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-white rounded-2xl shadow-lg p-6"
+      className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
     >
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-        <span className="mr-3">🎯</span>
-        งานสัมมนาที่เข้าร่วม
-      </h2>
-      <p className="text-gray-600 mb-6">งานสัมมนาที่คุณลงทะเบียนแล้ว</p>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900">งานสัมมนาที่เข้าร่วม</h2>
+      </div>
+      <p className="text-gray-600 mb-8">งานสัมมนาที่คุณลงทะเบียนไว้แล้ว ({registeredSessions.length} งาน)</p>
 
       <div className="grid gap-6 md:grid-cols-2">
         {registeredSessions.map((registration, index) => {
@@ -115,6 +136,10 @@ function RegisteredSessionsSection() {
           const startDate = new Date(session.start_date)
           const endDate = new Date(session.end_date)
           const registeredDate = new Date(registration.registered_at)
+          const today = new Date()
+          const isUpcoming = startDate > today
+          const isOngoing = startDate <= today && endDate >= today
+          const isPast = endDate < today
 
           return (
             <motion.div
@@ -122,60 +147,115 @@ function RegisteredSessionsSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition-colors p-6"
+              className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-300 p-6 relative overflow-hidden"
             >
+              {/* Status indicator */}
+              <div className="absolute top-4 right-4">
+                {isOngoing && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    กำลังดำเนินการ
+                  </span>
+                )}
+                {isUpcoming && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    เร็วๆ นี้
+                  </span>
+                )}
+                {isPast && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    เสร็จสิ้น
+                  </span>
+                )}
+              </div>
+
               {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">✅</span>
+              <div className="mb-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-lg leading-tight mb-2 pr-20">
                       {session.title}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {startDate.toLocaleDateString('th-TH', {
-                        day: 'numeric',
-                        month: 'short'
-                      })} - {endDate.toLocaleDateString('th-TH', {
-                        day: 'numeric',
-                        month: 'short'
-                      })}
-                    </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-xs font-medium whitespace-nowrap">
-                  ✅ ลงทะเบียน
-                </span>
               </div>
 
-              {/* Content */}
-              <div>
-                {/* Meta info */}
-                <div className="flex flex-wrap gap-3 mb-4">
-                  <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-lg font-medium">
-                    👥 {session.max_participants} คน
-                  </span>
-                  <span className="inline-flex items-center px-3 py-1.5 bg-purple-100 text-purple-700 text-xs rounded-lg font-medium">
-                    📅 {registeredDate.toLocaleDateString('th-TH', {
-                      day: 'numeric',
-                      month: 'short'
-                    })}
-                  </span>
+              {/* Date and Time Information */}
+              <div className="space-y-3 mb-6">
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">วันที่จัด</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {startDate.toLocaleDateString('th-TH', {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </p>
+                      {startDate.getTime() !== endDate.getTime() && (
+                        <p className="text-xs text-gray-600">
+                          ถึง {endDate.toLocaleDateString('th-TH', {
+                            day: 'numeric',
+                            month: 'short'
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">ลงทะเบียนเมื่อ</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {registeredDate.toLocaleDateString('th-TH', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Action Button */}
-                <button
-                  onClick={() => navigate(`/sessions/${session.id}/feed`)}
-                  className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  <span>เข้าสู่งานสัมมนา</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                {/* Workshop Info */}
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    {session.max_participants} ที่นั่ง
+                  </span>
+                </div>
               </div>
+
+              {/* Action Button */}
+              <button
+                onClick={() => navigate(`/sessions/${session.id}/feed`)}
+                className={`w-full py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ${
+                  isOngoing 
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl' 
+                    : isUpcoming 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
+                    : 'bg-gray-600 hover:bg-gray-700 text-white'
+                }`}
+              >
+                <span>
+                  {isOngoing ? 'เข้าสู่งานสัมมนา' : isUpcoming ? 'ดูรายละเอียด' : 'ดูเนื้อหา'}
+                </span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </motion.div>
           )
         })}
@@ -278,44 +358,56 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
                   className="bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 max-w-sm mx-auto"
                 >
                   {/* Header */}
-                  <div className="p-3 border-b border-gray-100">
+                  <div className="p-4 border-b border-gray-100">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">🎯</span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
                       </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900 text-sm leading-tight">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 text-sm leading-tight mb-1">
                           {session.title}
                         </h3>
                         <p className="text-xs text-gray-500">
                           {startDate.toLocaleDateString('th-TH', {
+                            weekday: 'short',
                             day: 'numeric',
-                            month: 'short'
-                          })} - {endDate.toLocaleDateString('th-TH', {
-                            day: 'numeric',
-                            month: 'short'
+                            month: 'short',
+                            year: 'numeric'
                           })}
+                          {startDate.getTime() !== endDate.getTime() && 
+                            ` - ${endDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}`
+                          }
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Content */}
-                  <div className="p-3">
-                    <p className="text-gray-700 text-sm mb-3 whitespace-pre-line leading-relaxed">
-                      {session.description?.length > 120 
-                        ? `${session.description.slice(0, 120)}...` 
-                        : session.description
-                      }
-                    </p>
+                  <div className="p-4">
+                    {session.description && (
+                      <p className="text-gray-700 text-sm mb-4 whitespace-pre-line leading-relaxed">
+                        {session.description?.length > 120 
+                          ? `${session.description.slice(0, 120)}...` 
+                          : session.description
+                        }
+                      </p>
+                    )}
 
                     {/* Meta info */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
-                        👥 {session.max_participants} คน
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="inline-flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-700 text-xs rounded-lg font-medium">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {session.max_participants} ที่นั่ง
                       </span>
-                      <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full">
-                        📝 เปิดรับสมัคร
+                      <span className="inline-flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 text-xs rounded-lg font-medium">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        เปิดรับสมัคร
                       </span>
                     </div>
 
@@ -323,7 +415,7 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
                     <button
                       onClick={() => registerForSession(session.id)}
                       disabled={isRegistering}
-                      className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                     >
                       {isRegistering ? (
                         <>
@@ -331,7 +423,12 @@ function SessionRegistrationSection({ onSessionRegistered }: SessionRegistration
                           <span>กำลังลงทะเบียน...</span>
                         </>
                       ) : (
-                        <span>ลงทะเบียนเข้าร่วม</span>
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>ลงทะเบียนเข้าร่วม</span>
+                        </>
                       )}
                     </button>
                   </div>
@@ -506,10 +603,14 @@ export function ParticipantDashboard() {
                 transition={{ duration: 0.7, delay: 0.6 }}
                 className="bg-white rounded-2xl shadow-lg p-6 mb-8"
               >
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="mr-3">⚡</span>
-                    Quick Actions
-                  </h2>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">การดำเนินการด่วน</h2>
+                  </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
@@ -521,7 +622,11 @@ export function ParticipantDashboard() {
                           <p className="text-lg font-semibold mb-1">ลงทะเบียน</p>
                           <p className="text-gray-500 text-sm">ลงทะเบียนงานสัมมนาใหม่</p>
                         </div>
-                        <span className="text-3xl group-hover:scale-110 transition-transform">🎯</span>
+                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
                       </div>
                     </button>
 
@@ -534,7 +639,11 @@ export function ParticipantDashboard() {
                           <p className="text-lg font-semibold mb-1">โปรไฟล์</p>
                           <p className="text-gray-500 text-sm">จัดการข้อมูลส่วนตัว</p>
                         </div>
-                        <span className="text-3xl group-hover:scale-110 transition-transform">🧖‍♂️</span>
+                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
                       </div>
                     </button>
                   </div>
@@ -551,10 +660,14 @@ export function ParticipantDashboard() {
               transition={{ duration: 0.7, delay: 0.7 }}
               className="bg-white rounded-lg border border-gray-200 p-4"
             >
-                <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <span className="mr-2">📋</span>
-                  งานทั้งหมด
-                </h2>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-6 h-6 bg-gray-100 rounded-md flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                  </div>
+                  <h2 className="text-lg font-medium text-gray-900">งานทั้งหมด</h2>
+                </div>
                 
                 {stats.allUserWorkshops && stats.allUserWorkshops.length > 0 ? (
                   <div className="space-y-2">
@@ -642,9 +755,13 @@ export function ParticipantDashboard() {
                       ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-gray-500">
-                    <div className="text-2xl mb-2">📝</div>
-                    <p className="text-sm">ยังไม่มีงานในระบบ</p>
+                  <div className="text-center py-8 text-gray-500">
+                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium">ยังไม่มีงานในระบบ</p>
                   </div>
                 )}
             </motion.div>
