@@ -603,9 +603,9 @@ export function ParticipantDashboard() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.6 }}
-                className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+                className="bg-white rounded-2xl shadow-lg p-4 mb-8"
               >
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
                       <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -617,12 +617,12 @@ export function ParticipantDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                       onClick={() => navigate('/sessions')}
-                      className="group card p-6 hover:shadow-lg transition-all duration-300 hover-lift"
+                      className="group card p-4 hover:shadow-lg transition-all duration-300 hover-lift"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-left">
-                          <p className="text-lg font-semibold mb-1">ลงทะเบียน</p>
-                          <p className="text-gray-500 text-sm">ลงทะเบียนงานสัมมนาใหม่</p>
+                          <p className="text-base font-semibold mb-1">ลงทะเบียน</p>
+                          <p className="text-gray-500 text-xs">ลงทะเบียนงานสัมมนาใหม่</p>
                         </div>
                         <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                           <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -634,12 +634,12 @@ export function ParticipantDashboard() {
 
                     <button
                       onClick={() => setShowProfileModal(true)}
-                      className="group card p-6 hover:shadow-lg transition-all duration-300 hover-lift"
+                      className="group card p-4 hover:shadow-lg transition-all duration-300 hover-lift"
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-left">
-                          <p className="text-lg font-semibold mb-1">โปรไฟล์</p>
-                          <p className="text-gray-500 text-sm">จัดการข้อมูลส่วนตัว</p>
+                          <p className="text-base font-semibold mb-1">โปรไฟล์</p>
+                          <p className="text-gray-500 text-xs">จัดการข้อมูลส่วนตัว</p>
                         </div>
                         <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                           <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
