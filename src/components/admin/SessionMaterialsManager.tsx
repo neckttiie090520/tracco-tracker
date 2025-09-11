@@ -18,6 +18,14 @@ interface AddMaterialModalProps {
   isLoading: boolean;
 }
 
+interface EditMaterialModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (material: CreateSessionMaterialRequest) => void;
+  material: SessionMaterial;
+  isLoading: boolean;
+}
+
 function AddMaterialModal({ isOpen, onClose, onAdd, isLoading }: AddMaterialModalProps) {
   const [url, setUrl] = useState('');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('title');
@@ -283,10 +291,291 @@ function AddMaterialModal({ isOpen, onClose, onAdd, isLoading }: AddMaterialModa
   return createPortal(modalContent, document.body);
 }
 
+function EditMaterialModal({ isOpen, onClose, onSave, material, isLoading }: EditMaterialModalProps) {
+  const [url, setUrl] = useState(material.url);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(material.display_mode);
+  const [customTitle, setCustomTitle] = useState(material.title);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<{
+    valid: boolean;
+    canEmbed: boolean;
+    suggestedTitle: string;
+    materialType?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setUrl(material.url);
+      setDisplayMode(material.display_mode);
+      setCustomTitle(material.title);
+      setValidationResult({
+        valid: true,
+        canEmbed: !!material.embed_url,
+        suggestedTitle: material.title
+      });
+    }
+  }, [isOpen, material]);
+
+  const validateUrl = useCallback(async (inputUrl: string) => {
+    if (!inputUrl.trim()) {
+      setValidationResult(null);
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const metadata = await fetchUrlMetadata(inputUrl);
+      const materialType = detectMaterialType(inputUrl);
+      
+      setValidationResult({
+        valid: true,
+        canEmbed: metadata.canEmbed,
+        suggestedTitle: metadata.title,
+        materialType
+      });
+
+      if (metadata.canEmbed && displayMode === 'title') {
+        setDisplayMode('embed');
+      }
+    } catch (error) {
+      console.error('URL validation error:', error);
+      setValidationResult({
+        valid: false,
+        canEmbed: false,
+        suggestedTitle: '',
+      });
+    } finally {
+      setIsValidating(false);
+    }
+  }, [displayMode]);
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUrl = e.target.value;
+    setUrl(newUrl);
+    if (newUrl !== material.url) {
+      const timeoutId = setTimeout(() => {
+        if (newUrl.trim()) {
+          validateUrl(newUrl);
+        }
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!url.trim()) {
+      alert('Please enter a URL');
+      return;
+    }
+
+    const finalTitle = customTitle.trim() || validationResult?.suggestedTitle || 'Untitled Material';
+
+    onSave({
+      session_id: material.session_id,
+      url: url.trim(),
+      title: finalTitle,
+      display_mode: displayMode,
+    });
+  };
+
+  const handleClose = () => {
+    setUrl(material.url);
+    setDisplayMode(material.display_mode);
+    setCustomTitle(material.title);
+    setValidationResult({
+      valid: true,
+      canEmbed: !!material.embed_url,
+      suggestedTitle: material.title
+    });
+    onClose();
+  };
+
+  const getPreviewMaterial = (): SessionMaterial | null => {
+    if (!validationResult?.valid) return null;
+
+    return {
+      id: 'preview',
+      session_id: '',
+      title: customTitle.trim() || validationResult.suggestedTitle,
+      type: detectMaterialType(url),
+      url: url,
+      embed_url: canEmbed(detectMaterialType(url)) ? convertToEmbedUrl(url, detectMaterialType(url)) : undefined,
+      display_mode: displayMode,
+      dimensions: getDefaultDimensions(detectMaterialType(url)),
+      metadata: {
+        title: validationResult.suggestedTitle,
+        favicon: getFaviconUrl(url),
+      },
+      order_index: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+  };
+
+  if (!isOpen) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
+        <div className="p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Edit Session Material</h2>
+          
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+            {/* URL Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Material URL *
+              </label>
+              <input
+                type="url"
+                value={url}
+                onChange={handleUrlChange}
+                placeholder="https://docs.google.com/... or https://canva.com/..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+              {isValidating && (
+                <p className="mt-1 text-xs text-blue-600">Validating URL...</p>
+              )}
+              {validationResult?.valid === false && (
+                <p className="mt-1 text-xs text-red-600">Unable to fetch this URL</p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Supports Google Docs/Slides, Canva, YouTube, and other embeddable content
+              </p>
+            </div>
+
+            {/* Custom Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Custom Title (optional)
+              </label>
+              <input
+                type="text"
+                value={customTitle}
+                onChange={(e) => setCustomTitle(e.target.value)}
+                placeholder={validationResult?.suggestedTitle || 'Enter custom title...'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {validationResult?.suggestedTitle && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Suggested: {validationResult.suggestedTitle}
+                </p>
+              )}
+            </div>
+
+            {/* Display Mode */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Display Mode *
+              </label>
+              <div className="space-y-3">
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="radio"
+                    name="display-mode"
+                    value="title"
+                    checked={displayMode === 'title'}
+                    onChange={(e) => setDisplayMode(e.target.value as DisplayMode)}
+                    className="mt-1"
+                  />
+                  <div>
+                    <div className="font-medium">Title</div>
+                    <div className="text-xs text-gray-500">
+                      Show favicon and title as styled card
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="radio"
+                    name="display-mode"
+                    value="link"
+                    checked={displayMode === 'link'}
+                    onChange={(e) => setDisplayMode(e.target.value as DisplayMode)}
+                    className="mt-1"
+                  />
+                  <div>
+                    <div className="font-medium">Link</div>
+                    <div className="text-xs text-gray-500">
+                      Show full URL with styled card
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="radio"
+                    name="display-mode"
+                    value="embed"
+                    checked={displayMode === 'embed'}
+                    onChange={(e) => setDisplayMode(e.target.value as DisplayMode)}
+                    disabled={!validationResult?.canEmbed}
+                    className="mt-1"
+                  />
+                  <div>
+                    <div className={`font-medium ${!validationResult?.canEmbed ? 'text-gray-400' : ''}`}>
+                      Embed
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Show interactive preview (iframe)
+                      {!validationResult?.canEmbed && ' - Not available for this URL'}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Preview */}
+            {getPreviewMaterial() && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Preview - {displayMode.charAt(0).toUpperCase() + displayMode.slice(1)} Mode
+                </label>
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <WorkshopMaterialDisplay material={getPreviewMaterial()!} />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  This is how the material will appear to participants
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSubmit()}
+                disabled={!url.trim() || isLoading}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? 'Updating...' : 'Update Material'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(modalContent, document.body);
+}
+
 export function SessionMaterialsManager({ sessionId, sessionTitle }: SessionMaterialsManagerProps) {
   const [materials, setMaterials] = useState<SessionMaterial[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<SessionMaterial | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -319,6 +608,45 @@ export function SessionMaterialsManager({ sessionId, sessionTitle }: SessionMate
     } catch (error) {
       console.error('Error adding session material:', error);
       // Handle error (show toast notification, etc.)
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditMaterial = (material: SessionMaterial) => {
+    setEditingMaterial(material);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedMaterial = async (materialRequest: CreateSessionMaterialRequest) => {
+    if (!editingMaterial) return;
+    
+    setIsLoading(true);
+    try {
+      // In a real implementation, you'd call the update API
+      // For now, we'll simulate updating the material locally
+      const updatedMaterial: SessionMaterial = {
+        ...editingMaterial,
+        title: materialRequest.title || '',
+        type: detectMaterialType(materialRequest.url),
+        url: materialRequest.url,
+        embed_url: canEmbed(detectMaterialType(materialRequest.url)) 
+          ? convertToEmbedUrl(materialRequest.url, detectMaterialType(materialRequest.url))
+          : undefined,
+        display_mode: materialRequest.display_mode,
+        dimensions: getDefaultDimensions(detectMaterialType(materialRequest.url)),
+        updated_at: new Date().toISOString()
+      };
+
+      // Update local state
+      setMaterials(materials.map(m => m.id === editingMaterial.id ? updatedMaterial : m));
+      setShowEditModal(false);
+      setEditingMaterial(null);
+      
+      // In real implementation: await MaterialService.updateSessionMaterial(editingMaterial.id, materialRequest);
+      // Then: await fetchMaterials();
+    } catch (error) {
+      console.error('Error updating session material:', error);
     } finally {
       setIsLoading(false);
     }
@@ -428,6 +756,16 @@ export function SessionMaterialsManager({ sessionId, sessionTitle }: SessionMate
                   </button>
                   
                   <button
+                    onClick={() => handleEditMaterial(material)}
+                    className="p-1 text-indigo-400 hover:text-indigo-600"
+                    title="Edit material"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  
+                  <button
                     onClick={() => handleDeleteMaterial(material.id)}
                     className="p-1 text-red-400 hover:text-red-600"
                     title="Delete material"
@@ -455,6 +793,20 @@ export function SessionMaterialsManager({ sessionId, sessionTitle }: SessionMate
         onAdd={handleAddMaterial}
         isLoading={isLoading}
       />
+
+      {/* Edit Material Modal */}
+      {editingMaterial && (
+        <EditMaterialModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingMaterial(null);
+          }}
+          onSave={handleSaveEditedMaterial}
+          material={editingMaterial}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }
