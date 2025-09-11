@@ -98,6 +98,75 @@ export const userService = {
     }
   },
 
+  // Batch generate avatar seeds for all users who don't have one
+  async batchGenerateAvatarSeeds() {
+    try {
+      console.log('🔄 Starting batch avatar_seed generation...')
+      
+      // Get all users without avatar_seed
+      const { data: users, error } = await supabase
+        .from('users')
+        .select('id, email, name, avatar_seed')
+        .is('avatar_seed', null)
+      
+      if (error) {
+        console.error('Error fetching users without avatar_seed:', error)
+        throw error
+      }
+      
+      if (!users || users.length === 0) {
+        console.log('✅ All users already have avatar_seed')
+        return { updated: 0, total: 0 }
+      }
+      
+      console.log(`📝 Found ${users.length} users without avatar_seed`)
+      
+      let updated = 0
+      const batchSize = 10 // Process in batches to avoid overwhelming the database
+      
+      for (let i = 0; i < users.length; i += batchSize) {
+        const batch = users.slice(i, i + batchSize)
+        
+        // Process batch in parallel
+        const promises = batch.map(async (user) => {
+          try {
+            const seed = `${user.email || 'user'}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            
+            const { error: updateError } = await supabase
+              .from('users')
+              .update({ avatar_seed: seed })
+              .eq('id', user.id)
+            
+            if (updateError) {
+              console.error(`❌ Failed to update avatar_seed for user ${user.id}:`, updateError)
+              return false
+            }
+            
+            console.log(`✅ Generated avatar_seed for user: ${user.name || user.email}`)
+            return true
+          } catch (error) {
+            console.error(`❌ Error processing user ${user.id}:`, error)
+            return false
+          }
+        })
+        
+        const results = await Promise.all(promises)
+        updated += results.filter(Boolean).length
+        
+        // Small delay between batches
+        if (i + batchSize < users.length) {
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+      }
+      
+      console.log(`🎉 Batch generation complete: ${updated}/${users.length} users updated`)
+      return { updated, total: users.length }
+    } catch (error) {
+      console.error('❌ Error in batch avatar_seed generation:', error)
+      throw error
+    }
+  },
+
   // Check if user is admin
   async isUserAdmin(userId: string) {
     try {
@@ -140,4 +209,10 @@ export const userService = {
 
     return data
   }
+}
+
+// Expose batch generation function globally for easy access in console
+// Usage: window.batchGenerateAvatarSeeds()
+if (typeof window !== 'undefined') {
+  (window as any).batchGenerateAvatarSeeds = userService.batchGenerateAvatarSeeds.bind(userService)
 }
