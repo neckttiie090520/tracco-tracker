@@ -80,7 +80,8 @@ export function RandomizerPage() {
             name,
             email,
             faculty,
-            department
+            department,
+            role
           )
         `)
         .eq('session_id', sessionId)
@@ -88,13 +89,15 @@ export function RandomizerPage() {
 
       if (error) throw error
 
-      const participantData = data?.map(reg => ({
-        id: reg.users.id,
-        name: reg.users.name || reg.users.email.split('@')[0],
-        email: reg.users.email,
-        faculty: reg.users.faculty,
-        department: reg.users.department
-      })) || []
+      // Filter out admin users - only include participants
+      const participantData = data?.filter(reg => reg.users.role === 'participant')
+        .map(reg => ({
+          id: reg.users.id,
+          name: reg.users.name || reg.users.email.split('@')[0],
+          email: reg.users.email,
+          faculty: reg.users.faculty,
+          department: reg.users.department
+        })) || []
 
       setParticipants(participantData)
     } catch (error) {

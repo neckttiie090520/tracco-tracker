@@ -102,11 +102,12 @@ export function AdminDashboard() {
       const sessionsWithStats: Session[] = []
       
       for (const session of sessionsData || []) {
-        // Get participant count
+        // Get participant count (excluding admin users)
         const { count: participantCount } = await supabase
           .from('session_registrations')
-          .select('*', { count: 'exact', head: true })
+          .select('*, users!inner(role)', { count: 'exact', head: true })
           .eq('session_id', session.id)
+          .eq('users.role', 'participant')
 
         // Get workshop count
         const { count: workshopCount } = await supabase
