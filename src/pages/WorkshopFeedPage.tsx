@@ -546,13 +546,16 @@ export function WorkshopFeedPage() {
         </div>
       )
     } else {
-      // It's already a name, not UUID
+      // It's already a name, not UUID - use default avatar settings
       return (
         <div className="flex items-center gap-3">
           <Avatar
             username={workshop.instructor}
             name={workshop.instructor}
+            avatarSeed={workshop.instructor}
             size={20}
+            saturation={95}
+            lightness={45}
           />
           <span className="text-gray-900 text-sm font-medium">{workshop.instructor}</span>
         </div>
