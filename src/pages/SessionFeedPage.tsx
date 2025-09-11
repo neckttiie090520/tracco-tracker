@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import { UserNavigation } from '../components/user/UserNavigation'
 import { BackButton } from '../components/common/BackButton'
@@ -85,6 +86,8 @@ const getEmbedUrl = (url: string) => {
 
 export function SessionFeedPage() {
   const { user } = useAuth()
+  const { sessionId } = useParams<{ sessionId: string }>()
+  const navigate = useNavigate()
   const [session, setSession] = useState<Session | null>(null)
   const [workshops, setWorkshops] = useState<Workshop[]>([])
   const [sessionMaterials, setSessionMaterials] = useState<SessionMaterial[]>([])
@@ -101,36 +104,50 @@ export function SessionFeedPage() {
     try {
       setLoading(true)
 
-      // Get user's active session
-      const { data: sessionReg, error: sessionError } = await supabase
-        .from('session_registrations')
+      if (!sessionId) {
+        navigate('/sessions')
+        return
+      }
+
+      // Get session data
+      const { data: sessionData, error: sessionError } = await supabase
+        .from('sessions')
         .select(`
-          *,
-          sessions (
-            id,
-            title,
-            description,
-            start_date,
-            end_date,
-            max_participants
-          )
+          id,
+          title,
+          description,
+          start_date,
+          end_date,
+          max_participants
         `)
-        .eq('user_id', user?.id)
-        .eq('status', 'registered')
-        .maybeSingle()
+        .eq('id', sessionId)
+        .single()
 
       if (sessionError) {
-        console.error('Session registration error:', sessionError)
+        console.error('Session error:', sessionError)
         setLoading(false)
         return
       }
 
-      if (!sessionReg?.sessions) {
+      if (!sessionData) {
         setLoading(false)
         return
       }
 
-      setSession(sessionReg.sessions)
+      // Check if user is registered for this session
+      const { data: registration, error: regError } = await supabase
+        .from('session_registrations')
+        .select('status')
+        .eq('user_id', user?.id)
+        .eq('session_id', sessionId)
+        .single()
+
+      if (regError || !registration || registration.status !== 'registered') {
+        navigate('/sessions')
+        return
+      }
+
+      setSession(sessionData)
 
       // Run workshops, instructors, and materials queries in parallel
       const [workshopsResult, materialsResult] = await Promise.allSettled([
@@ -153,11 +170,11 @@ export function SessionFeedPage() {
               created_at
             )
           `)
-          .eq('session_id', sessionReg.sessions.id)
+          .eq('session_id', sessionId)
           .eq('workshops.is_archived', false),
         
         // Get session materials
-        MaterialService.getSessionMaterials(sessionReg.sessions.id)
+        MaterialService.getSessionMaterials(sessionId)
       ])
 
       // Handle workshops result

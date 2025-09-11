@@ -167,7 +167,7 @@ function RegisteredSessionsSection() {
 
                 {/* Action Button */}
                 <button
-                  onClick={() => navigate('/session-feed')}
+                  onClick={() => navigate(`/sessions/${session.id}/feed`)}
                   className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <span>เข้าสู่งานสัมมนา</span>

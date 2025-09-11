@@ -253,7 +253,7 @@ export function SessionsPage() {
                     {/* Action Button */}
                     {session.isRegistered ? (
                       <button
-                        onClick={() => navigate('/session-feed')}
+                        onClick={() => navigate(`/sessions/${session.id}/feed`)}
                         className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-md transition-colors"
                       >
                         เข้าสู่งานสัมมนา →

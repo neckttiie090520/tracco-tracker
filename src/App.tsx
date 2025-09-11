@@ -119,7 +119,7 @@ function App() {
             }
           />
           <Route
-            path="/session-feed"
+            path="/sessions/:sessionId/feed"
             element={
               <ProtectedRoute>
                 <SessionFeedPage />
