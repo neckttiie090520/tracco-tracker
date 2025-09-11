@@ -169,7 +169,15 @@ export const submissionService = {
       if (error) throw error
       return data
     } else {
-      // Insert new
+      // For new group submissions, first delete any existing individual submission by this user for this task
+      await supabase
+        .from('submissions')
+        .delete()
+        .eq('task_id', submissionData.task_id)
+        .eq('user_id', submissionData.user_id)
+        .is('group_id', null) // Only delete individual submissions, not other group submissions
+
+      // Insert new group submission
       const { data, error } = await supabase
         .from('submissions')
         .insert({
