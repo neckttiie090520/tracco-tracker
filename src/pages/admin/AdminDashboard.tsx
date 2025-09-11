@@ -77,8 +77,11 @@ export function AdminDashboard() {
   }, [tasks])
 
   useEffect(() => {
-    fetchSessions()
-  }, [])
+    // Only fetch sessions after tasks data is loaded
+    if (!loading && tasks.length >= 0) {
+      fetchSessions()
+    }
+  }, [loading, tasks])
 
   const fetchSessions = async () => {
     try {
@@ -109,46 +112,31 @@ export function AdminDashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('session_id', session.id)
 
-        // Get total tasks - use adminOperations to bypass RLS
+        // Get total tasks using global task data (bypass session workshop linking issue)
         let totalTasks = 0
         let sessionWorkshops: any[] = []
         
         try {
-          // First get workshop IDs for this session using admin client
+          // First get workshop IDs for this session
           const { data: workshops } = await supabase
             .from('session_workshops')
             .select('workshop_id')
             .eq('session_id', session.id)
           
           sessionWorkshops = workshops || []
-          console.log('Session workshops for', session.title, ':', sessionWorkshops)
           
-          if (sessionWorkshops.length > 0) {
+          if (sessionWorkshops.length > 0 && tasks.length > 0) {
             const workshopIds = sessionWorkshops.map(sw => sw.workshop_id)
-            console.log('Workshop IDs:', workshopIds)
-            
-            // Count ALL tasks for these workshops (including archived)
-            const { data: allTasks } = await supabase
-              .from('tasks')
-              .select('id, workshop_id, is_archived')
-              .in('workshop_id', workshopIds)
-            
-            // Count active tasks  
-            const { data: activeTasks } = await supabase
-              .from('tasks')
-              .select('id, workshop_id')
-              .in('workshop_id', workshopIds)
-              .eq('is_archived', false)
-            
-            totalTasks = activeTasks?.length || 0
-            console.log('All tasks found:', allTasks)
-            console.log('Active tasks found:', activeTasks)
+            // Filter global tasks by workshop IDs (include all tasks, not just active ones)
+            const sessionTasks = tasks.filter(task => 
+              workshopIds.includes(task.workshop_id)
+            )
+            totalTasks = sessionTasks.length
           }
         } catch (error) {
           console.error('Error fetching tasks for session:', error)
         }
 
-        console.log('Total tasks for session', session.title, ':', totalTasks)
 
         // Calculate completion percentage
         let completionPercentage = 0
@@ -159,13 +147,21 @@ export function AdminDashboard() {
           const workshopIds = sessionWorkshops?.map(sw => sw.workshop_id) || []
           
           if (workshopIds.length > 0) {
-            // Count all submissions for tasks in this session's workshops
-            const { count: submissionsCount } = await supabase
-              .from('submissions')
-              .select('task_id, tasks!inner(workshop_id)', { count: 'exact', head: true })
-              .in('tasks.workshop_id', workshopIds)
+            // Get task IDs for this session (including ALL tasks - not just active ones)
+            const sessionTasks = tasks.filter(task => 
+              workshopIds.includes(task.workshop_id)
+            )
+            const taskIds = sessionTasks.map(task => task.id)
             
-            actualSubmissions = submissionsCount || 0
+            if (taskIds.length > 0) {
+              // Count submissions for these specific tasks
+              const { count: submissionsCount } = await supabase
+                .from('submissions')
+                .select('*', { count: 'exact', head: true })
+                .in('task_id', taskIds)
+              
+              actualSubmissions = submissionsCount || 0
+            }
             
             const totalPossibleSubmissions = totalTasks * participantCount
             completionPercentage = totalPossibleSubmissions > 0 
@@ -174,13 +170,6 @@ export function AdminDashboard() {
           }
         }
 
-        console.log('Session stats for', session.title, ':', {
-          participants: participantCount,
-          workshops: workshopCount, 
-          tasks: totalTasks,
-          submissions: actualSubmissions,
-          completion: completionPercentage
-        })
 
         sessionsWithStats.push({
           id: session.id,
