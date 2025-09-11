@@ -16,6 +16,16 @@ build/
 .env.test.local
 .env.production.local
 
+# MCP Configuration (contains sensitive tokens)
+.mcp.json
+.mcp/
+
+# Vercel tokens and sensitive files
+.verceltoken
+*.token
+*_token
+*-token
+
 # IDE and editor files
 .vscode/
 .idea/
@@ -120,3 +130,4 @@ temp*.txt
 
 # External sandbox
 tracco-workshop-tracker/
+.vercel
