@@ -26,7 +26,7 @@ export function AdminDashboard() {
   // Pagination state
   const [currentIndividualPage, setCurrentIndividualPage] = useState(1)
   const [currentGroupPage, setCurrentGroupPage] = useState(1)
-  const [tasksPerPage] = useState(8) // Show 8 tasks per page for better grid layout
+  const [tasksPerPage] = useState(24) // Show more tasks per page for compact overview
   
   // Separate view modes for Individual and Group tasks
   const [individualViewMode, setIndividualViewMode] = useState<'card' | 'table'>('card')
@@ -619,7 +619,7 @@ export function AdminDashboard() {
                           )
                         } else {
                           return (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                               {paginatedTasks.map(task => {
                                 const taskSubmissions = task.submissions?.[0]?.count || 0
                                 const taskProgress = selectedSession.total_participants > 0 
@@ -628,39 +628,27 @@ export function AdminDashboard() {
                                 const workshop = workshops.find(w => w.id === task.workshop_id)
                                 
                                 return (
-                                  <div key={task.id} className="bg-blue-50 border border-blue-200 rounded-lg p-3 aspect-square flex flex-col justify-between hover:bg-blue-100 transition-colors">
-                                    {/* Header with submission type badge */}
-                                    <div className="flex justify-end mb-2">
-                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                        <svg className="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
-                                        </svg>
+                                  <div key={task.id} className="bg-blue-50 border border-blue-200 rounded-md p-2 aspect-square flex flex-col justify-between hover:bg-blue-100 transition-colors text-center">
+                                    {/* Task type badge - compact */}
+                                    <div className="flex justify-center mb-1">
+                                      <span className="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                         เดี่ยว
                                       </span>
                                     </div>
 
-                                    {/* Task title - centered */}
-                                    <div className="flex-1 flex items-center justify-center text-center">
-                                      <h4 className="text-sm font-semibold text-gray-900 line-clamp-3 leading-tight">{task.title}</h4>
+                                    {/* Task title - compact */}
+                                    <div className="flex-1 flex items-center justify-center">
+                                      <h4 className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">{task.title}</h4>
                                     </div>
 
-                                    {/* Bottom section */}
-                                    <div className="space-y-2">
-                                      {/* Workshop */}
-                                      <p className="text-xs text-gray-600 truncate">{workshop?.title}</p>
-                                      
-                                      {/* Progress info */}
-                                      <div className="text-center">
-                                        <span className="text-xs font-medium text-blue-600">
-                                          {taskSubmissions}/{selectedSession.total_participants}
-                                        </span>
-                                        <div className="text-xs text-gray-500">{taskProgress}%</div>
+                                    {/* Progress info - minimal */}
+                                    <div className="space-y-1">
+                                      <div className="text-xs font-medium text-blue-600">
+                                        {taskSubmissions}/{selectedSession.total_participants}
                                       </div>
-
-                                      {/* Progress bar */}
-                                      <div className="w-full bg-blue-200 rounded-full h-2">
+                                      <div className="w-full bg-blue-200 rounded-full h-1">
                                         <div
-                                          className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                                          className="bg-blue-600 h-1 rounded-full transition-all duration-500"
                                           style={{ width: `${taskProgress}%` }}
                                         />
                                       </div>
@@ -869,7 +857,7 @@ export function AdminDashboard() {
                           )
                         } else {
                           return (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                               {paginatedTasks.map(task => {
                                 const uniqueGroupSubmissions = task.submissions?.[0]?.count || 0
                                 const totalTaskGroups = task.task_groups?.length || 0
@@ -877,39 +865,27 @@ export function AdminDashboard() {
                                 const workshop = workshops.find(w => w.id === task.workshop_id)
                                 
                                 return (
-                                  <div key={task.id} className="bg-green-50 border border-green-200 rounded-lg p-3 aspect-square flex flex-col justify-between hover:bg-green-100 transition-colors">
-                                    {/* Header with submission type badge */}
-                                    <div className="flex justify-end mb-2">
-                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                        <svg className="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-                                        </svg>
+                                  <div key={task.id} className="bg-green-50 border border-green-200 rounded-md p-2 aspect-square flex flex-col justify-between hover:bg-green-100 transition-colors text-center">
+                                    {/* Task type badge - compact */}
+                                    <div className="flex justify-center mb-1">
+                                      <span className="inline-flex items-center px-1 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                         กลุ่ม
                                       </span>
                                     </div>
 
-                                    {/* Task title - centered */}
-                                    <div className="flex-1 flex items-center justify-center text-center">
-                                      <h4 className="text-sm font-semibold text-gray-900 line-clamp-3 leading-tight">{task.title}</h4>
+                                    {/* Task title - compact */}
+                                    <div className="flex-1 flex items-center justify-center">
+                                      <h4 className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">{task.title}</h4>
                                     </div>
 
-                                    {/* Bottom section */}
-                                    <div className="space-y-2">
-                                      {/* Workshop */}
-                                      <p className="text-xs text-gray-600 truncate">{workshop?.title}</p>
-                                      
-                                      {/* Progress info */}
-                                      <div className="text-center">
-                                        <span className="text-xs font-medium text-green-600">
-                                          {uniqueGroupSubmissions}/{totalTaskGroups}
-                                        </span>
-                                        <div className="text-xs text-gray-500">{taskProgress}%</div>
+                                    {/* Progress info - minimal */}
+                                    <div className="space-y-1">
+                                      <div className="text-xs font-medium text-green-600">
+                                        {uniqueGroupSubmissions}/{totalTaskGroups}
                                       </div>
-
-                                      {/* Progress bar */}
-                                      <div className="w-full bg-green-200 rounded-full h-2">
+                                      <div className="w-full bg-green-200 rounded-full h-1">
                                         <div
-                                          className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                                          className="bg-green-600 h-1 rounded-full transition-all duration-500"
                                           style={{ width: `${taskProgress}%` }}
                                         />
                                       </div>
