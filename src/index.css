@@ -44,21 +44,30 @@
 @layer base {
   body {
     margin: 0;
-    font-family: 'Prompt', sans-serif;
+    font-family: 'Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: 16px;
     line-height: 1.6;
+    /* Ensure proper text rendering for Thai */
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: 'liga', 'kern';
+    font-feature-settings: 'liga', 'kern';
   }
   
-  /* Thai text styling */
+  /* Force UTF-8 encoding for all text */
+  * {
+    font-family: inherit;
+  }
+  
+  /* Thai text styling with comprehensive fallback */
   .font-thai {
-    font-family: 'Prompt', sans-serif;
+    font-family: 'Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', sans-serif;
   }
   
   /* English text styling */
   .font-eng {
-    font-family: 'Spline Sans Mono', monospace;
+    font-family: 'Spline Sans Mono', 'Courier New', monospace;
   }
   
   /* Concert One for special elements */
@@ -66,13 +75,13 @@
     font-family: 'Concert One', cursive;
   }
   
-  /* Apply Thai font to common Thai text elements */
+  /* Apply Thai font to common Thai text elements with system fallbacks */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Prompt', sans-serif;
+    font-family: 'Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', sans-serif;
   }
   
-  p, span, div {
-    font-family: 'Prompt', sans-serif;
+  p, span, div, button, input, textarea, select {
+    font-family: 'Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', sans-serif;
   }
   
   /* English content - use for specific classes */
@@ -81,6 +90,36 @@
   pre,
   input[type="email"],
   input[type="password"] {
-    font-family: 'Spline Sans Mono', monospace;
+    font-family: 'Spline Sans Mono', 'Courier New', monospace;
+  }
+  
+  /* Ensure Thai characters display properly */
+  .thai-text,
+  [lang="th"] {
+    font-family: 'Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', sans-serif !important;
+    unicode-bidi: embed;
+    direction: ltr;
+  }
+  
+  /* Force font loading for Thai text */
+  @font-face {
+    font-family: 'ThaiSafe';
+    src: local('Prompt'),
+         local('Noto Sans Thai'),
+         local('Sarabun'),
+         local('TH Sarabun New'),
+         local('Tahoma');
+    unicode-range: U+0E00-0E7F; /* Thai Unicode range */
+  }
+  
+  /* Thai text debugging class */
+  .debug-thai {
+    font-family: 'Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', 'Arial Unicode MS', sans-serif !important;
+    font-size: 18px;
+    color: #1f2937;
+    background-color: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
   }
 }

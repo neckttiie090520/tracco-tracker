@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { Navigate, useLocation } from 'react-router-dom'
+import { ThaiFontTest } from '../components/debug/ThaiFontTest'
 
 // Extend Window interface for Vanta.js
 declare global {
@@ -178,6 +179,9 @@ export function LoginPage() {
           </button>
         </div>
       </div>
+      
+      {/* Temporary font test component */}
+      <ThaiFontTest />
     </div>
   )
 }

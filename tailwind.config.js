@@ -7,10 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'thai': ['Prompt', 'sans-serif'],
-        'eng': ['Spline Sans Mono', 'monospace'],
+        'thai': ['Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', 'sans-serif'],
+        'eng': ['Spline Sans Mono', 'Courier New', 'monospace'],
         'concert': ['Concert One', 'cursive'],
-        'sans': ['Prompt', 'sans-serif'], // Default for Thai content
+        'sans': ['Prompt', 'Noto Sans Thai', 'Sarabun', 'TH Sarabun New', 'Tahoma', 'sans-serif'], // Default with comprehensive Thai fallback
       },
     },
   },
