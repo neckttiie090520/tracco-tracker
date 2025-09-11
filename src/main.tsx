@@ -11,7 +11,7 @@ const root = createRoot(container)
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter future={{ v7_relativeSplatPath: true }}>
+    <BrowserRouter}>
       <ErrorBoundary>
         <App />
       </ErrorBoundary>
