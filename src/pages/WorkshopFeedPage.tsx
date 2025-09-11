@@ -918,9 +918,9 @@ export function WorkshopFeedPage() {
                         <div className="p-3 bg-blue-600 text-white rounded-t-lg">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <h3 className="text-sm font-medium mb-1">{task.title}</h3>
+                              <h3 className="text-sm font-medium mb-1 break-words">{task.title}</h3>
                               {task.description && (
-                                <p className="text-white/80 text-xs mb-2">{task.description}</p>
+                                <p className="text-white/80 text-xs mb-2 break-words whitespace-pre-wrap leading-relaxed">{task.description}</p>
                               )}
                               <div className="flex flex-wrap items-center gap-2 text-xs">
                                 <span className="bg-white/20 px-2 py-1 rounded text-xs flex items-center gap-1">
