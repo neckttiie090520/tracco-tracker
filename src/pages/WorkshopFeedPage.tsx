@@ -1438,40 +1438,67 @@ export function WorkshopFeedPage() {
                                   </span>
                                 </div>
 
-                                {/* Display existing draft links */}
+                                {/* Display existing draft links with notes */}
                                 {draftLinks[task.id] && draftLinks[task.id].length > 0 && (
-                                  <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-xs font-medium text-gray-600 mb-2">
+                                  <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">
                                       ลิงก์ที่จะส่ง ({draftLinks[task.id].length} รายการ)
                                     </p>
-                                    {draftLinks[task.id].map((link, index) => (
-                                      <div key={index} className="flex items-center gap-2">
-                                        <span className="text-xs text-gray-500">#{index + 1}</span>
-                                        <input
-                                          type="url"
-                                          value={link}
-                                          onChange={(e) => {
-                                            const newLinks = [...draftLinks[task.id]]
-                                            newLinks[index] = e.target.value
-                                            setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
-                                          }}
-                                          className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                                          placeholder={`ลิงก์ที่ ${index + 1}`}
-                                        />
-                                        <button
-                                          onClick={() => {
-                                            const newLinks = draftLinks[task.id].filter((_, i) => i !== index)
-                                            setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
-                                          }}
-                                          className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                          title="ลบลิงก์นี้"
-                                        >
-                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                          </svg>
-                                        </button>
-                                      </div>
-                                    ))}
+                                    {draftLinks[task.id].map((linkData, index) => {
+                                      const isStringFormat = typeof linkData === 'string'
+                                      const url = isStringFormat ? linkData : linkData.url || ''
+                                      const note = isStringFormat ? '' : linkData.note || ''
+                                      
+                                      return (
+                                        <div key={index} className="space-y-2 p-3 bg-white rounded border">
+                                          <div className="flex items-center justify-between">
+                                            <span className="text-xs font-medium text-gray-600">ลิงก์ที่ {index + 1}</span>
+                                            <button
+                                              onClick={() => {
+                                                const newLinks = draftLinks[task.id].filter((_, i) => i !== index)
+                                                setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
+                                              }}
+                                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                              title="ลบลิงก์นี้"
+                                            >
+                                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                              </svg>
+                                            </button>
+                                          </div>
+                                          <input
+                                            type="url"
+                                            value={url}
+                                            onChange={(e) => {
+                                              const newLinks = [...draftLinks[task.id]]
+                                              if (isStringFormat) {
+                                                newLinks[index] = { url: e.target.value, note: '' }
+                                              } else {
+                                                newLinks[index] = { ...newLinks[index], url: e.target.value }
+                                              }
+                                              setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
+                                            }}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                            placeholder="https://docs.google.com/... หรือ https://www.canva.com/..."
+                                          />
+                                          <input
+                                            type="text"
+                                            value={note}
+                                            onChange={(e) => {
+                                              const newLinks = [...draftLinks[task.id]]
+                                              if (isStringFormat) {
+                                                newLinks[index] = { url: url, note: e.target.value }
+                                              } else {
+                                                newLinks[index] = { ...newLinks[index], note: e.target.value }
+                                              }
+                                              setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
+                                            }}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                            placeholder="หมายเหตุ เช่น 'ไฟล์นำเสนอ', 'Source code', 'ผลงานเสร็จ'"
+                                          />
+                                        </div>
+                                      )
+                                    })}
                                   </div>
                                 )}
 
@@ -1493,7 +1520,7 @@ export function WorkshopFeedPage() {
                                         const currentLinks = draftLinks[task.id] || []
                                         setDraftLinks(prev => ({ 
                                           ...prev, 
-                                          [task.id]: [...currentLinks, submissionUrl.trim()] 
+                                          [task.id]: [...currentLinks, { url: submissionUrl.trim(), note: '' }] 
                                         }))
                                         setSubmissionUrl('')
                                       }
@@ -1503,14 +1530,35 @@ export function WorkshopFeedPage() {
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                     </svg>
-                                    เพิ่มลิงก์อื่นๆ (Google Drive, Canva, GitHub, etc.)
+                                    เพิ่มลิงก์อื่นๆ
                                   </button>
                                 </div>
 
-                                {/* Helper text */}
-                                <div className="bg-blue-50 rounded-lg p-2 text-xs text-blue-700">
-                                  <p className="font-semibold mb-1">💡 คุณสามารถส่งลิงก์ได้หลายลิงก์</p>
-                                  <p className="text-xs">เหมาะสำหรับ: Presentation + Source Code, Design + Documentation</p>
+                                {/* Helper text with specific examples */}
+                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+                                  <div className="flex items-start gap-2">
+                                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                      <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                      </svg>
+                                    </div>
+                                    <div className="text-xs text-blue-800">
+                                      <p className="font-semibold mb-1">💡 ตัวอย่างลิงก์ที่น่าส่ง:</p>
+                                      <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                          <p className="font-medium text-blue-900 mb-0.5">📄 เอกสาร:</p>
+                                          <p className="text-blue-700">• Google Docs/Slides<br/>• Canva Design<br/>• Figma Project</p>
+                                        </div>
+                                        <div>
+                                          <p className="font-medium text-blue-900 mb-0.5">🔗 อื่นๆ:</p>
+                                          <p className="text-blue-700">• GitHub Repo<br/>• ChatGPT Share<br/>• YouTube Video</p>
+                                        </div>
+                                      </div>
+                                      <div className="mt-2 p-2 bg-white/60 rounded text-xs">
+                                        <strong>เคล็ดลับ:</strong> ใส่หมายเหตุแต่ละลิงก์ เพื่อให้ผู้ตรวจเข้าใจงานของคุณง่ายขึ้น
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                                 
                                 <textarea
