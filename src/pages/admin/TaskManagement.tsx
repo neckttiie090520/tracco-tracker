@@ -809,7 +809,13 @@ export function TaskManagement() {
       />
 
       {/* Task Submissions Modal */}
-      <TaskSubmissionsModal task={viewingSubmissions} onClose={() => setViewingSubmissions(null)} initialShowLuckyDraw={(window as any).__openLuckyDrawForTask === viewingSubmissions?.id} />
+      {viewingSubmissions && (
+        <TaskSubmissionsModal
+          task={viewingSubmissions}
+          onClose={() => setViewingSubmissions(null)}
+          initialShowLuckyDraw={(window as any).__openLuckyDrawForTask === viewingSubmissions?.id}
+        />
+      )}
 
       {/* Task Groups Modal */}
       {viewingGroups && (
@@ -828,4 +834,3 @@ export function TaskManagement() {
     </div>
   )
 }
-
