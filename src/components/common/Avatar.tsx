@@ -22,14 +22,17 @@ export function Avatar({
   className = '',
   onClick 
 }: AvatarProps) {
-  // Always prioritize avatarSeed, then username (email) for consistency
-  // Only use name as last resort to avoid inconsistency from name variations
+  // Always prioritize saved avatarSeed from profile, only use fallbacks if no saved seed
+  // This ensures all locations show the same avatar that user selected in Edit Profile
   const baseSeed = useMemo(() => {
+    // If user has saved a specific avatarSeed in their profile, always use it
     if (avatarSeed && avatarSeed.trim()) return avatarSeed.trim()
-    if (username && username.trim()) return username.trim()
+    
+    // Fallback priority: name -> username -> anonymous
     if (name && name.trim()) return name.trim()
+    if (username && username.trim()) return username.trim()
     return 'anonymous'
-  }, [avatarSeed, username, name])
+  }, [avatarSeed, name, username])
   
   // Generate seed for different avatar styles
   // For predefined styles, use variants to get different shapes
