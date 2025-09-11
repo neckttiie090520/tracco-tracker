@@ -1,5 +1,4 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -64,12 +63,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               >
                 รีโหลดหน้า
               </button>
-              <Link
-                to="/dashboard"
+              <button
+                onClick={() => window.location.href = '/dashboard'}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 กลับหน้าหลัก
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -105,12 +104,12 @@ export const LazyLoadErrorFallback: React.FC<{ error?: Error }> = ({ error }) =>
           >
             รีโหลด
           </button>
-          <Link
-            to="/dashboard" 
+          <button
+            onClick={() => window.location.href = '/dashboard'}
             className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
           >
             หน้าหลัก
-          </Link>
+          </button>
         </div>
       </div>
     </div>
