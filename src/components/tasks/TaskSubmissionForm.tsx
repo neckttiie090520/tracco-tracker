@@ -75,7 +75,7 @@ export function TaskSubmissionForm({ taskId, task, workshopId }: TaskSubmissionF
 
         const saved = await submissionService.upsertGroupSubmission({
           task_id: taskId,
-          user_id: group.owner_id,
+          user_id: user.id,  // Use current user instead of group owner
           group_id: group.id,
           notes: formData.notes || null,
           submission_url: formData.submission_url || null,

@@ -131,8 +131,8 @@ export const submissionService = {
   },
 
   // Upsert a submission for a group (one per group per task)
-  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string, user_id: string, links?: string[] }) {
-    // First, check if there's an existing group submission
+  async upsertGroupSubmission(submissionData: SubmissionInsert & { group_id: string, links?: string[] }) {
+    // Try to find existing submission by (task_id, group_id)
     const { data: existing, error: findError } = await supabase
       .from('submissions')
       .select('id')
@@ -146,7 +146,7 @@ export const submissionService = {
     }
 
     if (existing?.id) {
-      // Update existing group submission
+      // Update existing
       const { data, error } = await supabase
         .from('submissions')
         .update({
@@ -166,24 +166,15 @@ export const submissionService = {
           )
         `)
         .single()
-      
       if (error) throw error
       return data
     } else {
-      // For new submissions, first delete any individual user submission for this task to avoid conflicts
-      await supabase
-        .from('submissions')
-        .delete()
-        .eq('task_id', submissionData.task_id)
-        .eq('user_id', submissionData.user_id)
-        .is('group_id', null) // Only delete individual submissions, not group ones
-
-      // Now insert new group submission
+      // Insert new
       const { data, error } = await supabase
         .from('submissions')
         .insert({
           task_id: submissionData.task_id,
-          user_id: submissionData.user_id, // Use the actual user_id (group owner)
+          user_id: submissionData.user_id,
           group_id: submissionData.group_id,
           notes: submissionData.notes ?? null,
           submission_url: submissionData.submission_url ?? null,
@@ -201,11 +192,7 @@ export const submissionService = {
           )
         `)
         .single()
-      
-      if (error) {
-        console.error('Error inserting group submission:', error)
-        throw error
-      }
+      if (error) throw error
       return data
     }
   },

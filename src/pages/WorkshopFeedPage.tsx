@@ -1246,7 +1246,7 @@ export function WorkshopFeedPage() {
                                             const newLinks = [...linkObjs, newLink]
                                             try {
                                               if ((task as any).submission_mode === 'group' && g) {
-                                                await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: g.owner_id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
+                                                await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
                                                 const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
                                                 setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
                                               } else if (effective?.id) {
@@ -1346,7 +1346,7 @@ export function WorkshopFeedPage() {
                                                         await fetchWorkshopData()
                                                       } else {
                                                         if ((task as any).submission_mode==='group' && g) {
-                                                          await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: g.owner_id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
+                                                          await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
                                                           const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
                                                           setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed }))
                                                         } else if (effective?.id) {
@@ -1407,7 +1407,7 @@ export function WorkshopFeedPage() {
                   if ((task as any).submission_mode==='group' && g){ await submissionService.deleteGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: null })) }
                   else { await submissionService.deleteUserTaskSubmission(user!.id, task.id) }
                 } else {
-                  if ((task as any).submission_mode==='group' && g){ await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: g.owner_id, group_id: g.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any) }
+                  if ((task as any).submission_mode==='group' && g){ await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: user.id, group_id: g.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any) }
                   else { await supabase.from('submissions').upsert({ task_id: task.id, user_id: user!.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any, { onConflict: 'task_id,user_id' }) }
                 }
                 await fetchWorkshopData(); setEditingTaskId(null)
