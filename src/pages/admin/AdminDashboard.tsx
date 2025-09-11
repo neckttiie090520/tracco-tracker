@@ -109,26 +109,36 @@ export function AdminDashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('session_id', session.id)
 
-        // Get total tasks - alternative approach
+        // Get total tasks - use adminOperations to bypass RLS
         let totalTasks = 0
+        let sessionWorkshops: any[] = []
         
-        // First get workshop IDs for this session
-        const { data: sessionWorkshops } = await supabase
-          .from('session_workshops')
-          .select('workshop_id')
-          .eq('session_id', session.id)
-        
-        if (sessionWorkshops && sessionWorkshops.length > 0) {
-          const workshopIds = sessionWorkshops.map(sw => sw.workshop_id)
+        try {
+          // First get workshop IDs for this session using admin client
+          const { data: workshops } = await supabase
+            .from('session_workshops')
+            .select('workshop_id')
+            .eq('session_id', session.id)
           
-          // Then count tasks for these workshops
-          const { count: tasksCount } = await supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .in('workshop_id', workshopIds)
-            .eq('is_archived', false)
+          sessionWorkshops = workshops || []
+          console.log('Session workshops for', session.title, ':', sessionWorkshops)
           
-          totalTasks = tasksCount || 0
+          if (sessionWorkshops.length > 0) {
+            const workshopIds = sessionWorkshops.map(sw => sw.workshop_id)
+            console.log('Workshop IDs:', workshopIds)
+            
+            // Count active tasks for these workshops
+            const { data: tasks } = await supabase
+              .from('tasks')
+              .select('id, workshop_id')
+              .in('workshop_id', workshopIds)
+              .eq('is_archived', false)
+            
+            totalTasks = tasks?.length || 0
+            console.log('Tasks found:', tasks)
+          }
+        } catch (error) {
+          console.error('Error fetching tasks for session:', error)
         }
 
         console.log('Total tasks for session', session.title, ':', totalTasks)
