@@ -1400,8 +1400,12 @@ export function WorkshopFeedPage() {
             <button className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200" onClick={()=>{ const url=submissionUrl.trim(); if(!url) return; setEditLinksMap(prev=>({ ...prev, [task.id]: [ ...(prev[task.id]||[]), submissionNotes.trim()? {url, note:submissionNotes.trim()} : {url} ] })); setSubmissionUrl(''); setSubmissionNotes('') }}>เพิ่มลิงก์</button>
           </div>
           <div className="flex gap-2">
-            <button className="btn btn-primary px-4 py-2 text-sm font-medium" onClick={async ()=>{
+            <button 
+              className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
+              disabled={(!submissionUrl.trim() && (!editLinksMap[task.id] || editLinksMap[task.id].filter(it=>it.url && it.url.trim()).length === 0))}
+              onClick={async ()=>{
               const toSave=(editLinksMap[task.id]||[]).filter(it=>it.url && it.url.trim())
+              if (submissionUrl.trim()) toSave.push({ url: submissionUrl.trim(), note: submissionNotes.trim() || undefined })
               try{
                 if (toSave.length===0){
                   if ((task as any).submission_mode==='group' && g){ await submissionService.deleteGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: null })) }
@@ -1412,7 +1416,14 @@ export function WorkshopFeedPage() {
                 }
                 await fetchWorkshopData(); setEditingTaskId(null)
               }catch(e){ console.error('save links failed', e)}
-            }}>ส่งงาน</button>
+            }}>
+              ส่งงาน {(() => {
+                const currentLinks = (editLinksMap[task.id]||[]).filter(it=>it.url && it.url.trim()).length
+                const newLink = submissionUrl.trim() ? 1 : 0
+                const total = currentLinks + newLink
+                return total > 0 ? `(${total} ลิงก์)` : ''
+              })()}
+            </button>
             <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm" onClick={()=>{ setEditingTaskId(null); setSubmissionUrl(''); setSubmissionNotes(''); setEditLinksMap(prev=>({ ...prev, [task.id]: [] })) }}>ยกเลิก</button>
           </div>
         </div>

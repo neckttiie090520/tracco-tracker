@@ -294,7 +294,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             </div>
           </div>
           
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 overflow-y-auto">
             {loading && (
               <div className="flex items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -848,7 +848,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
               </div>
             </div>
 
-            <div className="flex-1 p-6">
+            <div className="flex-1 p-6 overflow-y-auto">
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">
                   {selectedSubmissionItems.is_group_submission ? 'Group Information' : 'Student Information'}
