@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Users, Plus, X, Edit2, Trash2, Copy, HelpCircle } from 'lucide-react'
 import { groupService } from '../../services/groups'
 import { useAuth } from '../../hooks/useAuth'
-import { StandardizedAvatar } from '../common/StandardizedAvatar'
+import { Avatar } from '../common/Avatar'
 
 interface GroupManagementCardProps {
   group?: any
@@ -356,11 +356,13 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
               <div className="flex flex-wrap gap-2">
                 {members.slice(0, 4).map((member) => (
                   <div key={member.user_id} className="flex items-center gap-2 bg-white px-3 py-2 rounded-md border">
-                    <StandardizedAvatar
-                      user={member.user}
+                    <Avatar
+                      username={member.user?.email}
+                      name={member.user?.name}
+                      avatarSeed={member.user?.avatar_seed}
                       size={24}
-                      showName={false}
-                      showEmail={false}
+                      saturation={member.user?.avatar_saturation}
+                      lightness={member.user?.avatar_lightness}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium text-gray-900 truncate">{member.user.name}</div>
@@ -397,14 +399,24 @@ export function GroupManagementCard({ group, taskId, onGroupUpdated, onGroupDele
                   <div className="mt-2 space-y-2">
                     {members.slice(4).map((member) => (
                       <div key={member.user_id} className="flex items-center justify-between p-2 bg-white rounded border">
-                        <StandardizedAvatar
-                          user={member.user}
-                          size={20}
-                          showName={true}
-                          showEmail={true}
-                          nameClassName="text-xs font-medium text-gray-900"
-                          emailClassName="text-xs text-gray-500"
-                        />
+                        <div className="flex items-center space-x-3">
+                          <Avatar
+                            username={member.user?.email}
+                            name={member.user?.name}
+                            avatarSeed={member.user?.avatar_seed}
+                            size={20}
+                            saturation={member.user?.avatar_saturation}
+                            lightness={member.user?.avatar_lightness}
+                          />
+                          <div>
+                            <div className="text-xs font-medium text-gray-900">
+                              {member.user?.name || 'Unknown User'}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {member.user?.email || 'No email'}
+                            </div>
+                          </div>
+                        </div>
                         
                         <div className="flex items-center gap-2">
                           {member.role === 'owner' && (

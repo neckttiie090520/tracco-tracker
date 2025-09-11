@@ -3,7 +3,7 @@ import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
 import { LuckyDrawSlot } from './LuckyDrawSlot'
-import { StandardizedAvatar } from '../common/StandardizedAvatar'
+import { Avatar } from '../common/Avatar'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -447,11 +447,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <StandardizedAvatar
-                                      user={submission.user}
+                                    <Avatar
+                                      username={submission.user?.email}
+                                      name={submission.user?.name}
+                                      avatarSeed={submission.user?.avatar_seed}
                                       size={20}
-                                      showName={false}
-                                      showEmail={false}
+                                      saturation={submission.user?.avatar_saturation}
+                                      lightness={submission.user?.avatar_lightness}
                                     />
                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -468,14 +470,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                       <div className="mt-1 pl-3 space-y-0.5">
                                         {submission.group_members.map((member: any, idx: number) => (
                                           <div key={idx} className="flex items-center gap-2">
-                                            <StandardizedAvatar
-                                              user={{
-                                                name: member.name,
-                                                email: member.email
-                                              }}
+                                            <Avatar
+                                              username={member.email}
+                                              name={member.name}
                                               size={16}
-                                              showName={false}
-                                              showEmail={false}
                                             />
                                             <span className={member.email === submission.user?.email ? 'font-semibold text-green-700' : ''}>
                                               {member.name}
@@ -488,14 +486,24 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                   )}
                                 </div>
                               ) : (
-                                <StandardizedAvatar
-                                  user={submission.user}
-                                  size={compact ? 32 : 40}
-                                  showName={true}
-                                  showEmail={true}
-                                  nameClassName="text-sm font-medium text-gray-900"
-                                  emailClassName="text-sm text-gray-500"
-                                />
+                                <div className="flex items-center space-x-3">
+                                  <Avatar
+                                    username={submission.user?.email}
+                                    name={submission.user?.name}
+                                    avatarSeed={submission.user?.avatar_seed}
+                                    size={compact ? 32 : 40}
+                                    saturation={submission.user?.avatar_saturation}
+                                    lightness={submission.user?.avatar_lightness}
+                                  />
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {submission.user?.name || 'Unknown User'}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {submission.user?.email || 'No email'}
+                                    </div>
+                                  </div>
+                                </div>
                               )}
                             </td>
                             <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap`}>
@@ -763,11 +771,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </svg>
                               GROUP WINNER
                             </div>
-                            <StandardizedAvatar
-                              user={selectedSubmissionItems.user}
+                            <Avatar
+                              username={selectedSubmissionItems.user?.email}
+                              name={selectedSubmissionItems.user?.name}
+                              avatarSeed={selectedSubmissionItems.user?.avatar_seed}
                               size={64}
-                              showName={false}
-                              showEmail={false}
+                              saturation={selectedSubmissionItems.user?.avatar_saturation}
+                              lightness={selectedSubmissionItems.user?.avatar_lightness}
                               className="ring-4 ring-white/50 mb-3"
                             />
                             <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl mb-2 leading-tight">
@@ -785,11 +795,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                               </svg>
                               INDIVIDUAL WINNER
                             </div>
-                            <StandardizedAvatar
-                              user={selectedSubmissionItems.user}
+                            <Avatar
+                              username={selectedSubmissionItems.user?.email}
+                              name={selectedSubmissionItems.user?.name}
+                              avatarSeed={selectedSubmissionItems.user?.avatar_seed}
                               size={64}
-                              showName={false}
-                              showEmail={false}
+                              saturation={selectedSubmissionItems.user?.avatar_saturation}
+                              lightness={selectedSubmissionItems.user?.avatar_lightness}
                               className="ring-4 ring-white/50 mb-3"
                             />
                             <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl leading-tight">
@@ -853,14 +865,24 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                       
                       <div className="border-l-4 border-green-500 pl-3 py-2 bg-green-50 rounded-r">
                         <div className="text-xs font-medium text-green-700 uppercase tracking-wider mb-2">ผู้ส่งงาน</div>
-                        <StandardizedAvatar
-                          user={selectedSubmissionItems.user}
-                          size={32}
-                          showName={true}
-                          showEmail={true}
-                          nameClassName="text-sm text-gray-900 font-medium"
-                          emailClassName="text-xs text-gray-600"
-                        />
+                        <div className="flex items-center space-x-3">
+                          <Avatar
+                            username={selectedSubmissionItems.user?.email}
+                            name={selectedSubmissionItems.user?.name}
+                            avatarSeed={selectedSubmissionItems.user?.avatar_seed}
+                            size={32}
+                            saturation={selectedSubmissionItems.user?.avatar_saturation}
+                            lightness={selectedSubmissionItems.user?.avatar_lightness}
+                          />
+                          <div>
+                            <div className="text-sm text-gray-900 font-medium">
+                              {selectedSubmissionItems.user?.name || 'Unknown User'}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              {selectedSubmissionItems.user?.email || 'No email'}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       
                       {selectedSubmissionItems.group_members && selectedSubmissionItems.group_members.length > 0 && (
@@ -875,14 +897,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                     ? 'bg-green-100 border border-green-300' 
                                     : 'bg-white border border-gray-200'
                                 }`}>
-                                  <StandardizedAvatar
-                                    user={{
-                                      name: member?.name,
-                                      email: member?.email
-                                    }}
+                                  <Avatar
+                                    username={member?.email}
+                                    name={member?.name}
                                     size={24}
-                                    showName={false}
-                                    showEmail={false}
                                   />
                                   <span className={isSubmitter ? 'font-semibold text-green-800' : 'text-gray-700'}>
                                     {member?.name || 'Unknown'}
@@ -898,14 +916,24 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                   ) : (
                     <div>
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Student Information</p>
-                      <StandardizedAvatar
-                        user={selectedSubmissionItems.user}
-                        size={40}
-                        showName={true}
-                        showEmail={true}
-                        nameClassName="text-sm text-gray-900"
-                        emailClassName="text-sm text-gray-500"
-                      />
+                      <div className="flex items-center space-x-3">
+                        <Avatar
+                          username={selectedSubmissionItems.user?.email}
+                          name={selectedSubmissionItems.user?.name}
+                          avatarSeed={selectedSubmissionItems.user?.avatar_seed}
+                          size={40}
+                          saturation={selectedSubmissionItems.user?.avatar_saturation}
+                          lightness={selectedSubmissionItems.user?.avatar_lightness}
+                        />
+                        <div>
+                          <div className="text-sm text-gray-900">
+                            {selectedSubmissionItems.user?.name || 'Unknown User'}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {selectedSubmissionItems.user?.email || 'No email'}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

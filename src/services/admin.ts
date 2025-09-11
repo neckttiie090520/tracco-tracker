@@ -51,12 +51,40 @@ export const adminService = {
   },
 
   // Create workshop (admin only)
-  async createWorkshop(workshopData: WorkshopInsert, materials?: WorkshopMaterial[]) {
+  async createWorkshop(workshopData: WorkshopInsert, materials?: WorkshopMaterial[], adminUserId?: string) {
     console.log('🚀 Admin service createWorkshop called')
     try {
       // First, create the workshop
       const workshop = await adminOperations.createWorkshop(workshopData)
       console.log('✅ Workshop created:', workshop)
+      
+      // Automatically add admin to the workshop
+      if (adminUserId && workshop.id) {
+        console.log('👤 Auto-registering admin to workshop:', workshop.id)
+        try {
+          const { error: registrationError } = await supabase
+            .from('workshop_registrations')
+            .insert({
+              workshop_id: workshop.id,
+              user_id: adminUserId,
+              status: 'registered'
+            })
+          
+          if (registrationError) {
+            // Only log if it's not a duplicate entry error
+            if (!registrationError.message.includes('duplicate') && !registrationError.message.includes('already exists')) {
+              console.error('⚠️ Admin auto-registration warning:', registrationError)
+            } else {
+              console.log('ℹ️ Admin already registered to workshop')
+            }
+          } else {
+            console.log('✅ Admin auto-registered to workshop successfully')
+          }
+        } catch (regError) {
+          console.error('❌ Admin auto-registration error:', regError)
+          // Don't throw - workshop creation should still succeed
+        }
+      }
       
       // Then, create materials if provided
       if (materials && materials.length > 0) {

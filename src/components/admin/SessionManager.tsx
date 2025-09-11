@@ -6,6 +6,7 @@ import { MaterialManager } from './MaterialManager'
 import { SearchAndFilter } from './SearchAndFilter'
 import { BulkActionBar } from './BulkActionBar'
 import { MaterialService } from '../../services/materials'
+import { useAuth } from '../../hooks/useAuth'
 import type { WorkshopMaterial } from '../../types/materials'
 
 interface Session {
@@ -811,6 +812,7 @@ function AddWorkshopToSessionModal({ isOpen, session, onClose, onWorkshopAdded }
 }
 
 export function SessionManager() {
+  const { user } = useAuth()
   const [sessions, setSessions] = useState<SessionWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -910,6 +912,30 @@ export function SessionManager() {
       if (error) {
         console.error('Error creating session:', error)
         throw error
+      }
+
+      console.log('✅ Session created successfully:', sessionResult)
+
+      // Automatically add admin to the session
+      if (user && user.id && sessionResult) {
+        try {
+          const { error: registrationError } = await supabase
+            .from('session_registrations')
+            .insert({
+              session_id: sessionResult.id,
+              user_id: user.id,
+              status: 'registered'
+            })
+
+          if (registrationError && !registrationError.message.includes('duplicate')) {
+            console.error('Error auto-registering admin:', registrationError)
+          } else {
+            console.log('✅ Admin automatically registered for session:', sessionResult.title)
+          }
+        } catch (regError) {
+          console.error('Error auto-registering admin:', regError)
+          // Continue even if admin registration fails
+        }
       }
 
       // Add materials if provided (similar to Workshop approach)

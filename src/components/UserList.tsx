@@ -1,7 +1,7 @@
 import React from 'react'
 import { Users } from 'lucide-react'
 import { usePostsAndUsers } from '@/services/optimizedApi'
-import { StandardizedAvatar } from './common/StandardizedAvatar'
+import { Avatar } from './common/Avatar'
 
 const UserList: React.FC = () => {
   const { data, isLoading } = usePostsAndUsers()
@@ -35,21 +35,24 @@ const UserList: React.FC = () => {
       <div className="p-4 space-y-3">
         {data?.users?.slice(0, 5).map(user => (
           <div key={user.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-            <StandardizedAvatar
-              user={{
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                avatar_seed: user.avatar_seed,
-                avatar_saturation: user.avatar_saturation,
-                avatar_lightness: user.avatar_lightness
-              }}
-              size={40}
-              showName={true}
-              showEmail={true}
-              nameClassName="font-medium"
-              emailClassName="text-sm text-gray-600"
-            />
+            <div className="flex items-center space-x-3">
+              <Avatar
+                username={user.email}
+                name={user.name}
+                avatarSeed={user.avatar_seed}
+                size={40}
+                saturation={user.avatar_saturation}
+                lightness={user.avatar_lightness}
+              />
+              <div>
+                <div className="font-medium">
+                  {user.name || 'Unknown User'}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {user.email || 'No email'}
+                </div>
+              </div>
+            </div>
             <span className={`text-xs px-2 py-1 rounded ${
               user.role === 'admin' ? 'bg-red-100 text-red-800' :
               user.role === 'moderator' ? 'bg-blue-100 text-blue-800' :

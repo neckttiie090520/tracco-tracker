@@ -35,6 +35,7 @@ export function useDashboardStats() {
 }
 
 export function useAdminWorkshops() {
+  const { user } = useAuth()
   const [workshops, setWorkshops] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +55,7 @@ export function useAdminWorkshops() {
 
   const createWorkshop = async (workshopData: any, materials?: any[]) => {
     try {
-      await adminService.createWorkshop(workshopData, materials)
+      await adminService.createWorkshop(workshopData, materials, user?.id)
       await fetchWorkshops() // Refresh the list
     } catch (error) {
       console.error('Error creating workshop:', error)
