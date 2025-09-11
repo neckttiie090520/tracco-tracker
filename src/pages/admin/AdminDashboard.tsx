@@ -352,7 +352,23 @@ export function AdminDashboard() {
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">
-                    {selectedSession?.completion_percentage || 0}%
+                    {(() => {
+                      if (!selectedSession) return 0
+                      
+                      // Calculate overall progress from actual task submission data
+                      const sessionTasks = tasks.filter(task => {
+                        const taskWorkshop = workshops.find(w => w.id === task.workshop_id)
+                        return selectedSession.workshops?.some(sw => sw.id === taskWorkshop?.id)
+                      })
+                      
+                      const totalSubmissions = sessionTasks.reduce((sum, task) => {
+                        return sum + (task.submissions?.[0]?.count || 0)
+                      }, 0)
+                      
+                      const totalPossible = sessionTasks.length * selectedSession.total_participants
+                      
+                      return totalPossible > 0 ? Math.round((totalSubmissions / totalPossible) * 100) : 0
+                    })()}%
                   </div>
                   <div className="text-xs text-gray-500">Overall Progress</div>
                 </div>
