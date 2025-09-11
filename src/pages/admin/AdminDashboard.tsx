@@ -430,13 +430,6 @@ export function AdminDashboard() {
                       {/* Individual Task Cards */}
                       <div className="grid gap-3">
                         {individualTasks.map(task => {
-                          // Debug: log task submissions data
-                          console.log(`Task ${task.title}:`, {
-                            submissions: task.submissions,
-                            submission_mode: task.submission_mode,
-                            actualSubmissionCount: task.submissions?.[0]?.count,
-                            oldLengthMethod: task.submissions?.length
-                          })
                           
                           // Use the total submissions count directly since filtering seems to exclude all
                           // For individual tasks, we want all submissions regardless of status
@@ -526,14 +519,6 @@ export function AdminDashboard() {
                       {/* Group Task Cards */}
                       <div className="grid gap-3">
                         {groupTasks.map(task => {
-                          // Debug: log group task data
-                          console.log(`Group Task ${task.title}:`, {
-                            submissions: task.submissions,
-                            task_groups: task.task_groups,
-                            submission_mode: task.submission_mode,
-                            actualSubmissionCount: task.submissions?.[0]?.count,
-                            oldLengthMethod: task.submissions?.length
-                          })
                           
                           // For group tasks, count total submissions (assuming each represents a group submission)
                           const uniqueGroupSubmissions = task.submissions?.[0]?.count || 0

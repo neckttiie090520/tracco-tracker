@@ -403,8 +403,6 @@ export const adminOperations = {
       throw submissionsError
     }
 
-    console.log('Total submissions fetched:', allSubmissions?.length || 0)
-    console.log('Sample submissions:', allSubmissions?.slice(0, 5))
 
     // Group submissions by task_id
     const submissionsByTask = (allSubmissions || []).reduce((acc, submission) => {
@@ -437,11 +435,6 @@ export const adminOperations = {
         const uniqueGroups = new Set(groupSubmissions.map(sub => sub.group_id))
         task.submissions = [{ count: uniqueGroups.size }]
         
-        console.log(`Group task ${task.title}: ${taskSubmissions.length} total submissions, ${groupSubmissions.length} group submissions, ${uniqueGroups.size} unique groups`)
-      } else {
-        // For individual tasks, log the count for debugging
-        const taskSubmissions = submissionsByTask[task.id] || []
-        console.log(`Individual task ${task.title}: ${taskSubmissions.length} submissions`)
       }
     }
 
