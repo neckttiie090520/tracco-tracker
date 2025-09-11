@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { AlertProvider } from './contexts/AlertContext'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { QueryProvider } from './providers/QueryProvider'
@@ -82,6 +83,7 @@ function App() {
     <ErrorBoundary message="แอปพลิเคชันประสบปัญหา กรุณารีโหลดหน้าเพื่อลองใหม่">
       <QueryProvider>
         <AuthProvider>
+          <AlertProvider>
           <RealtimeProvider>
             
               <Suspense fallback={
@@ -228,8 +230,9 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
-            
+          
           </RealtimeProvider>
+          </AlertProvider>
         </AuthProvider>
       </QueryProvider>
     </ErrorBoundary>
