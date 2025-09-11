@@ -11,7 +11,6 @@ import { WorkshopMaterialsList, WorkshopMaterialDisplay } from '../components/ma
 import TaskMaterialDisplay from '../components/tasks/TaskMaterialDisplay'
 import { MaterialService } from '../services/materials'
 import { Avatar } from '../components/common/Avatar'
-import { StandardizedMemberAvatar } from '../components/common/StandardizedAvatar'
 import type { WorkshopMaterial } from '../types/materials'
 import { groupService } from '../services/groups'
 import { submissionService } from '../services/submissions'
@@ -1039,22 +1038,26 @@ export function WorkshopFeedPage() {
                           return (
                             <div className="px-3 py-2 bg-purple-50 border-t border-purple-100" data-testid="group-card">
                               <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="text-sm text-purple-700 font-medium mb-2 block">สมาชิกในกลุ่ม:</span>
-                                  <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-purple-700 font-medium">สมาชิกในกลุ่ม:</span>
+                                  <div className="flex items-center gap-1">
                                     {displayMembers.map((member, idx) => (
-                                      <div key={member.user_id} className="flex items-center justify-between">
-                                        <StandardizedMemberAvatar
-                                          member={member}
+                                      <div key={member.user_id} className="flex items-center">
+                                        <Avatar
+                                          username={member.user?.email}
+                                          name={member.user?.name}
+                                          avatarSeed={member.user?.avatar_seed}
                                           size={24}
+                                          saturation={member.user?.avatar_saturation}
+                                          lightness={member.user?.avatar_lightness}
                                         />
                                         {member.role === 'owner' && (
-                                          <span className="text-sm text-purple-600 font-medium">Owner 👑</span>
+                                          <span className="text-xs text-purple-600 ml-1">👑</span>
                                         )}
                                       </div>
                                     ))}
                                     {remainingCount > 0 && (
-                                      <span className="text-sm text-purple-600 font-medium">และอีก {remainingCount} คน</span>
+                                      <span className="text-xs text-purple-600 ml-1">+{remainingCount}</span>
                                     )}
                                   </div>
                                 </div>
@@ -1243,7 +1246,7 @@ export function WorkshopFeedPage() {
                                             const newLinks = [...linkObjs, newLink]
                                             try {
                                               if ((task as any).submission_mode === 'group' && g) {
-                                                await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: g.owner_id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
+                                                await submissionService.upsertGroupSubmission({ task_id: task.id, group_id: g.id, links: newLinks, status: 'submitted', updated_at: new Date().toISOString() } as any)
                                                 const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
                                                 setGroupSubmissions(prev => ({ ...prev, [g.id]: refreshed }))
                                               } else if (effective?.id) {
@@ -1343,7 +1346,7 @@ export function WorkshopFeedPage() {
                                                         await fetchWorkshopData()
                                                       } else {
                                                         if ((task as any).submission_mode==='group' && g) {
-                                                          await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: g.owner_id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
+                                                          await submissionService.upsertGroupSubmission({ task_id: task.id, group_id: g.id, links:newLinks, status:'submitted', updated_at:new Date().toISOString() } as any)
                                                           const refreshed = await submissionService.getGroupTaskSubmission(task.id, g.id)
                                                           setGroupSubmissions(prev=>({ ...prev, [g.id]: refreshed }))
                                                         } else if (effective?.id) {
@@ -1404,7 +1407,7 @@ export function WorkshopFeedPage() {
                   if ((task as any).submission_mode==='group' && g){ await submissionService.deleteGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: null })) }
                   else { await submissionService.deleteUserTaskSubmission(user!.id, task.id) }
                 } else {
-                  if ((task as any).submission_mode==='group' && g){ await submissionService.upsertGroupSubmission({ task_id: task.id, user_id: g.owner_id, group_id: g.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any) }
+                  if ((task as any).submission_mode==='group' && g){ await submissionService.upsertGroupSubmission({ task_id: task.id, group_id: g.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any) }
                   else { await supabase.from('submissions').upsert({ task_id: task.id, user_id: user!.id, links: toSave, status:'submitted', updated_at:new Date().toISOString() } as any, { onConflict: 'task_id,user_id' }) }
                 }
                 await fetchWorkshopData(); setEditingTaskId(null)
