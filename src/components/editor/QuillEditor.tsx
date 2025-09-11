@@ -1,11 +1,7 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import dynamic from 'next/dynamic'
+import React, { useEffect, useRef, forwardRef, useImperativeHandle, Suspense, lazy } from 'react'
 
-// Dynamically import ReactQuill to prevent SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>
-})
+// Dynamically import ReactQuill using React.lazy
+const ReactQuill = lazy(() => import('react-quill'))
 
 // Import Quill CSS
 import 'react-quill/dist/quill.snow.css'
@@ -203,19 +199,21 @@ const QuillEditor = forwardRef<QuillEditorRef, QuillEditorProps>(({
     <>
       <style jsx>{editorStyles}</style>
       <div className={`quill-editor-container ${className}`}>
-        <ReactQuill
-          ref={quillRef}
-          theme={theme}
-          value={value}
-          onChange={onChange}
-          readOnly={readOnly}
-          placeholder={placeholder}
-          modules={modules}
-          formats={formats}
-          style={{
-            backgroundColor: readOnly ? 'transparent' : 'white'
-          }}
-        />
+        <Suspense fallback={<p>Loading editor...</p>}>
+          <ReactQuill
+            ref={quillRef}
+            theme={theme}
+            value={value}
+            onChange={onChange}
+            readOnly={readOnly}
+            placeholder={placeholder}
+            modules={modules}
+            formats={formats}
+            style={{
+              backgroundColor: readOnly ? 'transparent' : 'white'
+            }}
+          />
+        </Suspense>
       </div>
     </>
   )

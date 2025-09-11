@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import dynamic from 'next/dynamic'
+import React, { useEffect, useState, Suspense, lazy } from 'react'
 import DOMPurify from 'dompurify'
 
-// Dynamically import ReactQuill to prevent SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => (
-    <div className="animate-pulse">
-      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-    </div>
-  )
-})
+// Dynamically import ReactQuill using React.lazy
+const ReactQuill = lazy(() => import('react-quill'))
 
 // Import Quill CSS
 import 'react-quill/dist/quill.snow.css'
@@ -257,12 +247,20 @@ export default function QuillViewer({ content, html, className = '', style }: Qu
       <>
         <style jsx>{viewerStyles}</style>
         <div className={`quill-viewer ${className}`} style={style}>
-          <ReactQuill
-            value={content}
-            readOnly={true}
-            theme="snow"
-            modules={{ toolbar: false }}
-          />
+          <Suspense fallback={
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+          }>
+            <ReactQuill
+              value={content}
+              readOnly={true}
+              theme="snow"
+              modules={{ toolbar: false }}
+            />
+          </Suspense>
         </div>
       </>
     )
