@@ -190,7 +190,11 @@ export function TaskManagement() {
     setBulkLoading(true)
     try {
       await Promise.all(
-        selectedItems.map(id => updateTask(id, { status: 'archived' }))
+        selectedItems.map(id => updateTask(id, { 
+          is_archived: true, 
+          archived_at: new Date().toISOString(), 
+          is_active: false 
+        }))
       )
       setSelectedItems([])
       alert('Selected tasks have been archived successfully')
