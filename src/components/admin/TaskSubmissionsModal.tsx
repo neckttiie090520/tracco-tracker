@@ -3,6 +3,7 @@ import { useTaskSubmissions } from '../../hooks/useSubmissions'
 import { submissionService } from '../../services/submissions'
 import { useAuth } from '../../hooks/useAuth'
 import { LuckyDrawSlot } from './LuckyDrawSlot'
+import { StandardizedAvatar } from '../common/StandardizedAvatar'
 
 interface TaskSubmissionsModalProps {
   task: any
@@ -445,7 +446,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                       {submission.group_members?.length || 0} คน
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-2">
+                                    <StandardizedAvatar
+                                      user={submission.user}
+                                      size={20}
+                                      showName={false}
+                                      showEmail={false}
+                                    />
                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd"/>
@@ -460,8 +467,16 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                       </summary>
                                       <div className="mt-1 pl-3 space-y-0.5">
                                         {submission.group_members.map((member: any, idx: number) => (
-                                          <div key={idx} className="flex items-center gap-1">
-                                            <span className="text-gray-400">•</span>
+                                          <div key={idx} className="flex items-center gap-2">
+                                            <StandardizedAvatar
+                                              user={{
+                                                name: member.name,
+                                                email: member.email
+                                              }}
+                                              size={16}
+                                              showName={false}
+                                              showEmail={false}
+                                            />
                                             <span className={member.email === submission.user?.email ? 'font-semibold text-green-700' : ''}>
                                               {member.name}
                                               {member.email === submission.user?.email && ' (ผู้ส่ง)'}
@@ -473,14 +488,14 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                   )}
                                 </div>
                               ) : (
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {submission.user?.name}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {submission.user?.email}
-                                  </div>
-                                </div>
+                                <StandardizedAvatar
+                                  user={submission.user}
+                                  size={compact ? 32 : 40}
+                                  showName={true}
+                                  showEmail={true}
+                                  nameClassName="text-sm font-medium text-gray-900"
+                                  emailClassName="text-sm text-gray-500"
+                                />
                               )}
                             </td>
                             <td className={`px-6 ${compact ? 'py-2' : 'py-4'} whitespace-nowrap`}>
@@ -741,13 +756,20 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                       
                       <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 border border-white/30 mt-2">
                         {selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group ? (
-                          <div>
-                            <div className="inline-flex items-center px-3 py-1 bg-blue-500/80 text-white rounded-full text-xs font-medium mb-2">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="inline-flex items-center px-3 py-1 bg-blue-500/80 text-white rounded-full text-xs font-medium mb-3">
                               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                               </svg>
                               GROUP WINNER
                             </div>
+                            <StandardizedAvatar
+                              user={selectedSubmissionItems.user}
+                              size={64}
+                              showName={false}
+                              showEmail={false}
+                              className="ring-4 ring-white/50 mb-3"
+                            />
                             <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl mb-2 leading-tight">
                               {selectedSubmissionItems.group.name}
                             </div>
@@ -756,13 +778,20 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                             </div>
                           </div>
                         ) : (
-                          <div>
-                            <div className="inline-flex items-center px-3 py-1 bg-green-500/80 text-white rounded-full text-xs font-medium mb-2">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="inline-flex items-center px-3 py-1 bg-green-500/80 text-white rounded-full text-xs font-medium mb-3">
                               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
                               INDIVIDUAL WINNER
                             </div>
+                            <StandardizedAvatar
+                              user={selectedSubmissionItems.user}
+                              size={64}
+                              showName={false}
+                              showEmail={false}
+                              className="ring-4 ring-white/50 mb-3"
+                            />
                             <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl leading-tight">
                               {selectedSubmissionItems.user?.name || luckyWinner}
                             </div>
@@ -823,9 +852,15 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                       </div>
                       
                       <div className="border-l-4 border-green-500 pl-3 py-2 bg-green-50 rounded-r">
-                        <div className="text-xs font-medium text-green-700 uppercase tracking-wider mb-1">ผู้ส่งงาน</div>
-                        <div className="text-sm text-gray-900 font-medium">{selectedSubmissionItems.user?.name || 'Unknown'}</div>
-                        <div className="text-xs text-gray-600">{selectedSubmissionItems.user?.email || 'No email'}</div>
+                        <div className="text-xs font-medium text-green-700 uppercase tracking-wider mb-2">ผู้ส่งงาน</div>
+                        <StandardizedAvatar
+                          user={selectedSubmissionItems.user}
+                          size={32}
+                          showName={true}
+                          showEmail={true}
+                          nameClassName="text-sm text-gray-900 font-medium"
+                          emailClassName="text-xs text-gray-600"
+                        />
                       </div>
                       
                       {selectedSubmissionItems.group_members && selectedSubmissionItems.group_members.length > 0 && (
@@ -835,11 +870,20 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                             {selectedSubmissionItems.group_members.map((member: any, idx: number) => {
                               const isSubmitter = member?.email === selectedSubmissionItems.user?.email
                               return (
-                                <div key={idx} className={`flex items-center gap-2 p-2 rounded text-sm ${
+                                <div key={idx} className={`flex items-center gap-3 p-2 rounded text-sm ${
                                   isSubmitter
                                     ? 'bg-green-100 border border-green-300' 
                                     : 'bg-white border border-gray-200'
                                 }`}>
+                                  <StandardizedAvatar
+                                    user={{
+                                      name: member?.name,
+                                      email: member?.email
+                                    }}
+                                    size={24}
+                                    showName={false}
+                                    showEmail={false}
+                                  />
                                   <span className={isSubmitter ? 'font-semibold text-green-800' : 'text-gray-700'}>
                                     {member?.name || 'Unknown'}
                                     {isSubmitter && ' (ผู้ส่ง)'}
@@ -852,15 +896,16 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                       )}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</p>
-                        <p className="text-sm text-gray-900 mt-1">{selectedSubmissionItems.user?.name || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</p>
-                        <p className="text-sm text-gray-900 mt-1">{selectedSubmissionItems.user?.email || 'N/A'}</p>
-                      </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Student Information</p>
+                      <StandardizedAvatar
+                        user={selectedSubmissionItems.user}
+                        size={40}
+                        showName={true}
+                        showEmail={true}
+                        nameClassName="text-sm text-gray-900"
+                        emailClassName="text-sm text-gray-500"
+                      />
                     </div>
                   )}
                 </div>
