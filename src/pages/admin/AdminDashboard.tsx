@@ -115,6 +115,7 @@ export function AdminDashboard() {
         // Get total tasks using global task data (bypass session workshop linking issue)
         let totalTasks = 0
         let sessionWorkshops: any[] = []
+        let activeTasks = 0
         
         try {
           // First get workshop IDs for this session
@@ -132,6 +133,9 @@ export function AdminDashboard() {
               workshopIds.includes(task.workshop_id)
             )
             totalTasks = sessionTasks.length
+            
+            // Also count only active tasks for display purposes
+            activeTasks = sessionTasks.filter(task => task.is_active && !task.is_archived).length
           }
         } catch (error) {
           console.error('Error fetching tasks for session:', error)
@@ -142,28 +146,29 @@ export function AdminDashboard() {
         let completionPercentage = 0
         let actualSubmissions = 0
         
-        if (totalTasks > 0 && participantCount > 0) {
+        if (activeTasks > 0 && participantCount > 0) {
           // Get workshop IDs again for submissions query  
           const workshopIds = sessionWorkshops?.map(sw => sw.workshop_id) || []
           
           if (workshopIds.length > 0) {
-            // Get task IDs for this session (including ALL tasks - not just active ones)
-            const sessionTasks = tasks.filter(task => 
-              workshopIds.includes(task.workshop_id)
+            // Get ONLY ACTIVE task IDs for this session for submission counting
+            const activeSessionTasks = tasks.filter(task => 
+              workshopIds.includes(task.workshop_id) && task.is_active && !task.is_archived
             )
-            const taskIds = sessionTasks.map(task => task.id)
+            const activeTaskIds = activeSessionTasks.map(task => task.id)
             
-            if (taskIds.length > 0) {
-              // Count submissions for these specific tasks
+            if (activeTaskIds.length > 0) {
+              // Count submissions for these ACTIVE tasks only
               const { count: submissionsCount } = await supabase
                 .from('submissions')
                 .select('*', { count: 'exact', head: true })
-                .in('task_id', taskIds)
+                .in('task_id', activeTaskIds)
               
               actualSubmissions = submissionsCount || 0
             }
             
-            const totalPossibleSubmissions = totalTasks * participantCount
+            // Calculate completion based on active tasks only
+            const totalPossibleSubmissions = activeTasks * participantCount
             completionPercentage = totalPossibleSubmissions > 0 
               ? Math.min(100, Math.round(actualSubmissions / totalPossibleSubmissions * 100))
               : 0
@@ -177,7 +182,7 @@ export function AdminDashboard() {
           description: session.description || '',
           total_participants: participantCount || 0,
           total_workshops: workshopCount || 0,
-          total_tasks: totalTasks,
+          total_tasks: activeTasks, // Show only active tasks in the display
           total_submissions: actualSubmissions,
           completion_percentage: completionPercentage,
           is_active: session.is_active
