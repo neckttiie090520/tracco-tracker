@@ -108,7 +108,7 @@ export function ProfileButton({
         >
           <Avatar
             username={user.email}
-            name={userProfile?.name || user.email}
+            name={userProfile?.name}
             avatarSeed={userProfile?.avatar_seed}
             size={compact ? 28 : 32}
             saturation={userProfile?.avatar_saturation}
@@ -138,7 +138,7 @@ export function ProfileButton({
               <div className="flex items-center space-x-3">
                 <Avatar
                   username={user.email}
-                  name={userProfile?.name || user.email}
+                  name={userProfile?.name}
                   avatarSeed={userProfile?.avatar_seed}
                   size={44}
                   saturation={userProfile?.avatar_saturation}

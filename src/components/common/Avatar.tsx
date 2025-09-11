@@ -22,7 +22,14 @@ export function Avatar({
   className = '',
   onClick 
 }: AvatarProps) {
-  const baseSeed = avatarSeed || username || name || 'anonymous'
+  // Always prioritize avatarSeed, then username (email) for consistency
+  // Only use name as last resort to avoid inconsistency from name variations
+  const baseSeed = useMemo(() => {
+    if (avatarSeed && avatarSeed.trim()) return avatarSeed.trim()
+    if (username && username.trim()) return username.trim()
+    if (name && name.trim()) return name.trim()
+    return 'anonymous'
+  }, [avatarSeed, username, name])
   
   // Generate seed for different avatar styles
   // For predefined styles, use variants to get different shapes
