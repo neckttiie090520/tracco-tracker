@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { QueryProvider } from './providers/QueryProvider'
@@ -82,9 +82,7 @@ function App() {
     <ErrorBoundary message="แอปพลิเคชันเกิดข้อผิดพลาด กรุณาโหลดหน้าใหม่">
       <QueryProvider>
         <AuthProvider>
-          <RealtimeProvider>
-            <BrowserRouter>
-              <Suspense fallback={
+          <RealtimeProvider><Suspense fallback={
                   <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
@@ -111,9 +109,7 @@ function App() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="*" element={<NotFoundPage />} />
                 </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </RealtimeProvider>
+              </Suspense></RealtimeProvider>
         </AuthProvider>
       </QueryProvider>
     </ErrorBoundary>
