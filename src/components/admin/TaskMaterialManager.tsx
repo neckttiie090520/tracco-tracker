@@ -19,6 +19,14 @@ interface AddTaskMaterialModalProps {
   isLoading: boolean;
 }
 
+interface EditTaskMaterialModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (material: CreateTaskMaterialRequest) => void;
+  material: TaskMaterial;
+  isLoading: boolean;
+}
+
 function AddTaskMaterialModal({ isOpen, onClose, onAdd, isLoading }: AddTaskMaterialModalProps) {
   const [url, setUrl] = useState('');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('title');
@@ -323,8 +331,323 @@ function AddTaskMaterialModal({ isOpen, onClose, onAdd, isLoading }: AddTaskMate
   return createPortal(modalContent, document.body);
 }
 
+function EditTaskMaterialModal({ isOpen, onClose, onSave, material, isLoading }: EditTaskMaterialModalProps) {
+  const [url, setUrl] = useState(material.url);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(material.display_mode);
+  const [customTitle, setCustomTitle] = useState(material.title);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<{
+    valid: boolean;
+    canEmbed: boolean;
+    suggestedTitle: string;
+    materialType?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setUrl(material.url);
+      setDisplayMode(material.display_mode);
+      setCustomTitle(material.title);
+      setValidationResult({
+        valid: true,
+        canEmbed: !!material.embed_url,
+        suggestedTitle: material.title
+      });
+    }
+  }, [isOpen, material]);
+
+  const validateUrl = useCallback(async (inputUrl: string) => {
+    if (!inputUrl.trim()) {
+      setValidationResult(null);
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const metadata = await fetchUrlMetadata(inputUrl);
+      const materialType = detectMaterialType(inputUrl);
+      
+      setValidationResult({
+        valid: true,
+        canEmbed: metadata.canEmbed,
+        suggestedTitle: metadata.title,
+        materialType
+      });
+    } catch (error) {
+      setValidationResult({
+        valid: false,
+        canEmbed: false,
+        suggestedTitle: 'Invalid URL'
+      });
+    }
+    setIsValidating(false);
+  }, []);
+
+  const handleUrlChange = (newUrl: string) => {
+    setUrl(newUrl);
+    if (newUrl !== material.url) {
+      validateUrl(newUrl);
+    }
+  };
+
+  const getPreviewMaterial = useCallback(() => {
+    if (!validationResult?.valid || !url.trim()) return null;
+
+    return {
+      id: 'preview',
+      workshop_id: 'preview',
+      title: customTitle.trim() || validationResult.suggestedTitle,
+      type: detectMaterialType(url),
+      url: url.trim(),
+      embed_url: validationResult.canEmbed ? convertToEmbedUrl(url.trim(), detectMaterialType(url)) : undefined,
+      display_mode: displayMode,
+      dimensions: getDefaultDimensions(detectMaterialType(url)),
+      order_index: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      metadata: {
+        title: validationResult.suggestedTitle,
+        favicon: getFaviconUrl(url)
+      }
+    };
+  }, [url, customTitle, validationResult, displayMode]);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!url.trim() || !validationResult?.valid) return;
+
+    const materialType = detectMaterialType(url);
+    const dimensions = getDefaultDimensions(materialType);
+
+    onSave({
+      task_id: material.task_id,
+      url: url.trim(),
+      display_mode: displayMode,
+      title: customTitle.trim() || validationResult.suggestedTitle,
+      dimensions
+    });
+  };
+
+  const resetForm = () => {
+    setUrl(material.url);
+    setCustomTitle(material.title);
+    setDisplayMode(material.display_mode);
+    setValidationResult({
+      valid: true,
+      canEmbed: !!material.embed_url,
+      suggestedTitle: material.title
+    });
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  const modalContent = (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Edit Task Material</h2>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* URL Input */}
+            <div>
+              <label htmlFor="material-url" className="block text-sm font-medium text-gray-700 mb-2">
+                Material URL *
+              </label>
+              <input
+                id="material-url"
+                type="url"
+                value={url}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                placeholder="https://docs.google.com/document/d/... or https://www.canva.com/design/.../view"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+              
+              {/* URL Validation Status */}
+              {isValidating && (
+                <div className="mt-2 flex items-center text-sm text-gray-600">
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Checking URL...
+                </div>
+              )}
+              
+              {validationResult && !isValidating && (
+                <div className={`mt-2 text-sm ${validationResult.valid ? 'text-green-600' : 'text-red-600'}`}>
+                  {validationResult.valid ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Valid URL detected
+                      </div>
+                      {validationResult.materialType && (
+                        <div className="text-xs text-gray-500">
+                          Type: {validationResult.materialType.replace('_', ' ')}
+                        </div>
+                      )}
+                      {!validationResult.canEmbed && (
+                        <div className="text-xs text-yellow-600">
+                          ⚠️ This URL cannot be embedded. Only Title and Link modes available.
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      Invalid or unsupported URL
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Custom Title */}
+            <div>
+              <label htmlFor="material-title" className="block text-sm font-medium text-gray-700 mb-2">
+                Custom Title (optional)
+              </label>
+              <input
+                id="material-title"
+                type="text"
+                value={customTitle}
+                onChange={(e) => setCustomTitle(e.target.value)}
+                placeholder={validationResult?.suggestedTitle || 'Enter custom title...'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {validationResult?.suggestedTitle && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Suggested: {validationResult.suggestedTitle}
+                </p>
+              )}
+            </div>
+
+            {/* Display Mode */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Display Mode *
+              </label>
+              <div className="space-y-3">
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="radio"
+                    name="display-mode"
+                    value="title"
+                    checked={displayMode === 'title'}
+                    onChange={(e) => setDisplayMode(e.target.value as DisplayMode)}
+                    className="mt-1"
+                  />
+                  <div>
+                    <div className="font-medium">Title</div>
+                    <div className="text-xs text-gray-500">
+                      Show favicon and title as styled card
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="radio"
+                    name="display-mode"
+                    value="link"
+                    checked={displayMode === 'link'}
+                    onChange={(e) => setDisplayMode(e.target.value as DisplayMode)}
+                    className="mt-1"
+                  />
+                  <div>
+                    <div className="font-medium">Link</div>
+                    <div className="text-xs text-gray-500">
+                      Show full URL with styled card
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="radio"
+                    name="display-mode"
+                    value="embed"
+                    checked={displayMode === 'embed'}
+                    onChange={(e) => setDisplayMode(e.target.value as DisplayMode)}
+                    disabled={!validationResult?.canEmbed}
+                    className="mt-1"
+                  />
+                  <div>
+                    <div className={`font-medium ${!validationResult?.canEmbed ? 'text-gray-400' : ''}`}>
+                      Embed
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Show interactive preview (iframe)
+                      {!validationResult?.canEmbed && ' - Not available for this URL'}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Preview */}
+            {getPreviewMaterial() && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Preview - {displayMode.charAt(0).toUpperCase() + displayMode.slice(1)} Mode
+                </label>
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <WorkshopMaterialDisplay material={getPreviewMaterial()!} />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  This is how the material will appear to participants
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSubmit()}
+                disabled={!url.trim() || !validationResult?.valid || isLoading}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? 'Updating...' : 'Update Material'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(modalContent, document.body);
+}
+
 export function TaskMaterialManager({ taskId, materials, onMaterialsChange, className = '' }: TaskMaterialManagerProps) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<TaskMaterial | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddMaterial = async (materialRequest: CreateTaskMaterialRequest) => {
@@ -358,6 +681,44 @@ export function TaskMaterialManager({ taskId, materials, onMaterialsChange, clas
     } catch (error) {
       console.error('Error adding task material:', error);
       // Handle error (show toast notification, etc.)
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditMaterial = (material: TaskMaterial) => {
+    setEditingMaterial(material);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedMaterial = async (materialRequest: CreateTaskMaterialRequest) => {
+    if (!editingMaterial) return;
+    
+    setIsLoading(true);
+    try {
+      if (!materialRequest.url || !materialRequest.url.trim()) {
+        console.error('Cannot update material without URL');
+        return;
+      }
+      
+      const updatedMaterial: TaskMaterial = {
+        ...editingMaterial,
+        title: materialRequest.title || '',
+        type: detectMaterialType(materialRequest.url),
+        url: materialRequest.url,
+        embed_url: canEmbed(detectMaterialType(materialRequest.url)) 
+          ? convertToEmbedUrl(materialRequest.url, detectMaterialType(materialRequest.url))
+          : undefined,
+        display_mode: materialRequest.display_mode,
+        dimensions: materialRequest.dimensions,
+        updated_at: new Date().toISOString()
+      };
+
+      onMaterialsChange(materials.map(m => m.id === editingMaterial.id ? updatedMaterial : m));
+      setShowEditModal(false);
+      setEditingMaterial(null);
+    } catch (error) {
+      console.error('Error updating task material:', error);
     } finally {
       setIsLoading(false);
     }
@@ -449,6 +810,16 @@ export function TaskMaterialManager({ taskId, materials, onMaterialsChange, clas
                   </button>
                   
                   <button
+                    onClick={() => handleEditMaterial(material)}
+                    className="p-1 text-indigo-400 hover:text-indigo-600"
+                    title="Edit material"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  
+                  <button
                     onClick={() => handleDeleteMaterial(material.id)}
                     className="p-1 text-red-400 hover:text-red-600"
                     title="Delete material"
@@ -478,6 +849,19 @@ export function TaskMaterialManager({ taskId, materials, onMaterialsChange, clas
         onAdd={handleAddMaterial}
         isLoading={isLoading}
       />
+
+      {editingMaterial && (
+        <EditTaskMaterialModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingMaterial(null);
+          }}
+          onSave={handleSaveEditedMaterial}
+          material={editingMaterial}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }
