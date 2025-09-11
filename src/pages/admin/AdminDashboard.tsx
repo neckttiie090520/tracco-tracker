@@ -293,15 +293,28 @@ export function AdminDashboard() {
             <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Session Progress: {selectedSession.title}</h3>
-                  <p className="text-sm text-gray-500">Real-time workshop completion tracking</p>
+                  <h3 className="text-lg font-semibold text-gray-900">Session Progress</h3>
+                  <div className="flex items-center gap-3 mt-1">
+                    <select 
+                      value={selectedSession.id} 
+                      onChange={(e) => {
+                        const session = sessions.find(s => s.id === e.target.value)
+                        if (session) setSelectedSession(session)
+                      }}
+                      className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white"
+                    >
+                      {sessions.map(session => (
+                        <option key={session.id} value={session.id}>
+                          {session.title}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-sm text-gray-500">Real-time workshop completion tracking</span>
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">
-                    {selectedSession && taskStats.totalTasks > 0 && selectedSession.total_participants > 0
-                      ? Math.round((taskStats.totalSubmissions / (taskStats.totalTasks * selectedSession.total_participants)) * 100)
-                      : 0
-                    }%
+                    {selectedSession?.completion_percentage || 0}%
                   </div>
                   <div className="text-xs text-gray-500">Overall Progress</div>
                 </div>
@@ -317,12 +330,15 @@ export function AdminDashboard() {
                   <div className="text-sm text-gray-600">Workshops</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{taskStats.totalTasks}</div>
+                  <div className="text-2xl font-bold text-purple-600">{selectedSession.total_tasks}</div>
                   <div className="text-sm text-gray-600">Total Tasks</div>
                 </div>
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {taskStats.totalSubmissions}
+                    {selectedSession.total_participants > 0 && selectedSession.total_tasks > 0 
+                      ? Math.round((selectedSession.completion_percentage * selectedSession.total_participants * selectedSession.total_tasks) / 100)
+                      : 0
+                    }
                   </div>
                   <div className="text-sm text-gray-600">Total Submissions</div>
                 </div>
