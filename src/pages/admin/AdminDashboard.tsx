@@ -371,7 +371,7 @@ export function AdminDashboard() {
                 </div>
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">
-                    {selectedSession.total_submissions || 0}
+                    {selectedSession.total_submissions || taskStats.totalSubmissions || 0}
                   </div>
                   <div className="text-sm text-gray-600">Total Submissions</div>
                 </div>
@@ -382,8 +382,8 @@ export function AdminDashboard() {
                   <div
                     className="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-1000"
                     style={{ 
-                      width: `${selectedSession && taskStats.totalTasks > 0 && selectedSession.total_participants > 0
-                        ? Math.round((taskStats.totalSubmissions / (taskStats.totalTasks * selectedSession.total_participants)) * 100)
+                      width: `${selectedSession && selectedSession.total_tasks > 0 && selectedSession.total_participants > 0
+                        ? Math.round(((selectedSession.total_submissions || taskStats.totalSubmissions) / (selectedSession.total_tasks * selectedSession.total_participants)) * 100)
                         : 0
                       }%` 
                     }}
