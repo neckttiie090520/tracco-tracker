@@ -1425,13 +1425,93 @@ export function WorkshopFeedPage() {
                                 </div>
                               )}
                               <div className="space-y-3">
-                                <input
-                                  type="url"
-                                  value={submissionUrl}
-                                  onChange={(e) => setSubmissionUrl(e.target.value)}
-                                  placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
-                                />
+                                {/* Header with multi-link indicator */}
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium text-gray-700">📎 ส่งลิงก์งาน</span>
+                                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                      รองรับหลาย URL
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    สามารถส่งได้หลายลิงก์ 
+                                  </span>
+                                </div>
+
+                                {/* Display existing draft links */}
+                                {draftLinks[task.id] && draftLinks[task.id].length > 0 && (
+                                  <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-xs font-medium text-gray-600 mb-2">
+                                      ลิงก์ที่จะส่ง ({draftLinks[task.id].length} รายการ)
+                                    </p>
+                                    {draftLinks[task.id].map((link, index) => (
+                                      <div key={index} className="flex items-center gap-2">
+                                        <span className="text-xs text-gray-500">#{index + 1}</span>
+                                        <input
+                                          type="url"
+                                          value={link}
+                                          onChange={(e) => {
+                                            const newLinks = [...draftLinks[task.id]]
+                                            newLinks[index] = e.target.value
+                                            setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
+                                          }}
+                                          className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                                          placeholder={`ลิงก์ที่ ${index + 1}`}
+                                        />
+                                        <button
+                                          onClick={() => {
+                                            const newLinks = draftLinks[task.id].filter((_, i) => i !== index)
+                                            setDraftLinks(prev => ({ ...prev, [task.id]: newLinks }))
+                                          }}
+                                          className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                          title="ลบลิงก์นี้"
+                                        >
+                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* Main URL input */}
+                                <div className="space-y-2">
+                                  <input
+                                    type="url"
+                                    value={submissionUrl}
+                                    onChange={(e) => setSubmissionUrl(e.target.value)}
+                                    placeholder="https://drive.google.com/... หรือ https://docs.google.com/..."
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"
+                                  />
+                                  
+                                  {/* Add more links button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (submissionUrl.trim()) {
+                                        const currentLinks = draftLinks[task.id] || []
+                                        setDraftLinks(prev => ({ 
+                                          ...prev, 
+                                          [task.id]: [...currentLinks, submissionUrl.trim()] 
+                                        }))
+                                        setSubmissionUrl('')
+                                      }
+                                    }}
+                                    className="w-full py-2 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    เพิ่มลิงก์อื่นๆ (Google Drive, Canva, GitHub, etc.)
+                                  </button>
+                                </div>
+
+                                {/* Helper text */}
+                                <div className="bg-blue-50 rounded-lg p-2 text-xs text-blue-700">
+                                  <p className="font-semibold mb-1">💡 คุณสามารถส่งลิงก์ได้หลายลิงก์</p>
+                                  <p className="text-xs">เหมาะสำหรับ: Presentation + Source Code, Design + Documentation</p>
+                                </div>
                                 
                                 <textarea
                                   value={submissionNotes}
@@ -1444,16 +1524,18 @@ export function WorkshopFeedPage() {
                                 <div className="flex gap-2">
                                   <button
                                     onClick={() => handleTaskSubmission(task.id)}
-                                    disabled={!submissionUrl.trim()}
+                                    disabled={!submissionUrl.trim() && (!draftLinks[task.id] || draftLinks[task.id].length === 0)}
                                     className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
-                                    ส่งงาน
+                                    ส่งงาน {(draftLinks[task.id]?.length || 0) + (submissionUrl.trim() ? 1 : 0) > 0 && 
+                                      `(${(draftLinks[task.id]?.length || 0) + (submissionUrl.trim() ? 1 : 0)} ลิงก์)`}
                                   </button>
                                   <button
                                     onClick={() => {
                                       setEditingTaskId(null)
                                       setSubmissionUrl('')
                                       setSubmissionNotes('')
+                                      setDraftLinks(prev => ({ ...prev, [task.id]: [] }))
                                     }}
                                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                                   >
