@@ -397,7 +397,7 @@ export function TaskManagement() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 pb-32" style={{maxHeight: '80vh', minHeight: '80vh'}}>
+        <div className="flex-1 overflow-y-auto p-6 pb-8" style={{maxHeight: '80vh', minHeight: '80vh'}}>
           {/* Quick Status Tabs */}
         {tasks.length > 0 && (
           <div className="bg-white rounded-lg border border-gray-200 p-2 mb-4">
@@ -538,7 +538,7 @@ export function TaskManagement() {
           </div>
 
           {/* Tasks Table */}
-          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-32">
+          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-8">
             {/* Table Header with Refresh Button */}
             <div className="flex items-center justify-end px-6 py-3 bg-gray-50 border-b border-gray-200">
               <button

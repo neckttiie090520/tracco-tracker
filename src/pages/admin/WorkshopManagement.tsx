@@ -316,7 +316,7 @@ export function WorkshopManagement() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 pb-32" style={{maxHeight: '80vh', minHeight: '80vh'}}>
+        <div className="flex-1 overflow-y-auto p-6 pb-8" style={{maxHeight: '80vh', minHeight: '80vh'}}>
 
         {/* Quick Status Tabs */}
         {workshops.length > 0 && (
@@ -379,7 +379,7 @@ export function WorkshopManagement() {
         </div>
 
           {/* Workshops Table */}
-          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-32">
+          <div className="bg-white rounded-lg shadow-sm overflow-visible mb-8">
             {/* Bulk Action Bar */}
             {filteredWorkshops.length > 0 && (
               <BulkActionBar
