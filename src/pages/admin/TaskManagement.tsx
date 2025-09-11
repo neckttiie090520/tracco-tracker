@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useAdminTasks } from '../../hooks/useAdminData'
+import { useAlert } from '../../contexts/AlertContext'
 import { AdminNavigation } from '../../components/admin/AdminNavigation'
 import { CreateTaskModal } from '../../components/admin/CreateTaskModal'
 import { EditTaskModal } from '../../components/admin/EditTaskModal'
@@ -12,6 +13,7 @@ import { TaskGroupsModal } from '../../components/admin/TaskGroupsModal'
 
 export function TaskManagement() {
   const { tasks, workshops, loading, error, createTask, updateTask, deleteTask, refetch } = useAdminTasks()
+  const { showError, showSuccess } = useAlert()
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingTask, setEditingTask] = useState<any>(null)
   const [viewingSubmissions, setViewingSubmissions] = useState<any>(null)
@@ -83,7 +85,7 @@ export function TaskManagement() {
       setSelectedItems(prev => prev.filter(id => id !== deleteConfirm.task.id))
     } catch (error) {
       console.error('Failed to delete task:', error)
-      alert(`Failed to delete task: ${error.message || error}`)
+      showError(`Failed to delete task: ${error.message || error}`)
     } finally {
       setDeleteLoading(false)
     }
@@ -145,10 +147,10 @@ export function TaskManagement() {
         selectedItems.map(id => updateTask(id, { is_active: false }))
       )
       setSelectedItems([])
-      alert('Selected tasks have been hidden successfully')
+      showSuccess('Selected tasks have been hidden successfully')
     } catch (error) {
       console.error('Error hiding tasks:', error)
-      alert('Failed to hide selected tasks')
+      showError('Failed to hide selected tasks')
     } finally {
       setBulkLoading(false)
     }
@@ -161,10 +163,10 @@ export function TaskManagement() {
         selectedItems.map(id => updateTask(id, { is_active: true }))
       )
       setSelectedItems([])
-      alert('Selected tasks have been shown successfully')
+      showSuccess('Selected tasks have been shown successfully')
     } catch (error) {
       console.error('Error showing tasks:', error)
-      alert('Failed to show selected tasks')
+      showError('Failed to show selected tasks')
     } finally {
       setBulkLoading(false)
     }
@@ -177,10 +179,10 @@ export function TaskManagement() {
         selectedItems.map(id => deleteTask(id))
       )
       setSelectedItems([])
-      alert('Selected tasks have been deleted successfully')
+      showSuccess('Selected tasks have been deleted successfully')
     } catch (error) {
       console.error('Error deleting tasks:', error)
-      alert('Failed to delete selected tasks')
+      showError('Failed to delete selected tasks')
     } finally {
       setBulkLoading(false)
     }
@@ -197,10 +199,10 @@ export function TaskManagement() {
         }))
       )
       setSelectedItems([])
-      alert('Selected tasks have been archived successfully')
+      showSuccess('Selected tasks have been archived successfully')
     } catch (error) {
       console.error('Error archiving tasks:', error)
-      alert('Failed to archive selected tasks')
+      showError('Failed to archive selected tasks')
     } finally {
       setBulkLoading(false)
     }
@@ -214,10 +216,10 @@ export function TaskManagement() {
       )
       setSelectedItems([])
       refetch()
-      alert('Selected tasks have been restored successfully')
+      showSuccess('Selected tasks have been restored successfully')
     } catch (error) {
       console.error('Error restoring tasks:', error)
-      alert('Failed to restore selected tasks')
+      showError('Failed to restore selected tasks')
     } finally {
       setBulkLoading(false)
     }
@@ -271,10 +273,10 @@ export function TaskManagement() {
       for (const task of sampleTasks) {
         await createTask(task)
       }
-      alert('à¸ªà¸£à¹‰à¸²à¸‡ sample tasks à¸ªà¸³à¹€à¸£à¹‡à¸ˆ!')
+      showSuccess('สร้าง sample tasks สำเร็จ!')
     } catch (error) {
       console.error('Error creating sample tasks:', error)
-      alert('à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¸ªà¸£à¹‰à¸²à¸‡ sample tasks')
+      showError('à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¸ªà¸£à¹‰à¸²à¸‡ sample tasks')
     }
   }
 
