@@ -912,22 +912,19 @@ export function SessionManager() {
         throw error
       }
 
-      // Add materials if provided
+      // Add materials if provided (similar to Workshop approach)
       if (materials && materials.length > 0 && sessionResult) {
         try {
-          // Filter out materials with temporary IDs and prepare them for saving
-          const validMaterials = materials
-            .filter(m => m.url && m.url.trim() !== '')
-            .map((m) => ({
-              url: m.url,
-              display_mode: m.display_mode || 'title',
-              title: m.title || '',
-              dimensions: m.dimensions || null
-            }))
-          
-          if (validMaterials.length > 0) {
-            await MaterialService.replaceSessionMaterials(sessionResult.id, validMaterials)
+          console.log('📚 Creating materials for session:', sessionResult.id)
+          for (const material of materials) {
+            const materialData = {
+              ...material,
+              session_id: sessionResult.id,
+            }
+            delete materialData.id // Remove temporary ID
+            await MaterialService.createSessionMaterial(materialData)
           }
+          console.log('✅ Session materials created successfully')
         } catch (materialError) {
           console.error('Error adding session materials:', materialError)
           // Continue even if materials fail to save
@@ -1007,27 +1004,32 @@ export function SessionManager() {
         throw error
       }
 
-      // Replace session materials with current list from editor
+      // Replace session materials (similar to Workshop approach)
       if (materials !== undefined) {
         try {
-          // Filter out materials with temporary IDs and prepare them for saving
-          const validMaterials = materials
-            .filter(m => m.url && m.url.trim() !== '')
-            .map((m) => ({
-              url: m.url,
-              display_mode: m.display_mode || 'title',
-              title: m.title || '',
-              dimensions: m.dimensions || null
-            }))
+          // First delete existing materials
+          console.log('🗑️ Deleting existing materials for session:', sessionId)
+          const { error: deleteError } = await supabase
+            .from('session_materials')
+            .delete()
+            .eq('session_id', sessionId)
           
-          if (validMaterials.length > 0) {
-            await MaterialService.replaceSessionMaterials(sessionId, validMaterials)
-          } else {
-            // If no materials, delete all existing ones
-            await supabase
-              .from('session_materials')
-              .delete()
-              .eq('session_id', sessionId)
+          if (deleteError) {
+            console.error('Error deleting existing materials:', deleteError)
+          }
+
+          // Then create new materials
+          if (materials && materials.length > 0) {
+            console.log('📚 Creating new materials for session:', sessionId)
+            for (const material of materials) {
+              const materialData = {
+                ...material,
+                session_id: sessionId,
+              }
+              delete materialData.id // Remove temporary ID
+              await MaterialService.createSessionMaterial(materialData)
+            }
+            console.log('✅ Session materials updated successfully')
           }
         } catch (materialError) {
           console.error('Error updating session materials:', materialError)
