@@ -430,6 +430,13 @@ export function AdminDashboard() {
                       {/* Individual Task Cards */}
                       <div className="grid gap-3">
                         {individualTasks.map(task => {
+                          // Debug: log task submissions data
+                          console.log(`Task ${task.title}:`, {
+                            submissions: task.submissions,
+                            submission_mode: task.submission_mode,
+                            totalSubmissions: task.submissions?.length
+                          })
+                          
                           const taskSubmissions = task.submissions?.filter(s => s.status === 'submitted' && !s.group_id).length || 0
                           const taskProgress = selectedSession.total_participants > 0 
                             ? Math.round((taskSubmissions / selectedSession.total_participants) * 100) 
@@ -519,6 +526,13 @@ export function AdminDashboard() {
                       {/* Group Task Cards */}
                       <div className="grid gap-3">
                         {groupTasks.map(task => {
+                          // Debug: log group task data
+                          console.log(`Group Task ${task.title}:`, {
+                            submissions: task.submissions,
+                            task_groups: task.task_groups,
+                            submission_mode: task.submission_mode
+                          })
+                          
                           const uniqueGroupSubmissions = new Set(
                             task.submissions?.filter(s => s.status === 'submitted' && s.group_id).map(s => s.group_id)
                           ).size
