@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { WorkshopMaterial, CreateMaterialRequest, DisplayMode } from '../../types/materials';
 import { detectMaterialType, convertToEmbedUrl, canEmbed, getDefaultDimensions, getFaviconUrl } from '../../utils/materialUtils';

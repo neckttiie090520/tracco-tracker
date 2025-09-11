@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './components/AuthProvider'
 import { RealtimeProvider } from './components/providers/RealtimeProvider'
 import { QueryProvider } from './providers/QueryProvider'
@@ -79,20 +79,20 @@ const GroupSettingsPage = createLazyComponent(
 
 function App() {
   return (
-    <ErrorBoundary message="????????????????????? ???????????????????????????">
+    <ErrorBoundary message="แอปพลิเคชันเกิดข้อผิดพลาด กรุณาโหลดหน้าใหม่">
       <QueryProvider>
         <AuthProvider>
-          <AlertProvider>
-            <RealtimeProvider>
+          <RealtimeProvider>
+            <BrowserRouter>
               <Suspense fallback={
-                <div className="flex items-center justify-center min-h-screen">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-                    <p className="text-gray-600">?????????...</p>
+                  <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                      <p className="text-gray-600">กำลังโหลด...</p>
+                    </div>
                   </div>
-                </div>
-              }>
-              <Routes>
+                }>
+                <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                 <Route path="/workshops/:id" element={<ProtectedRoute><WorkshopFeedPage /></ProtectedRoute>} />
@@ -110,12 +110,14 @@ function App() {
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </Suspense>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
           </RealtimeProvider>
-          </AlertProvider>
         </AuthProvider>
       </QueryProvider>
     </ErrorBoundary>
   )
-}export default App
+}
+
+export default App
