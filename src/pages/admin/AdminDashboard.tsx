@@ -127,15 +127,22 @@ export function AdminDashboard() {
             const workshopIds = sessionWorkshops.map(sw => sw.workshop_id)
             console.log('Workshop IDs:', workshopIds)
             
-            // Count active tasks for these workshops
-            const { data: tasks } = await supabase
+            // Count ALL tasks for these workshops (including archived)
+            const { data: allTasks } = await supabase
+              .from('tasks')
+              .select('id, workshop_id, is_archived')
+              .in('workshop_id', workshopIds)
+            
+            // Count active tasks  
+            const { data: activeTasks } = await supabase
               .from('tasks')
               .select('id, workshop_id')
               .in('workshop_id', workshopIds)
               .eq('is_archived', false)
             
-            totalTasks = tasks?.length || 0
-            console.log('Tasks found:', tasks)
+            totalTasks = activeTasks?.length || 0
+            console.log('All tasks found:', allTasks)
+            console.log('Active tasks found:', activeTasks)
           }
         } catch (error) {
           console.error('Error fetching tasks for session:', error)
