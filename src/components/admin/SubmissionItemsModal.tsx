@@ -47,7 +47,6 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
       }}
     >
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
-        <div className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
             <div className="flex justify-between items-start">
@@ -327,7 +326,7 @@ export function SubmissionItemsModal({ submission, task, onClose }: SubmissionIt
               </div>
             )}
           </div>
-
+          
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex-shrink-0">
             <div className="flex justify-end">
