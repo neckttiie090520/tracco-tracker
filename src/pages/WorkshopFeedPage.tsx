@@ -396,7 +396,7 @@ export function WorkshopFeedPage() {
       
       const linksArr = [
         ...(draftLinks[taskId] || []),
-        ...(submissionUrl.trim() ? [submissionUrl.trim()] : [])
+        ...(submissionUrl.trim() ? [{ url: submissionUrl.trim(), note: submissionNotes.trim() || '' }] : [])
       ]
       const submissionData = {
         task_id: taskId,
