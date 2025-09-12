@@ -9,6 +9,7 @@ import { ProgressRing } from '../components/ui/ProgressRing'
 import { supabase } from '../services/supabase'
 import { adminOperations } from '../services/supabaseAdmin'
 import { useAuth } from '../hooks/useAuth'
+import { useAlert } from '../contexts/AlertContext'
 import type { WorkshopMaterial } from '../types/materials'
 import { formatDateShort, formatDateTimeShort } from '../utils/date'
 
@@ -36,6 +37,7 @@ export function WorkshopDetailPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { workshop, loading, error } = useWorkshop(id!)
+  const { showSuccess, showError, showWarning, showConfirm, showAlert } = useAlert()
   const [materials, setMaterials] = useState<WorkshopMaterial[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [submissions, setSubmissions] = useState<TaskSubmission[]>([])
@@ -50,7 +52,10 @@ export function WorkshopDetailPage() {
 
   useEffect(() => {
     const fetchWorkshopData = async () => {
-      if (!workshop?.id || !user) return
+      if (!workshop?.id) {
+        setLoadingData(false)
+        return
+      }
       
       try {
         setLoadingData(true)
@@ -69,7 +74,7 @@ export function WorkshopDetailPage() {
           setTasks([])
         }
         
-        // Fetch user submissions
+        // Fetch user submissions - only if user is authenticated
         if (tasksData && user) {
           const taskIds = tasksData.map(t => t.id)
           const { data: submissionsData } = await supabase
@@ -94,27 +99,48 @@ export function WorkshopDetailPage() {
   const progressPercentage = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0
 
   const handleSubmitTask = async (taskId: string) => {
-    if (!user || !submissionForm.submission_url.trim()) return
+    if (!user || !submissionForm.submission_url.trim()) {
+      showWarning('กรุณากรอก URL งานที่ต้องการส่ง')
+      return
+    }
     
     try {
       setSubmitting(true)
       console.log('WorkshopDetailPage: Submitting task:', taskId, 'for user:', user.id)
       
-      // Check if submission already exists
-      const existingSubmission = submissions.find(s => s.task_id === taskId)
+      // First, check if submission already exists in database
+      const { data: existingData, error: checkError } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('task_id', taskId)
+        .eq('user_id', user.id)
+        .single()
       
-      if (existingSubmission) {
-        console.log('WorkshopDetailPage: Updating existing submission:', existingSubmission.id)
-        // Update existing submission
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('WorkshopDetailPage: Error checking existing submission:', checkError)
+        throw checkError
+      }
+      
+      if (existingData) {
+        console.log('WorkshopDetailPage: Updating existing submission:', existingData.id)
+        // Update existing submission with links array
+        const currentLinks = existingData.links || []
+        const newLink = { 
+          url: submissionForm.submission_url, 
+          note: submissionForm.notes || '', 
+          submitted_at: new Date().toISOString() 
+        }
+        
         const { error } = await supabase
           .from('submissions')
           .update({
+            links: [...currentLinks, newLink],
             submission_url: submissionForm.submission_url,
             notes: submissionForm.notes,
             status: 'submitted',
             updated_at: new Date().toISOString()
           })
-          .eq('id', existingSubmission.id)
+          .eq('id', existingData.id)
           
         if (error) {
           console.error('WorkshopDetailPage: Update submission error:', error)
@@ -123,7 +149,13 @@ export function WorkshopDetailPage() {
         console.log('WorkshopDetailPage: Submission updated successfully')
       } else {
         console.log('WorkshopDetailPage: Creating new submission')
-        // Create new submission
+        // Create new submission with initial link
+        const initialLink = { 
+          url: submissionForm.submission_url, 
+          note: submissionForm.notes || '', 
+          submitted_at: new Date().toISOString() 
+        }
+        
         const { data, error } = await supabase
           .from('submissions')
           .insert({
@@ -131,13 +163,42 @@ export function WorkshopDetailPage() {
             user_id: user.id,
             submission_url: submissionForm.submission_url,
             notes: submissionForm.notes,
+            links: [initialLink],
             status: 'submitted'
           })
           .select()
           
         if (error) {
           console.error('WorkshopDetailPage: Create submission error:', error)
-          throw error
+          // If duplicate key error, try to fetch and update instead
+          if (error.code === '23505') {
+            console.log('WorkshopDetailPage: Duplicate key detected, attempting update instead')
+            const { data: retryData, error: retryError } = await supabase
+              .from('submissions')
+              .select('*')
+              .eq('task_id', taskId)
+              .eq('user_id', user.id)
+              .single()
+            
+            if (!retryError && retryData) {
+              const { error: updateError } = await supabase
+                .from('submissions')
+                .update({
+                  submission_url: submissionForm.submission_url,
+                  notes: submissionForm.notes,
+                  links: [initialLink],
+                  status: 'submitted',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', retryData.id)
+              
+              if (updateError) throw updateError
+            } else {
+              throw error
+            }
+          } else {
+            throw error
+          }
         }
         console.log('WorkshopDetailPage: New submission created:', data)
       }
@@ -161,16 +222,38 @@ export function WorkshopDetailPage() {
       }
       
       setSubmissions(updatedSubmissions || [])
-      alert('ส่งงานเรียบร้อยแล้ว!')
+      showSuccess('ส่งงานเรียบร้อยแล้ว!')
       
     } catch (error) {
       console.error('WorkshopDetailPage: Error submitting task:', error)
-      alert(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
+      showError(`เกิดข้อผิดพลาดในการส่งงาน: ${error.message || error}`)
     } finally {
       setSubmitting(false)
     }
   }
 
+  // Check authentication first
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <UserNavigation />
+        <div className="max-w-4xl mx-auto px-8 py-12">
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <div className="text-yellow-500 text-5xl mb-4">🔒</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">กรุณาเข้าสู่ระบบ</h2>
+            <p className="text-gray-600 mb-6">คุณต้องเข้าสู่ระบบเพื่อดูรายละเอียด Workshop นี้</p>
+            <Link
+              to="/login"
+              className="btn btn-primary px-6 py-3 font-semibold"
+            >
+              เข้าสู่ระบบ
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -506,11 +589,11 @@ export function WorkshopDetailPage() {
                 return (
                   <div 
                     key={task.id}
-                    className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover-lift relative ${
+                    className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover-lift ${
                       isSubmitted ? 'ring-2 ring-green-400' : isOverdue ? 'ring-2 ring-red-400' : ''
                     }`}
                   >
-                    <div className="p-6 pb-16">
+                    <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-start gap-4">
                           <div className="text-4xl">
@@ -574,12 +657,14 @@ export function WorkshopDetailPage() {
                       {!isSubmitted ? (
                         <>
                           {!isOverdue && activeTaskId !== task.id && (
-                            <button
-                              onClick={() => setActiveTaskId(task.id)}
-                              className="absolute bottom-4 right-4 btn btn-primary px-4 py-2 font-medium"
-                            >
-                              ส่งงาน
-                            </button>
+                            <div className="mt-4 flex justify-end">
+                              <button
+                                onClick={() => setActiveTaskId(task.id)}
+                                className="btn btn-primary px-6 py-2 font-medium hover:bg-blue-700 transition-colors"
+                              >
+                                ส่งงาน
+                              </button>
+                            </div>
                           )}
                           
                           {isOverdue && (
@@ -649,6 +734,7 @@ export function WorkshopDetailPage() {
                                     className="btn btn-primary px-3 py-1 text-xs"
                                     aria-label="เพิ่มลิงก์"
                                     onClick={async () => {
+                                      // Using temporary prompts for now - will enhance later
                                       const url = prompt('เพิ่มลิงก์ URL')?.trim()
                                       if (!url) return
                                       const note = prompt('หมายเหตุ (ไม่บังคับ)')?.trim() || ''
@@ -665,7 +751,11 @@ export function WorkshopDetailPage() {
                                           .eq('id', submission.id)
                                           .single()
                                         setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
-                                      } catch (e) { console.error('add link failed', e) }
+                                        showSuccess('เพิ่มลิงก์เรียบร้อยแล้ว')
+                                      } catch (e) { 
+                                        console.error('add link failed', e)
+                                        showError('ไม่สามารถเพิ่มลิงก์ได้')
+                                      }
                                     }}
                                   >เพิ่มลิงก์</button>
                                 </div>
@@ -752,17 +842,20 @@ export function WorkshopDetailPage() {
                                             <button
                                               className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-700"
                                               onClick={async () => {
-                                                if (!confirm(`ลบลิงก์ "${getDomainName(linkObj.url)}" นี้?`)) return
+                                                const confirmed = await showConfirm(`ลบลิงก์ "${getDomainName(linkObj.url)}" นี้?`)
+                                                if (!confirmed) return
                                                 const newLinks = linkObjects.filter((_: any, i: number) => i !== idx)
                                                 try {
                                                   if (newLinks.length === 0) {
                                                     // ถ้าลบลิงก์สุดท้าย ให้ลบงานที่ส่งทิ้งไปด้วย
-                                                    if (confirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?')) {
+                                                    const confirmDelete = await showConfirm('นี่เป็นลิงก์สุดท้าย หากลบแล้วงานที่ส่งจะถูกลบทิ้งด้วย ต้องการดำเนินการต่อ?', 'คำเตือน')
+                                                    if (confirmDelete) {
                                                       await supabase
                                                         .from('submissions')
                                                         .delete()
                                                         .eq('id', submission.id)
                                                       setSubmissions(prev => prev.filter(s => s.id !== submission.id))
+                                                      showSuccess('ลบงานที่ส่งเรียบร้อยแล้ว')
                                                     }
                                                   } else {
                                                     await supabase
@@ -775,8 +868,12 @@ export function WorkshopDetailPage() {
                                                       .eq('id', submission.id)
                                                       .single()
                                                     setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...refreshed } : s))
+                                                    showSuccess('ลบลิงก์เรียบร้อยแล้ว')
                                                   }
-                                                } catch (e) { console.error('remove link failed', e) }
+                                                } catch (e) { 
+                                                  console.error('remove link failed', e)
+                                                  showError('ไม่สามารถลบลิงก์ได้')
+                                                }
                                               }}
                                             >
                                               ลบ
