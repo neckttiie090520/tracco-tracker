@@ -157,7 +157,7 @@ function App() {
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                  <Route path="/workshops/:id" element={<ProtectedRoute><WorkshopDetailPage /></ProtectedRoute>} />
+                  <Route path="/workshops/:id" element={<ProtectedRoute><WorkshopFeedPage /></ProtectedRoute>} />
                   <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
                   <Route path="/sessions/:sessionId/feed" element={<ProtectedRoute><SessionFeedPage /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminDashboard /></AdminRoute></ProtectedRoute>} />
