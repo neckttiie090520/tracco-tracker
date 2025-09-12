@@ -1409,7 +1409,7 @@ export function WorkshopFeedPage() {
               disabled={(!submissionUrl.trim() && (!editLinksMap[task.id] || editLinksMap[task.id].filter(it=>it.url && it.url.trim()).length === 0))}
               onClick={async ()=>{
               const toSave=(editLinksMap[task.id]||[]).filter(it=>it.url && it.url.trim())
-              if (submissionUrl.trim()) toSave.push({ url: submissionUrl.trim(), note: submissionNotes.trim() || undefined })
+              if (submissionUrl.trim()) toSave.push({ url: submissionUrl.trim(), note: submissionNotes.trim() || '' })
               try{
                 if (toSave.length===0){
                   if ((task as any).submission_mode==='group' && g){ await submissionService.deleteGroupTaskSubmission(task.id, g.id); setGroupSubmissions(prev=>({ ...prev, [g.id]: null })) }
