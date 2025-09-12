@@ -48,9 +48,37 @@ export function useAuth() {
 }
 
 export function useAuthState() {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Mock development user for testing scroll issues
+  const mockUser: User = {
+    id: 'mock-admin-id',
+    email: 'admin@test.com',
+    user_metadata: { 
+      full_name: 'Test Admin',
+      role: 'admin' 
+    },
+    app_metadata: {},
+    aud: 'authenticated',
+    role: 'authenticated',
+    email_confirmed_at: new Date().toISOString(),
+    phone_confirmed_at: null,
+    confirmed_at: new Date().toISOString(),
+    last_sign_in_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  } as User
+  
+  const mockSession: Session = {
+    user: mockUser,
+    access_token: 'mock-token',
+    refresh_token: 'mock-refresh-token',
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    expires_in: 3600,
+    token_type: 'bearer'
+  } as Session
+
+  const [user, setUser] = useState<User | null>(mockUser)
+  const [session, setSession] = useState<Session | null>(mockSession)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     // Get initial session

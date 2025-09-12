@@ -4,29 +4,30 @@
 import { QueryClient } from '@tanstack/react-query'
 
 // Cache time configurations based on data freshness needs
+// ✅ OPTIMIZED: Adjusted for better performance while maintaining data freshness
 export const CACHE_CONFIG = {
-  // Long-term stable data (rarely changes)
+  // Long-term stable data (rarely changes) - e.g., workshops, users
   STABLE: {
-    staleTime: 10 * 60 * 1000,    // 10 minutes - consider fresh
-    gcTime: 30 * 60 * 1000,      // 30 minutes - keep in memory
+    staleTime: 15 * 60 * 1000,    // 15 minutes - increased from 10 minutes
+    gcTime: 60 * 60 * 1000,      // 1 hour - increased from 30 minutes
   },
   
-  // Medium-term data (changes occasionally)
+  // Medium-term data (changes occasionally) - e.g., tasks, settings
   MEDIUM: {
-    staleTime: 5 * 60 * 1000,     // 5 minutes - consider fresh
-    gcTime: 15 * 60 * 1000,      // 15 minutes - keep in memory
+    staleTime: 5 * 60 * 1000,     // 5 minutes - keep same
+    gcTime: 30 * 60 * 1000,      // 30 minutes - increased from 15 minutes
   },
   
-  // Short-term data (changes frequently)
+  // Short-term data (changes frequently) - e.g., submissions, dashboard stats
   DYNAMIC: {
-    staleTime: 30 * 1000,        // 30 seconds - consider fresh
-    gcTime: 2 * 60 * 1000,       // 2 minutes - keep in memory
+    staleTime: 2 * 60 * 1000,    // 2 minutes - increased from 30 seconds for better UX
+    gcTime: 10 * 60 * 1000,      // 10 minutes - increased from 2 minutes
   },
   
-  // Real-time data (always fetch fresh)
+  // Real-time data (always fetch fresh) - e.g., live notifications
   REALTIME: {
     staleTime: 0,                // Always consider stale
-    gcTime: 30 * 1000,          // 30 seconds - minimal cache
+    gcTime: 60 * 1000,          // 1 minute - increased from 30 seconds
   }
 }
 

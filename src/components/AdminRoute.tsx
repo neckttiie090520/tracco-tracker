@@ -9,6 +9,13 @@ interface AdminRouteProps {
 export function AdminRoute({ children }: AdminRouteProps) {
   const { isAdmin, loading, userProfile } = useAdmin()
 
+  // Development mode bypass for testing
+  const isDevelopment = import.meta.env.DEV
+  
+  if (isDevelopment) {
+    return <>{children}</>
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">

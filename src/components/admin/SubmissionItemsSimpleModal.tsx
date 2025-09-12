@@ -10,6 +10,10 @@ export function SubmissionItemsSimpleModal({ submission, task, onClose }: Submis
   const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Lock body scroll when modal opens
+    const previousBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
@@ -17,7 +21,12 @@ export function SubmissionItemsSimpleModal({ submission, task, onClose }: Submis
     }
 
     document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
+    
+    return () => {
+      // Restore body scroll when modal closes
+      document.body.style.overflow = previousBodyOverflow
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [onClose])
 
   if (!submission) {
@@ -68,13 +77,13 @@ export function SubmissionItemsSimpleModal({ submission, task, onClose }: Submis
   return (
     <div 
       ref={modalRef}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm"
-      style={{ zIndex: 10001 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm overscroll-contain"
+      style={{ zIndex: 10002 }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex justify-between items-start">

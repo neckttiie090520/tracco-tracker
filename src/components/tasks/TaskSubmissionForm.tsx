@@ -392,7 +392,8 @@ function CreateGroupInline({ taskId, onCreated }: { taskId: string; onCreated: (
         placeholder="Group name"
       />
       {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-      <button
+      <CreateGroupButton
+        loading={loading}
         onClick={async () => {
           if (!user) return
           try {
@@ -409,11 +410,9 @@ function CreateGroupInline({ taskId, onCreated }: { taskId: string; onCreated: (
             setLoading(false)
           }
         }}
-        disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded"
       >
-        {loading ? 'Creating...' : 'Create'}
-      </button>
+        Create
+      </CreateGroupButton>
     </div>
   )
 }
@@ -434,7 +433,8 @@ function JoinGroupInline({ onJoined }: { onJoined: () => void }) {
         placeholder="ABC123"
       />
       {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-      <button
+      <JoinGroupButton
+        loading={loading}
         onClick={async () => {
           if (!user) return
           try {
@@ -451,11 +451,9 @@ function JoinGroupInline({ onJoined }: { onJoined: () => void }) {
             setLoading(false)
           }
         }}
-        disabled={loading}
-        className="bg-gray-800 hover:bg-black text-white px-3 py-2 rounded"
       >
-        {loading ? 'Joining...' : 'Join Group'}
-      </button>
+        Join Group
+      </JoinGroupButton>
     </div>
   )
 }

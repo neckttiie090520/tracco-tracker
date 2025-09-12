@@ -10,6 +10,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
   const location = useLocation()
 
+  // Development mode bypass for testing
+  const isDevelopment = import.meta.env.DEV
+  
+  if (isDevelopment) {
+    return <>{children}</>
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

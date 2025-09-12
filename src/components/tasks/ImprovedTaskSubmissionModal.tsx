@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { UrlSubmissionDisplay } from './UrlSubmissionDisplay'
 import { StatusBadge } from '../ui/StatusBadge'
+import { LoadingOverlay, SubmitButton, UpdateButton, UploadButton } from '../ui/LoadingButton'
 
 interface TaskSubmissionModalProps {
   isOpen: boolean
@@ -13,6 +14,10 @@ interface TaskSubmissionModalProps {
   uploading: boolean
   onFileChange: (file: File | null) => void
   taskTitle?: string
+  isSubmitting?: boolean
+  isUpdating?: boolean
+  operationStep?: number
+  operationSteps?: string[]
 }
 
 export function ImprovedTaskSubmissionModal({ 
@@ -24,7 +29,11 @@ export function ImprovedTaskSubmissionModal({
   onSubmit, 
   uploading,
   onFileChange,
-  taskTitle = 'งานที่กำหนด'
+  taskTitle = 'งานที่กำหนด',
+  isSubmitting = false,
+  isUpdating = false,
+  operationStep = 0,
+  operationSteps = ['เตรียมข้อมูล', 'อัปโหลดไฟล์', 'บันทึกงาน', 'เสร็จสิ้น']
 }: TaskSubmissionModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
@@ -167,7 +176,11 @@ export function ImprovedTaskSubmissionModal({
 
         {/* Form Content */}
         <div className="p-8 overflow-y-auto flex-1 custom-scrollbar pb-32">
-          <form onSubmit={handleSubmitWithAnimation} className="space-y-6">
+          <LoadingOverlay 
+            loading={uploading || isSubmitting || isUpdating}
+            message={uploading ? 'กำลังอัปโหลดไฟล์...' : isSubmitting ? 'กำลังส่งงาน...' : isUpdating ? 'กำลังอัปเดตงาน...' : 'กำลังโหลด...'}
+          >
+            <form onSubmit={handleSubmitWithAnimation} className="space-y-6">
             {/* Progress Indicator */}
             <div className="bg-gray-50 rounded-2xl p-4 mb-6">
               <div className="flex items-center justify-between mb-2">
@@ -451,35 +464,68 @@ export function ImprovedTaskSubmissionModal({
               </div>
             )}
 
+            {/* Operation Progress Indicator */}
+            {(uploading || isSubmitting || isUpdating) && (
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-blue-900">
+                      {uploading ? 'กำลังอัปโหลดไฟล์' : isSubmitting ? 'กำลังส่งงาน' : 'กำลังอัปเดตงาน'}
+                    </h4>
+                    <p className="text-sm text-blue-700">กรุณารอสักครู่...</p>
+                  </div>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${((operationStep + 1) / operationSteps.length) * 100}%` }}
+                  />
+                </div>
+                
+                <div className="mt-2 text-xs text-blue-600">
+                  ขั้นตอน {operationStep + 1} จาก {operationSteps.length}: {operationSteps[operationStep]}
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={onClose}
-                disabled={uploading}
+                disabled={uploading || isSubmitting || isUpdating}
                 className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-all disabled:opacity-50 hover-lift"
               >
                 ยกเลิก
               </button>
-              <button
-                type="submit"
-                disabled={uploading || (!formData.notes.trim() && !formData.submission_url.trim() && !formData.file)}
-                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg hover-lift"
-              >
-                {uploading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>กำลังส่ง...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{submission ? 'อัปเดตงาน' : 'ส่งงาน'}</span>
-                    <span className="text-lg">→</span>
-                  </>
-                )}
-              </button>
+              
+              {submission ? (
+                <UpdateButton
+                  loading={isUpdating || uploading}
+                  type="submit"
+                  disabled={!formData.notes.trim() && !formData.submission_url.trim() && !formData.file}
+                  className="px-8 py-3"
+                >
+                  อัปเดตงาน
+                </UpdateButton>
+              ) : (
+                <SubmitButton
+                  loading={isSubmitting || uploading}
+                  type="submit"
+                  disabled={!formData.notes.trim() && !formData.submission_url.trim() && !formData.file}
+                  className="px-8 py-3"
+                >
+                  ส่งงาน
+                </SubmitButton>
+              )}
             </div>
-          </form>
+            </form>
+          </LoadingOverlay>
         </div>
       </div>
     </div>
