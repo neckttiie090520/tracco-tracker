@@ -38,6 +38,12 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   const [contentOnly, setContentOnly] = useState(false)
   const [refreshingList, setRefreshingList] = useState(false)
 
+  // Prevent background scroll while modal is open
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
 
   const quickStats = useMemo(() => {
     // Use all submissions for raw stats, but filter by submission mode for accurate counts
@@ -104,7 +110,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
     return Array.from(new Set(list))
   }, [filtered])
 
-
   const openWinnerDetail = (winnerNameOrEmail: string) => {
     if (!submissions || !winnerNameOrEmail) return
     const match = submissions.find((s: any) => {
@@ -130,7 +135,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
 
   useEffect(() => {
     if (!task) return
-
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (selectedSubmissionDetail) {
@@ -142,16 +146,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         }
       }
     }
-
     const handleClickOutside = (e: MouseEvent) => {
       if (modalRef.current && e.target === modalRef.current) {
         onClose()
       }
     }
-
     document.addEventListener('keydown', handleEscape)
     document.addEventListener('mousedown', handleClickOutside)
-
     return () => {
       document.removeEventListener('keydown', handleEscape)
       document.removeEventListener('mousedown', handleClickOutside)
@@ -172,17 +173,14 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
 
   const handleSaveReview = async () => {
     if (!selectedSubmission || !user) return
-
     try {
       setReviewLoading(true)
       setReviewError(null)
-
       await submissionService.reviewSubmission(selectedSubmission.id, {
         feedback: reviewData.feedback || undefined,
         grade: reviewData.grade || undefined,
         reviewedBy: user.id
       })
-
       setSelectedSubmission(null)
       refetch()
     } catch (err) {
@@ -194,7 +192,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
 
   const exportSubmissions = () => {
     if (!submissions || submissions.length === 0) return
-
     const csvData = submissions.map(sub => ({
       'Student Name': sub.user?.name || 'Unknown',
       'Student Email': sub.user?.email || 'Unknown',
@@ -206,12 +203,10 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
       'Submitted At': sub.submitted_at ? new Date(sub.submitted_at).toLocaleString() : '',
       'Updated At': sub.updated_at ? new Date(sub.updated_at).toLocaleString() : ''
     }))
-
     const csv = [
       Object.keys(csvData[0]).join(','),
       ...csvData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
     ].join('\n')
-
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -259,9 +254,9 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
     <>
       <div 
         ref={modalRef}
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm overscroll-contain"
       >
-        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[80vh] flex flex-col transform transition-all duration-200 scale-100 opacity-100">
+        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[80vh] overflow-hidden flex flex-col transform transition-all duration-200 scale-100 opacity-100">
           <div className="p-6 flex-shrink-0 border-b border-gray-200">
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -315,7 +310,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             </div>
           </div>
           
-          <div className="flex-1 p-6 overflow-y-auto pb-8">
+          <div className="flex-1 p-6 overflow-y-auto">
             {loading && (
               <div className="flex items-center justify-center py-12">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -342,7 +337,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                 </div>
               </div>
             )}
-
 
             {!loading && !error && (
               <div className="mb-4 bg-white border rounded-md p-3">
@@ -703,7 +697,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     disabled={reviewLoading}
                   />
                 </div>
-
                 <div>
                   <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-1">
                     Feedback
@@ -763,15 +756,12 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             ) && (
               <div className="relative rounded-t-lg">
                 <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative rounded-t-lg">
-                  {/* Decorative background elements */}
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
                   <div className="absolute -top-1 -left-1 w-12 h-12 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
                   <div className="absolute -bottom-1 -right-1 w-14 h-14 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
                   <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
                   
-                  {/* Content */}
                   <div className="relative">
-                    {/* Trophy and celebration icons */}
                     <div className="flex justify-center items-center gap-2 mb-3">
                       <div className="text-xl animate-bounce">🎉</div>
                       <svg className="w-6 h-6 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
@@ -779,8 +769,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                       </svg>
                       <div className="text-xl animate-bounce delay-300">🎊</div>
                     </div>
-
-                    {/* Winner announcement */}
                     <div>
                       <h2 className="text-lg font-bold text-white mb-2 drop-shadow-lg">
                         🏆 LUCKY DRAW WINNER! 🏆
@@ -1039,7 +1027,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigator.clipboard.writeText(linkUrl);
-                                  // Could add toast notification here
                                 }}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                                 title="Copy link"
@@ -1094,8 +1081,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                             </div>
                             <div className="group cursor-pointer" onClick={() => window.open(selectedSubmissionItems.submission_url, '_blank')}>
                               <p className="text-sm text-blue-600 group-hover:text-blue-700 group-hover:underline transition-colors" title={selectedSubmissionItems.submission_url}>
-                                {selectedSubmissionItems.submission_url.length > 60 
-                                  ? selectedSubmissionItems.submission_url.substring(0, 60) + '...' 
+                                {selectedSubmissionItems.submission_url.length > 60
+                                  ? selectedSubmissionItems.submission_url.substring(0, 60) + '...'
                                   : selectedSubmissionItems.submission_url}
                               </p>
                             </div>
