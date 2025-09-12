@@ -251,73 +251,73 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   if (!task) return null
 
   return (
-    <>
-      <div 
-        ref={modalRef}
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm overscroll-contain"
-      >
-        <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[80vh] overflow-hidden flex flex-col transform transition-all duration-200 scale-100 opacity-100">
-          <div className="p-6 flex-shrink-0 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{task.title} - Submissions</h2>
-                <p className="text-gray-600 mt-1">
-                  {task.workshop?.title} • {submissions?.length || 0} submission{submissions?.length !== 1 ? 's' : ''}
-                </p>
-              </div>
-              <div className="flex items-center space-x-3">
+    <div 
+      ref={modalRef}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm overscroll-contain"
+    >
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[80vh] flex flex-col transform transition-all duration-200 scale-100 opacity-100 overflow-hidden">
+        <div className="p-6 flex-shrink-0 border-b border-gray-200 rounded-t-lg">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">{task.title} - Submissions</h2>
+              <p className="text-gray-600 mt-1">
+                {task.workshop?.title} • {submissions?.length || 0} submission{submissions?.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={refreshAll}
+                className="text-sm border px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+                title="Refresh"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12a7.5 7.5 0 0112.9-5.3L20 4v4.5M19.5 12a7.5 7.5 0 01-12.9 5.3L4 20v-4.5" />
+                </svg>
+                {refreshingList ? 'Refreshing…' : 'Refresh'}
+              </button>
+              {eligibleNames.length > 0 && (
                 <button
-                  onClick={refreshAll}
-                  className="text-sm border px-3 py-2 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
-                  title="Refresh"
+                  onClick={() => setShowLuckyDraw((v) => !v)}
+                  className="text-sm bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
+                >
+                  <svg className="w-5 h-5 mr-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  ✨ Lucky Draw
+                </button>
+              )}
+              {submissions && submissions.length > 0 && (
+                <button
+                  onClick={exportSubmissions}
+                  className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md font-medium flex items-center"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12a7.5 7.5 0 0112.9-5.3L20 4v4.5M19.5 12a7.5 7.5 0 01-12.9 5.3L4 20v-4.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  {refreshingList ? 'Refreshing…' : 'Refresh'}
+                  Export CSV
                 </button>
-                {eligibleNames.length > 0 && (
-                  <button
-                    onClick={() => setShowLuckyDraw((v) => !v)}
-                    className="text-sm bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 hover:from-pink-600 hover:via-purple-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
-                  >
-                    <svg className="w-5 h-5 mr-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    ✨ Lucky Draw
-                  </button>
-                )}
-                {submissions && submissions.length > 0 && (
-                  <button
-                    onClick={exportSubmissions}
-                    className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md font-medium flex items-center"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export CSV
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+              )}
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
-          
-          <div className="flex-1 p-6 overflow-y-auto">
-            {loading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="ml-3 text-gray-600">Loading submissions...</span>
-              </div>
-            )}
+        </div>
+        
+        <div className="flex-1 overflow-y-auto">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className="ml-3 text-gray-600">Loading submissions...</span>
+            </div>
+          )}
 
+          <div className="p-6">
             {!loading && !error && showLuckyDraw && (
               <div className="mb-6 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 rounded-xl blur-lg opacity-20 animate-pulse"></div>
@@ -412,7 +412,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             )}
 
             {!loading && !error && (
-              <>
+              <div>
                 {filtered && filtered.length === 0 ? (
                   <div className="text-center py-12">
                     <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,8 +422,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     <p className="text-gray-600">No items match your search or filters.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -614,9 +613,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                         ))}
                       </tbody>
                     </table>
-                  </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -1344,6 +1342,6 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }
