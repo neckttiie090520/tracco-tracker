@@ -107,6 +107,11 @@ export function WorkshopDetailPage() {
     try {
       setSubmitting(true)
       console.log('WorkshopDetailPage: Submitting task:', taskId, 'for user:', user.id)
+      console.log('WorkshopDetailPage: Submission form data:', {
+        url: submissionForm.submission_url,
+        notes: submissionForm.notes,
+        notesLength: submissionForm.notes?.length || 0
+      })
       
       // First, check if submission already exists in database
       const { data: existingData, error: checkError } = await supabase
@@ -155,6 +160,7 @@ export function WorkshopDetailPage() {
           note: submissionForm.notes || '', 
           submitted_at: new Date().toISOString() 
         }
+        console.log('WorkshopDetailPage: Initial link object:', initialLink)
         
         const { data, error } = await supabase
           .from('submissions')
@@ -181,12 +187,18 @@ export function WorkshopDetailPage() {
               .single()
             
             if (!retryError && retryData) {
+              const retryLink = { 
+                url: submissionForm.submission_url, 
+                note: submissionForm.notes || '', 
+                submitted_at: new Date().toISOString() 
+              }
+              
               const { error: updateError } = await supabase
                 .from('submissions')
                 .update({
                   submission_url: submissionForm.submission_url,
                   notes: submissionForm.notes,
-                  links: [initialLink],
+                  links: [retryLink],
                   status: 'submitted',
                   updated_at: new Date().toISOString()
                 })
@@ -798,11 +810,15 @@ export function WorkshopDetailPage() {
                                               <p className="text-xs text-gray-600 truncate" title={linkObj.url}>
                                                 {linkObj.url}
                                               </p>
-                                              {linkObj.note && (
+                                              {linkObj.note && linkObj.note.trim() && (
                                                 <p className="text-xs text-gray-600 mt-1 italic">
                                                   💬 {linkObj.note}
                                                 </p>
                                               )}
+                                              {/* Debug: show note field even if empty */}
+                                              <p className="text-xs text-gray-400 mt-1" style={{fontSize: '10px'}}>
+                                                debug: note = "{linkObj.note || 'empty'}"
+                                              </p>
                                             </div>
                                           </div>
                                           
