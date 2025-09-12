@@ -103,7 +103,7 @@ export function ImprovedTaskSubmissionModal({
         </div>
       )}
 
-      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 animate-slideIn">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col transform transition-all duration-300 animate-slideIn">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
           <div className="flex items-start justify-between">
@@ -166,7 +166,7 @@ export function ImprovedTaskSubmissionModal({
         </div>
 
         {/* Form Content */}
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)] custom-scrollbar">
+        <div className="p-8 overflow-y-auto flex-1 custom-scrollbar pb-32">
           <form onSubmit={handleSubmitWithAnimation} className="space-y-6">
             {/* Progress Indicator */}
             <div className="bg-gray-50 rounded-2xl p-4 mb-6">
