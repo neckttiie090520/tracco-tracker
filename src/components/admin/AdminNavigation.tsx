@@ -112,7 +112,7 @@ export function AdminNavigation() {
   )
 
   return (
-    <nav className="relative w-0 md:w-64">
+    <nav className={`relative ${isCollapsed ? 'w-16 md:w-16' : 'w-0 md:w-64'}`}>
       {/* Mobile: hamburger button */}
       <button
         onClick={() => setIsMobileOpen(true)}
@@ -125,7 +125,7 @@ export function AdminNavigation() {
       </button>
 
       {/* Desktop sidebar */}
-      <div className={`hidden md:flex bg-white shadow-sm border-r border-gray-200 h-screen flex-col transition-all duration-300 overflow-y-auto ${isCollapsed ? 'w-16' : 'w-64'}`}>
+      <div className={`hidden md:flex relative bg-white shadow-sm border-r border-gray-200 h-screen flex-col transition-all duration-300 overflow-y-auto ${isCollapsed ? 'w-16' : 'w-64'}`}>
         <NavContent condensed={isCollapsed} />
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
