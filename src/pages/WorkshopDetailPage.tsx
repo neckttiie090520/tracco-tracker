@@ -699,7 +699,7 @@ export function WorkshopDetailPage() {
                             const linkData = (submission as any)?.links || []
                             const linkObjects = Array.isArray(linkData) 
                               ? linkData.map((item: any) => typeof item === 'string' ? { url: item, note: '', submitted_at: submission.submitted_at } : item)
-                              : (submission?.submission_url ? [{ url: submission.submission_url, note: '', submitted_at: submission.submitted_at }] : [])
+                              : (submission?.submission_url ? [{ url: submission.submission_url, note: submission.notes || '', submitted_at: submission.submitted_at }] : [])
                             
                             if (!linkObjects || linkObjects.length === 0) return null
                             
@@ -815,10 +815,6 @@ export function WorkshopDetailPage() {
                                                   💬 {linkObj.note}
                                                 </p>
                                               )}
-                                              {/* Debug: show note field even if empty */}
-                                              <p className="text-xs text-gray-400 mt-1" style={{fontSize: '10px'}}>
-                                                debug: note = "{linkObj.note || 'empty'}"
-                                              </p>
                                             </div>
                                           </div>
                                           
