@@ -763,14 +763,14 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                   <div className="absolute -bottom-1 -right-1 w-14 h-14 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
                   <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
                   
-                  {/* Hide Banner Button */}
+                  {/* Minimize Banner Button */}
                   <button
                     onClick={() => setHideLuckyBanner(true)}
                     className="absolute top-3 right-3 p-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 group"
-                    title="ซ่อน Lucky Draw banner"
+                    title="ย่อ Lucky Draw banner"
                   >
                     <svg className="w-4 h-4 text-white group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7-7m0 0l-7 7m7-7v18" />
                     </svg>
                   </button>
                   
@@ -865,12 +865,12 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     <button
                       onClick={() => setHideLuckyBanner(false)}
                       className="px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-pink-400 hover:from-yellow-500 hover:to-pink-500 text-white text-sm rounded-lg font-medium transition-all duration-200 flex items-center gap-1.5"
-                      title="แสดง Lucky Draw banner"
+                      title="ขยาย Lucky Draw banner"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7 7m0 0l7-7m-7 7V3" />
                       </svg>
-                      🏆 Winner
+                      แสดง Winner
                     </button>
                   )}
                   <button
