@@ -20,6 +20,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
   const [selectedSubmissionDetail, setSelectedSubmissionDetail] = useState<any>(null)
   const [selectedSubmissionItems, setSelectedSubmissionItems] = useState<any>(null)
   const [luckyWinner, setLuckyWinner] = useState<string | null>(null)
+  const [hideLuckyBanner, setHideLuckyBanner] = useState(false)
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
@@ -130,6 +131,8 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
         ? match.group.name 
         : (match?.user?.name || match?.user?.email || winnerNameOrEmail)
       setLuckyWinner(display)
+      // Reset banner visibility when a new winner is selected
+      setHideLuckyBanner(false)
     }
   }
 
@@ -743,12 +746,13 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
             if (e.target === e.currentTarget) {
               setSelectedSubmissionItems(null)
               setLuckyWinner(null)
+              setHideLuckyBanner(false)
             }
           }}
         >
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
             {/* Lucky Winner Header */}
-            {luckyWinner && (
+            {luckyWinner && !hideLuckyBanner && (
               (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
               (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
             ) && (
@@ -758,6 +762,17 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                   <div className="absolute -top-1 -left-1 w-12 h-12 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
                   <div className="absolute -bottom-1 -right-1 w-14 h-14 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
                   <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
+                  
+                  {/* Hide Banner Button */}
+                  <button
+                    onClick={() => setHideLuckyBanner(true)}
+                    className="absolute top-3 right-3 p-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 group"
+                    title="ซ่อน Lucky Draw banner"
+                  >
+                    <svg className="w-4 h-4 text-white group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                   
                   <div className="relative">
                     <div className="flex justify-center items-center gap-2 mb-3">
@@ -841,17 +856,36 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                     } • {task?.title || 'Task'}
                   </p>
                 </div>
-                <button
-                  onClick={() => {
-                    setSelectedSubmissionItems(null)
-                    setLuckyWinner(null)
-                  }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Show Lucky Banner Button - only show if luckyWinner exists and banner is hidden */}
+                  {luckyWinner && hideLuckyBanner && (
+                    (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
+                    (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
+                  ) && (
+                    <button
+                      onClick={() => setHideLuckyBanner(false)}
+                      className="px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-pink-400 hover:from-yellow-500 hover:to-pink-500 text-white text-sm rounded-lg font-medium transition-all duration-200 flex items-center gap-1.5"
+                      title="แสดง Lucky Draw banner"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      🏆 Winner
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedSubmissionItems(null)
+                      setLuckyWinner(null)
+                      setHideLuckyBanner(false)
+                    }}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1172,6 +1206,7 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                   onClick={() => {
                     setSelectedSubmissionItems(null)
                     setLuckyWinner(null)
+                    setHideLuckyBanner(false)
                   }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 border border-gray-300 rounded-md transition-colors"
                 >
