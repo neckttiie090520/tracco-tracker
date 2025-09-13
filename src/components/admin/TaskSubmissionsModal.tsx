@@ -751,101 +751,113 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
           }}
         >
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
-            {/* Lucky Winner Header */}
-            {luckyWinner && !hideLuckyBanner && (
+            {/* Lucky Winner Header with Animation */}
+            {luckyWinner && (
               (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
               (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
             ) && (
-              <div className="relative rounded-t-lg">
-                <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative rounded-t-lg">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
-                  <div className="absolute -top-1 -left-1 w-12 h-12 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
-                  <div className="absolute -bottom-1 -right-1 w-14 h-14 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
-                  <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
-                  
-                  {/* Minimize Banner Button */}
-                  <button
-                    onClick={() => setHideLuckyBanner(true)}
-                    className="absolute top-3 right-3 p-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 group"
-                    title="ย่อ Lucky Draw banner"
-                  >
-                    <svg className="w-4 h-4 text-white group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7-7m0 0l-7 7m7-7v18" />
-                    </svg>
-                  </button>
-                  
-                  <div className="relative">
-                    <div className="flex justify-center items-center gap-2 mb-3">
-                      <div className="text-xl animate-bounce">🎉</div>
-                      <svg className="w-6 h-6 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                      </svg>
-                      <div className="text-xl animate-bounce delay-300">🎊</div>
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-white mb-2 drop-shadow-lg">
-                        🏆 LUCKY DRAW WINNER! 🏆
-                      </h2>
-                      
-                      <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 border border-white/30 mt-2">
-                        {selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group ? (
-                          <div className="flex flex-col items-center text-center">
-                            <div className="inline-flex items-center px-3 py-1 bg-blue-500/80 text-white rounded-full text-xs font-medium mb-3">
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                              GROUP WINNER
+              <div className="relative">
+                {/* Collapsible Banner Container */}
+                <div
+                  className={`overflow-hidden transition-all duration-500 ease-in-out ${hideLuckyBanner ? 'max-h-0' : 'max-h-[500px]'} relative`}
+                >
+                  <div className="bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-400 px-6 py-6 text-center relative rounded-t-lg">
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-200/20 via-pink-200/20 to-purple-300/20"></div>
+                    <div className="absolute -top-1 -left-1 w-12 h-12 bg-yellow-200 rounded-full opacity-30 animate-pulse"></div>
+                    <div className="absolute -bottom-1 -right-1 w-14 h-14 bg-pink-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
+                    <div className="absolute top-1/2 left-1/4 w-6 h-6 bg-purple-200 rounded-full opacity-25 animate-bounce"></div>
+
+                    <div className="relative">
+                      <div className="flex justify-center items-center gap-2 mb-3">
+                        <div className="text-xl animate-bounce">🎉</div>
+                        <svg className="w-6 h-6 text-yellow-600 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                        </svg>
+                        <div className="text-xl animate-bounce delay-300">🎊</div>
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white mb-2 drop-shadow-lg">
+                          🏆 LUCKY DRAW WINNER! 🏆
+                        </h2>
+
+                        <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 border border-white/30 mt-2">
+                          {selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group ? (
+                            <div className="flex flex-col items-center text-center">
+                              <div className="inline-flex items-center px-3 py-1 bg-blue-500/80 text-white rounded-full text-xs font-medium mb-3">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                GROUP WINNER
+                              </div>
+                              <Avatar
+                                username={selectedSubmissionItems.user?.email}
+                                name={selectedSubmissionItems.user?.name}
+                                avatarSeed={selectedSubmissionItems.user?.avatar_seed}
+                                size={64}
+                                saturation={selectedSubmissionItems.user?.avatar_saturation}
+                                lightness={selectedSubmissionItems.user?.avatar_lightness}
+                                className="ring-4 ring-white/50 mb-3"
+                              />
+                              <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl mb-2 leading-tight">
+                                {selectedSubmissionItems.group.name}
+                              </div>
+                              <div className="text-lg text-white/95 font-semibold">
+                                Team Leader: {selectedSubmissionItems.user?.name || luckyWinner}
+                              </div>
                             </div>
-                            <Avatar
-                              username={selectedSubmissionItems.user?.email}
-                              name={selectedSubmissionItems.user?.name}
-                              avatarSeed={selectedSubmissionItems.user?.avatar_seed}
-                              size={64}
-                              saturation={selectedSubmissionItems.user?.avatar_saturation}
-                              lightness={selectedSubmissionItems.user?.avatar_lightness}
-                              className="ring-4 ring-white/50 mb-3"
-                            />
-                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl mb-2 leading-tight">
-                              {selectedSubmissionItems.group.name}
+                          ) : (
+                            <div className="flex flex-col items-center text-center">
+                              <div className="inline-flex items-center px-3 py-1 bg-green-500/80 text-white rounded-full text-xs font-medium mb-3">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                INDIVIDUAL WINNER
+                              </div>
+                              <Avatar
+                                username={selectedSubmissionItems.user?.email}
+                                name={selectedSubmissionItems.user?.name}
+                                avatarSeed={selectedSubmissionItems.user?.avatar_seed}
+                                size={64}
+                                saturation={selectedSubmissionItems.user?.avatar_saturation}
+                                lightness={selectedSubmissionItems.user?.avatar_lightness}
+                                className="ring-4 ring-white/50 mb-3"
+                              />
+                              <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl leading-tight">
+                                {selectedSubmissionItems.user?.name || luckyWinner}
+                              </div>
                             </div>
-                            <div className="text-lg text-white/95 font-semibold">
-                              Team Leader: {selectedSubmissionItems.user?.name || luckyWinner}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center text-center">
-                            <div className="inline-flex items-center px-3 py-1 bg-green-500/80 text-white rounded-full text-xs font-medium mb-3">
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                              INDIVIDUAL WINNER
-                            </div>
-                            <Avatar
-                              username={selectedSubmissionItems.user?.email}
-                              name={selectedSubmissionItems.user?.name}
-                              avatarSeed={selectedSubmissionItems.user?.avatar_seed}
-                              size={64}
-                              saturation={selectedSubmissionItems.user?.avatar_saturation}
-                              lightness={selectedSubmissionItems.user?.avatar_lightness}
-                              className="ring-4 ring-white/50 mb-3"
-                            />
-                            <div className="text-2xl md:text-3xl font-black text-white drop-shadow-2xl leading-tight">
-                              {selectedSubmissionItems.user?.name || luckyWinner}
-                            </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Toggle Button - Centered Between Banner and Header */}
+                <div className={`absolute left-1/2 -translate-x-1/2 z-20 transition-all duration-500 ${hideLuckyBanner ? 'top-2' : '-bottom-5'}`}>
+                  <button
+                    onClick={() => setHideLuckyBanner(!hideLuckyBanner)}
+                    className="p-2 bg-white hover:bg-gray-50 shadow-lg rounded-full transition-all duration-300 border-2 border-gray-200 group"
+                    title={hideLuckyBanner ? "แสดง Lucky Draw banner" : "ย่อ Lucky Draw banner"}
+                  >
+                    <svg
+                      className={`w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-transform duration-300 ${hideLuckyBanner ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
-            
+
             {/* Regular Header */}
-            <div className={`px-6 py-4 border-b border-gray-200 flex-shrink-0 ${luckyWinner && (
+            <div className={`px-6 border-b border-gray-200 flex-shrink-0 ${luckyWinner && (
               (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
               (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
-            ) ? 'bg-gradient-to-r from-yellow-50 to-pink-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
+            ) ? 'bg-gradient-to-r from-yellow-50 to-pink-50 pt-8 pb-4' : 'bg-gradient-to-r from-blue-50 to-indigo-50 py-4'}`}>
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">Submission Details</h2>
@@ -857,21 +869,17 @@ export function TaskSubmissionsModal({ task, onClose, initialShowLuckyDraw = fal
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Show Lucky Banner Button - only show if luckyWinner exists and banner is hidden */}
+                  {/* Collapsed Banner Indicator */}
                   {luckyWinner && hideLuckyBanner && (
                     (selectedSubmissionItems.is_group_submission && selectedSubmissionItems.group?.name === luckyWinner) ||
                     (selectedSubmissionItems.user?.name === luckyWinner || selectedSubmissionItems.user?.email === luckyWinner)
                   ) && (
-                    <button
-                      onClick={() => setHideLuckyBanner(false)}
-                      className="px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-pink-400 hover:from-yellow-500 hover:to-pink-500 text-white text-sm rounded-lg font-medium transition-all duration-200 flex items-center gap-1.5"
-                      title="ขยาย Lucky Draw banner"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7 7m0 0l7-7m-7 7V3" />
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-yellow-100 to-pink-100 text-yellow-700 text-sm rounded-lg font-medium animate-pulse">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                       </svg>
-                      แสดง Winner
-                    </button>
+                      🏆 Lucky Winner
+                    </div>
                   )}
                   <button
                     onClick={() => {
